@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Test hämtning av schema</title>
+</head>
+<body>
+  <h1>Test av data från Apps Script</h1>
+  <pre id="output">Hämtar data...</pre>
+
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
+
+    async function loadData() {
+      try {
+        const res = await fetch(url + "?t=" + Date.now());
+        const json = await res.json();
+        document.getElementById("output").textContent =
+          JSON.stringify(json, null, 2);
+      } catch (err) {
+        document.getElementById("output").textContent =
+          "Fel vid hämtning: " + err;
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
