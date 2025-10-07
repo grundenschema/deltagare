@@ -57,10 +57,40 @@
       cursor: pointer;
     }
     #backBtn:hover { background: #001f44; }
+
+    /* Blockschema */
+    #blockContainer { display:none; margin-top:20px; }
+    .block-header, .block-grid {
+      display:grid;
+      grid-template-columns:80px repeat(5,1fr);
+      max-width:95%;
+      margin:0 auto;
+    }
+    .block-header div {
+      background:#eef5ff;
+      padding:6px;
+      font-weight:700;
+      border:1px solid #ddd;
+    }
+    .block-grid div {
+      border:1px solid #eee;
+      min-height:28px;
+      font-size:.85rem;
+      padding:3px;
+    }
+    .block {
+      background:#fff;
+      border-left:6px solid #ccc;
+      border-radius:6px;
+      padding:2px 4px;
+      margin:1px;
+    }
+    .controls { margin:15px; }
   </style>
 </head>
 <body>
   <h1>Deltagarschema</h1>
+
   <div id="nameView">
     <p>Välj deltagare:</p>
     <div id="nameList" class="name-list">Laddar...</div>
@@ -68,9 +98,19 @@
 
   <div id="scheduleView" style="display:none;">
     <h2 id="personTitle"></h2>
+    <div class="controls">
+      <button id="btnCards">Kortschema</button>
+      <button id="btnBlocks">Blockschema</button>
+    </div>
     <div id="schedule"></div>
-    <button id="backBtn">⬅️ Tillbaka</button>
   </div>
+
+  <div id="blockContainer">
+    <div id="blockHeader" class="block-header"></div>
+    <div id="blockGrid" class="block-grid"></div>
+  </div>
+
+  <button id="backBtn">⬅️ Tillbaka till deltagarlista</button>
 
   <script>
     const url = "https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
@@ -89,7 +129,7 @@
       "Musikquizz":{color:"#D2B4DE",emoji:"🎶"}, "Musikdokumentär":{color:"#D2B4DE",emoji:"🎶"}
     };
 
-    let DATA = [];
+    let DATA = [], CURRENT = "";
 
     async function loadData() {
       const res = await fetch(url + "?t=" + Date.now());
@@ -109,19 +149,23 @@
     }
 
     function showSchedule(namn) {
+      CURRENT = namn;
       document.getElementById("nameView").style.display = "none";
       document.getElementById("scheduleView").style.display = "block";
+      document.getElementById("blockContainer").style.display = "none";
+      document.getElementById("backBtn").style.display = "inline-block";
       document.getElementById("personTitle").textContent = namn;
+      renderCards(namn);
+    }
 
+    function renderCards(namn) {
       const rows = DATA.filter(r => {
         const deltagare = (r.Deltagare || "").toLowerCase();
         return deltagare.includes(namn.toLowerCase()) || deltagare === "alla";
-      }).sort((a,b)=>a.Datum.localeCompare(b.Datum) || (a.Start||"").localeCompare(b.Start||""));
+      }).sort((a,b)=>a.Datum.localeCompare(b.Datum)||(a.Start||"").localeCompare(b.Start||""));
 
       const byDay = {};
-      rows.forEach(r => {
-        (byDay[r.Datum] = byDay[r.Datum] || []).push(r);
-      });
+      rows.forEach(r => (byDay[r.Datum] = byDay[r.Datum] || []).push(r));
 
       let html = "";
       for (const d of Object.keys(byDay).sort()) {
@@ -131,9 +175,9 @@
           const akt = aktivitetFarger[r.Aktivitet] || {color:"#fff",emoji:""};
           html += `
             <div class="activity" style="border-left-color:${akt.color}">
-              <div class="time">${r.Start || ""}–${r.Slut || ""}</div>
-              <h3>${akt.emoji} ${r.Aktivitet || "Aktivitet"}</h3>
-              <div>Coach: ${r.Coach || "-"}</div>
+              <div class="time">${r.Start||""}–${r.Slut||""}</div>
+              <h3>${akt.emoji} ${r.Aktivitet||"Aktivitet"}</h3>
+              <div>Coach: ${r.Coach||"-"}</div>
             </div>
           `;
         });
@@ -141,12 +185,66 @@
       document.getElementById("schedule").innerHTML = html || "<p>Inget schema hittades.</p>";
     }
 
-    document.getElementById("backBtn").onclick = () => {
-      document.getElementById("nameView").style.display = "block";
-      document.getElementById("scheduleView").style.display = "none";
+    // ===== BLOCKSCHEMA =====
+    function renderBlocks(namn) {
+      document.getElementById("schedule").innerHTML = "";
+      document.getElementById("blockContainer").style.display = "block";
+
+      const rows = DATA.filter(r => {
+        const deltagare = (r.Deltagare||"").toLowerCase();
+        return deltagare.includes(namn.toLowerCase()) || deltagare === "alla";
+      });
+
+      const days = [...new Set(rows.map(r=>r.Datum))].sort();
+      const slots = makeSlots();
+      const header = document.getElementById("blockHeader");
+      const grid = document.getElementById("blockGrid");
+      header.innerHTML = "<div>Tid</div>" + days.map(d => `<div>${new Date(d).toLocaleDateString("sv-SE",{weekday:"short"})}</div>`).join("");
+      grid.innerHTML = "";
+
+      slots.forEach(t=>{
+        grid.innerHTML += `<div>${t}</div>` + days.map(()=>"<div></div>").join("");
+      });
+
+      const cells = [...grid.children];
+      const dayMap={}; days.forEach((d,i)=>dayMap[d]=i+1);
+
+      rows.forEach(r=>{
+        const d=dayMap[r.Datum]; if(!d) return;
+        const s=slots.indexOf(floorSlot(r.Start||"08:00"))+1;
+        const e=slots.indexOf(floorSlot(r.Slut||"08:30"))+1;
+        if(s<1||e<s)return;
+        const akt=aktivitetFarger[r.Aktivitet]||{color:"#fff",emoji:""};
+        const cellIndex=(s-1)*(1+days.length)+d;
+        const cell=cells[cellIndex];
+        if(!cell)return;
+        const div=document.createElement("div");
+        div.className="block";
+        div.style.borderLeftColor=akt.color;
+        div.innerHTML=`${akt.emoji} ${r.Aktivitet||"Aktivitet"}<br><small>${r.Start||""}-${r.Slut||""}</small>`;
+        cell.appendChild(div);
+      });
+    }
+
+    function makeSlots(){
+      const out=[];let t=8*60;while(t<=16*60+30){
+        out.push(String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0"));t+=30;
+      }return out;
+    }
+    function floorSlot(t){const [h,m]=t.split(":").map(Number);return `${String(h).padStart(2,"0")}:${m<30?"00":"30"}`;}
+
+    // ===== KNAPPAR =====
+    document.getElementById("btnCards").onclick = ()=>renderCards(CURRENT);
+    document.getElementById("btnBlocks").onclick = ()=>renderBlocks(CURRENT);
+    document.getElementById("backBtn").onclick = ()=>{
+      document.getElementById("nameView").style.display="block";
+      document.getElementById("scheduleView").style.display="none";
+      document.getElementById("blockContainer").style.display="none";
+      document.getElementById("backBtn").style.display="none";
     };
 
     loadData();
   </script>
 </body>
 </html>
+
