@@ -1,250 +1,205 @@
+
+
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <title>Deltagarschema – Grunden DV</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f7faff;
-      color: #222;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 { color: #003366; margin-bottom: 10px; }
-    .name-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
-    button {
-      background: #e9f3ff;
-      border: 1px solid #bcd4ff;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 1.1rem;
-      cursor: pointer;
-    }
-    button:hover { background: #d4e9ff; }
-    .activity {
-      background: #fff;
-      border-left: 10px solid #9ecbff;
-      border-radius: 12px;
-      margin: 10px auto;
-      padding: 10px;
-      max-width: 600px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      text-align: left;
-    }
-    .activity h3 { margin: 0; font-size: 1.2rem; }
-    .activity .time { font-weight: bold; }
-    .day-heading {
-      background: #eef5ff;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-weight: bold;
-      margin: 20px auto 10px;
-      max-width: 600px;
-      text-align: left;
-    }
-    #backBtn {
-      display: none;
-      margin: 20px auto;
-      padding: 10px 20px;
-      border: none;
-      background: #003366;
-      color: white;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    #backBtn:hover { background: #001f44; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deltagarschema</title>
 
-    /* Blockschema */
-    #blockContainer { display:none; margin-top:20px; }
-    .block-header, .block-grid {
-      display:grid;
-      grid-template-columns:80px repeat(5,1fr);
-      max-width:95%;
-      margin:0 auto;
-    }
-    .block-header div {
-      background:#eef5ff;
-      padding:6px;
-      font-weight:700;
-      border:1px solid #ddd;
-    }
-    .block-grid div {
-      border:1px solid #eee;
-      min-height:28px;
-      font-size:.85rem;
-      padding:3px;
-    }
-    .block {
-      background:#fff;
-      border-left:6px solid #ccc;
-      border-radius:6px;
-      padding:2px 4px;
-      margin:1px;
-    }
-    .controls { margin:15px; }
-  </style>
+<style>
+:root{
+  --card-bg:#fff;--border:#ddd;--muted:#555;--shadow:0 3px 10px rgba(0,0,0,.05);
+  --radius:16px;--print-scale:1;
+}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  margin:0 auto;max-width:1100px;padding:20px;background:#fafafa;
+}
+header{text-align:center;margin-bottom:10px;}
+h1{margin:0;font-size:1.4rem;}
+select,button{
+  font-size:1rem;padding:10px 14px;border-radius:10px;border:1px solid #ccc;
+  background:#f8f8f8;cursor:pointer;
+}
+select{width:220px;}
+button:hover{background:#eee;}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:15px;}
+
+.cards{display:flex;flex-direction:column;gap:12px;}
+.card{
+  border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:12px 16px;background:var(--card-bg);
+  position:relative;
+}
+.card::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--band,#ccc);
+  border-top-left-radius:var(--radius);border-bottom-left-radius:var(--radius);
+}
+.card h3{margin:0;font-size:1.1rem;}
+.row{font-size:.95rem;margin-top:4px;}
+
+#blockContainer{display:none;margin-top:10px;}
+.block-header{display:grid;grid-template-columns:80px repeat(5,1fr);font-weight:bold;}
+.block-grid{display:grid;grid-template-columns:80px repeat(5,1fr);}
+.block-time{background:#fafafa;font-size:.85rem;padding:3px 6px;}
+.block-cell{position:relative;min-height:28px;border:1px solid #eee;}
+.block{
+  position:absolute;left:2px;right:2px;top:2px;
+  border-radius:6px;padding:3px 5px;font-size:.8rem;
+  border:1pt solid #666;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+
+@media print{
+  body{background:#fff;color:#000;font-size:9pt;margin:0;}
+  header,.toolbar,#viewTitle,#backBtn{display:none !important;}
+  #blockContainer{display:block !important;transform:scale(var(--print-scale,1));transform-origin:top left;}
+  @page{size:A4 landscape;margin:6mm;}
+}
+</style>
 </head>
 <body>
-  <h1>Deltagarschema</h1>
+<header><h1>Deltagarschema</h1></header>
 
-  <div id="nameView">
-    <p>Välj deltagare:</p>
-    <div id="nameList" class="name-list">Laddar...</div>
-  </div>
+<div class="toolbar">
+  <select id="nameSelect"><option value="">-- Välj deltagare --</option></select>
+  <button id="btnCards">Kortschema</button>
+  <button id="btnBlocks">Blockschema</button>
+  <button id="btnPrint">🖨️ Skriv ut</button>
+</div>
 
-  <div id="scheduleView" style="display:none;">
-    <h2 id="personTitle"></h2>
-    <div class="controls">
-      <button id="btnCards">Kortschema</button>
-      <button id="btnBlocks">Blockschema</button>
-    </div>
-    <div id="schedule"></div>
-  </div>
+<h2 id="viewTitle"></h2>
+<div id="schemaContainer"></div>
+<div id="blockContainer">
+  <div class="block-header" id="blockHeader"></div>
+  <div class="block-grid" id="blockGrid"></div>
+</div>
 
-  <div id="blockContainer">
-    <div id="blockHeader" class="block-header"></div>
-    <div id="blockGrid" class="block-grid"></div>
-  </div>
+<script>
+const url="https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
 
-  <button id="backBtn">⬅️ Tillbaka till deltagarlista</button>
+// 🎨 färger och emojis
+const aktivitetFarger={
+  "Måndagsmöte":{color:"#AED6F1",emoji:"📅"},"Gruppmöte":{color:"#7FB3D5",emoji:"👥"},
+  "Lunch":{color:"#F9E79F",emoji:"🍲"},"Frukost":{color:"#FAD7A0",emoji:"🥐"},
+  "Ateljé":{color:"#F5CBA7",emoji:"🎨"},"Musik":{color:"#D2B4DE",emoji:"🎶"},
+  "Pod":{color:"#A9CCE3",emoji:"🎙️"},"Padel":{color:"#82E0AA",emoji:"🏓"},
+  "Lite av varje":{color:"#FADBD8",emoji:"✨"},"Yoga":{color:"#D5F5E3",emoji:"🧘"},
+  "Gym":{color:"#A3E4D7",emoji:"🏋️‍♂️"},"Film":{color:"#E6B0AA",emoji:"🎬"},
+  "Föreningsgruppen":{color:"#D6DBDF",emoji:"🤝"},"Trummor":{color:"#F1948A",emoji:"🥁"},
+  "Återkoppling":{color:"#85C1E9",emoji:"🔄"},"Medicin":{color:"#E59866",emoji:"💊"},
+  "Biljard":{color:"#A9DFBF",emoji:"🎱"},"Spelgruppen":{color:"#F8C471",emoji:"🎲"},
+  "Sömnad":{color:"#F5EEF8",emoji:"🧵"},"Filmgruppen":{color:"#E6B0AA",emoji:"🎬"},
+  "Musikquizz":{color:"#D2B4DE",emoji:"🎶"},"Musikdokumentär":{color:"#D2B4DE",emoji:"🎶"},
+  "Warhammer":{color:"#C39BD3",emoji:"🛡️"},"Uppstart Taket":{color:"#AED6F1",emoji:"🌤️"},
+  "Gåträning":{color:"#ABEBC6",emoji:"🚶‍♂️"},"Promenad":{color:"#ABEBC6",emoji:"🚶‍♀️"},
+  "Baka":{color:"#FAD7A0",emoji:"🧁"},"Utflykt":{color:"#A9CCE3",emoji:"🚌"},
+};
+function colorFor(r){return(aktivitetFarger[r.Aktivitet]||{color:"#F4F6F7"}).color;}
+function emojiFor(r){return(aktivitetFarger[r.Aktivitet]||{emoji:""}).emoji;}
+function dayKey(str){return String(str).slice(0,10);}
 
-  <script>
-    const url = "https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
+// 🧠 data
+let DATA=[];
+async function loadData(){
+  try{
+    const res=await fetch(url+"?t="+Date.now());
+    const json=await res.json();
+    DATA=json.data||[];
+    fillNameList();
+  }catch(e){console.error(e);}
+}
+loadData();
 
-    const aktivitetFarger = {
-      "Måndagsmöte":{color:"#AED6F1",emoji:"📅"}, "Gruppmöte":{color:"#7FB3D5",emoji:"👥"},
-      "Lunch":{color:"#F9E79F",emoji:"🍲"}, "Frukost":{color:"#FAD7A0",emoji:"🥐"},
-      "Ateljé":{color:"#F5CBA7",emoji:"🎨"}, "Musik":{color:"#D2B4DE",emoji:"🎶"},
-      "Pod":{color:"#A9CCE3",emoji:"🎙️"}, "Padel":{color:"#82E0AA",emoji:"🏓"},
-      "Lite av varje":{color:"#FADBD8",emoji:"✨"}, "Yoga":{color:"#D5F5E3",emoji:"🧘"},
-      "Gym":{color:"#A3E4D7",emoji:"🏋️‍♂️"}, "Film":{color:"#E6B0AA",emoji:"🎬"},
-      "Föreningsgruppen":{color:"#D6DBDF",emoji:"🤝"}, "Trummor":{color:"#F1948A",emoji:"🥁"},
-      "Återkoppling":{color:"#85C1E9",emoji:"🔄"}, "Medicin":{color:"#E59866",emoji:"💊"},
-      "Biljard":{color:"#A9DFBF",emoji:"🎱"}, "Spelgruppen":{color:"#F8C471",emoji:"🎲"},
-      "Sömnad":{color:"#F5EEF8",emoji:"🧵"}, "Filmgruppen":{color:"#E6B0AA",emoji:"🎬"},
-      "Musikquizz":{color:"#D2B4DE",emoji:"🎶"}, "Musikdokumentär":{color:"#D2B4DE",emoji:"🎶"}
-    };
+// fyll namnlista
+function fillNameList(){
+  const s=document.getElementById("nameSelect");
+  s.innerHTML='<option value="">-- Välj deltagare --</option>';
+  [...new Set(DATA.map(r=>(r.Deltagare||"").split(/,|\/|;|\n/).map(x=>x.trim())).flat())]
+    .filter(x=>x&&x.toLowerCase()!=="alla")
+    .sort().forEach(n=>{
+      const o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o);
+    });
+}
 
-    let DATA = [], CURRENT = "";
-
-    async function loadData() {
-      const res = await fetch(url + "?t=" + Date.now());
-      const json = await res.json();
-      DATA = json.data || [];
-      buildNameList();
+// 🍽️ Mio-regel: ta bort generella luncher om specifik finns
+function applyMioRule(rows,name){
+  return rows.filter(r=>{
+    const isLunch=(r.Aktivitet||"").toLowerCase().includes("lunch");
+    const isAll=(r.Deltagare||"").trim().toLowerCase()==="alla";
+    if(isLunch&&isAll){
+      const specific=rows.some(x=>x.Datum===r.Datum&&x.Start===r.Start&&x.Slut===r.Slut&&
+        (x.Aktivitet||"").toLowerCase().includes("lunch")&&
+        (x.Deltagare||"").toLowerCase().includes(name.toLowerCase()));
+      if(specific) return false;
     }
+    return true;
+  });
+}
 
-    function parseList(str) {
-      return (str || "").split(/,|\/|;|\n| och /i).map(s => s.trim()).filter(Boolean);
-    }
+// 📋 kortschema
+function renderCards(name){
+  const rows=applyMioRule(
+    DATA.filter(r=>{
+      const d=(r.Deltagare||"").toLowerCase();
+      return d.includes(name.toLowerCase())||d==="alla";
+    }),name).sort((a,b)=>a.Datum.localeCompare(b.Datum)||(a.Start||"").localeCompare(b.Start||""));
+  const grouped={};
+  rows.forEach(r=>{const k=dayKey(r.Datum);(grouped[k]=grouped[k]||[]).push(r);});
+  let html="";
+  Object.keys(grouped).forEach(k=>{
+    const label=new Intl.DateTimeFormat("sv-SE",{weekday:"long",day:"numeric",month:"long"}).format(new Date(k));
+    html+=`<h3>${label}</h3><div class="cards">`;
+    grouped[k].forEach(r=>{
+      const b=colorFor(r), e=emojiFor(r);
+      html+=`<div class="card" style="--band:${b}">
+        <h3>${e} ${r.Aktivitet||"Aktivitet"}</h3>
+        <div class="row">🕒 ${r.Start||""}–${r.Slut||""}</div>
+        <div class="row">🧑‍🏫 Coach: ${r.Coach||"-"}</div>
+      </div>`;
+    });
+    html+="</div>";
+  });
+  document.getElementById("schemaContainer").innerHTML=html||"<p>Inga aktiviteter.</p>";
+  document.getElementById("schemaContainer").style.display="block";
+  document.getElementById("blockContainer").style.display="none";
+  document.getElementById("viewTitle").textContent=`Kortschema – ${name}`;
+}
 
-    function buildNameList() {
-      const names = [...new Set(DATA.flatMap(r => parseList(r.Deltagare)))].filter(n => n.toLowerCase() !== "alla").sort();
-      document.getElementById("nameList").innerHTML =
-        names.map(n => `<button onclick="showSchedule('${n}')">${n}</button>`).join("");
-    }
+// 🧱 blockschema
+function makeSlots(){const a=[];for(let h=8;h<=16;h++){a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);}a.push("16:30");return a;}
+function renderBlocks(name){
+  const slots=makeSlots(), days=[...new Set(DATA.map(r=>dayKey(r.Datum)))].sort();
+  const rows=applyMioRule(DATA.filter(r=>{
+    const d=(r.Deltagare||"").toLowerCase();return d.includes(name.toLowerCase())||d==="alla";
+  }),name);
+  const head=document.getElementById("blockHeader"), grid=document.getElementById("blockGrid");
+  head.innerHTML="<div>Tid</div>"+days.map(d=>`<div>${new Intl.DateTimeFormat("sv-SE",{weekday:"short"}).format(new Date(d))}</div>`).join("");
+  grid.innerHTML="";grid.style.gridTemplateColumns=`80px repeat(${days.length},1fr)`;
+  slots.forEach(t=>{
+    grid.innerHTML+=`<div class="block-time">${t}</div>`+days.map(()=>`<div class="block-cell"></div>`).join("");
+  });
+  const cells=[...grid.children], dayMap={};days.forEach((d,i)=>dayMap[d]=i+1);
+  rows.forEach(r=>{
+    const dk=dayKey(r.Datum),col=dayMap[dk];if(!col)return;
+    const toMin=t=>{const [h,m]=t.split(":").map(Number);return h*60+m;};
+    const sIdx=slots.indexOf(r.Start),eIdx=slots.indexOf(r.Slut);
+    if(sIdx<0||eIdx<=sIdx)return;
+    const firstCellIndex=(sIdx)*(1+days.length)+col,firstCell=cells[firstCellIndex];
+    const block=document.createElement("div");block.className="block";
+    block.style.background=colorFor(r);
+    block.innerHTML=`${emojiFor(r)} ${r.Aktivitet}<br>${r.Start||""}–${r.Slut||""}<br>Coach: ${r.Coach||"-"}`;
+    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;block.style.height=(eIdx-sIdx)*cellH+"px";});
+    firstCell.appendChild(block);
+  });
+  document.getElementById("schemaContainer").style.display="none";
+  document.getElementById("blockContainer").style.display="block";
+  document.getElementById("viewTitle").textContent=`Blockschema – ${name}`;
+}
 
-    function showSchedule(namn) {
-      CURRENT = namn;
-      document.getElementById("nameView").style.display = "none";
-      document.getElementById("scheduleView").style.display = "block";
-      document.getElementById("blockContainer").style.display = "none";
-      document.getElementById("backBtn").style.display = "inline-block";
-      document.getElementById("personTitle").textContent = namn;
-      renderCards(namn);
-    }
-
-    function renderCards(namn) {
-      const rows = DATA.filter(r => {
-        const deltagare = (r.Deltagare || "").toLowerCase();
-        return deltagare.includes(namn.toLowerCase()) || deltagare === "alla";
-      }).sort((a,b)=>a.Datum.localeCompare(b.Datum)||(a.Start||"").localeCompare(b.Start||""));
-
-      const byDay = {};
-      rows.forEach(r => (byDay[r.Datum] = byDay[r.Datum] || []).push(r));
-
-      let html = "";
-      for (const d of Object.keys(byDay).sort()) {
-        const label = new Date(d).toLocaleDateString("sv-SE",{weekday:"long",day:"numeric",month:"long"});
-        html += `<div class="day-heading">${label}</div>`;
-        byDay[d].forEach(r => {
-          const akt = aktivitetFarger[r.Aktivitet] || {color:"#fff",emoji:""};
-          html += `
-            <div class="activity" style="border-left-color:${akt.color}">
-              <div class="time">${r.Start||""}–${r.Slut||""}</div>
-              <h3>${akt.emoji} ${r.Aktivitet||"Aktivitet"}</h3>
-              <div>Coach: ${r.Coach||"-"}</div>
-            </div>
-          `;
-        });
-      }
-      document.getElementById("schedule").innerHTML = html || "<p>Inget schema hittades.</p>";
-    }
-
-    // ===== BLOCKSCHEMA =====
-    function renderBlocks(namn) {
-      document.getElementById("schedule").innerHTML = "";
-      document.getElementById("blockContainer").style.display = "block";
-
-      const rows = DATA.filter(r => {
-        const deltagare = (r.Deltagare||"").toLowerCase();
-        return deltagare.includes(namn.toLowerCase()) || deltagare === "alla";
-      });
-
-      const days = [...new Set(rows.map(r=>r.Datum))].sort();
-      const slots = makeSlots();
-      const header = document.getElementById("blockHeader");
-      const grid = document.getElementById("blockGrid");
-      header.innerHTML = "<div>Tid</div>" + days.map(d => `<div>${new Date(d).toLocaleDateString("sv-SE",{weekday:"short"})}</div>`).join("");
-      grid.innerHTML = "";
-
-      slots.forEach(t=>{
-        grid.innerHTML += `<div>${t}</div>` + days.map(()=>"<div></div>").join("");
-      });
-
-      const cells = [...grid.children];
-      const dayMap={}; days.forEach((d,i)=>dayMap[d]=i+1);
-
-      rows.forEach(r=>{
-        const d=dayMap[r.Datum]; if(!d) return;
-        const s=slots.indexOf(floorSlot(r.Start||"08:00"))+1;
-        const e=slots.indexOf(floorSlot(r.Slut||"08:30"))+1;
-        if(s<1||e<s)return;
-        const akt=aktivitetFarger[r.Aktivitet]||{color:"#fff",emoji:""};
-        const cellIndex=(s-1)*(1+days.length)+d;
-        const cell=cells[cellIndex];
-        if(!cell)return;
-        const div=document.createElement("div");
-        div.className="block";
-        div.style.borderLeftColor=akt.color;
-        div.innerHTML=`${akt.emoji} ${r.Aktivitet||"Aktivitet"}<br><small>${r.Start||""}-${r.Slut||""}</small>`;
-        cell.appendChild(div);
-      });
-    }
-
-    function makeSlots(){
-      const out=[];let t=8*60;while(t<=16*60+30){
-        out.push(String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0"));t+=30;
-      }return out;
-    }
-    function floorSlot(t){const [h,m]=t.split(":").map(Number);return `${String(h).padStart(2,"0")}:${m<30?"00":"30"}`;}
-
-    // ===== KNAPPAR =====
-    document.getElementById("btnCards").onclick = ()=>renderCards(CURRENT);
-    document.getElementById("btnBlocks").onclick = ()=>renderBlocks(CURRENT);
-    document.getElementById("backBtn").onclick = ()=>{
-      document.getElementById("nameView").style.display="block";
-      document.getElementById("scheduleView").style.display="none";
-      document.getElementById("blockContainer").style.display="none";
-      document.getElementById("backBtn").style.display="none";
-    };
-
-    loadData();
-  </script>
+document.getElementById("btnCards").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderCards(n);};
+document.getElementById("btnBlocks").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderBlocks(n);};
+document.getElementById("btnPrint").onclick=()=>{window.print();};
+</script>
 </body>
 </html>
-
