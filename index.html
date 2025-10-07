@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -9,7 +7,7 @@
 
 <style>
 :root{
-  --card-bg:#fff;--border:#ddd;--muted:#555;--shadow:0 3px 10px rgba(0,0,0,.05);
+  --card-bg:#fff;--border:#ddd;--shadow:0 3px 10px rgba(0,0,0,.05);
   --radius:16px;--print-scale:1;
 }
 body{
@@ -43,16 +41,18 @@ button:hover{background:#eee;}
 .block-header{display:grid;grid-template-columns:80px repeat(5,1fr);font-weight:bold;}
 .block-grid{display:grid;grid-template-columns:80px repeat(5,1fr);}
 .block-time{background:#fafafa;font-size:.85rem;padding:3px 6px;}
-.block-cell{position:relative;min-height:28px;border:1px solid #eee;}
+.block-cell{position:relative;min-height:28px;border:none;}
 .block{
   position:absolute;left:2px;right:2px;top:2px;
-  border-radius:6px;padding:3px 5px;font-size:.8rem;
-  border:1pt solid #666;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+  border-radius:8px;padding:4px 6px;line-height:1.2;
+  border:1pt solid #666;font-size:.8rem;
+  word-break:break-word;overflow:hidden;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
 }
 
 @media print{
   body{background:#fff;color:#000;font-size:9pt;margin:0;}
-  header,.toolbar,#viewTitle,#backBtn{display:none !important;}
+  header,.toolbar,#backBtn{display:none !important;}
   #blockContainer{display:block !important;transform:scale(var(--print-scale,1));transform-origin:top left;}
   @page{size:A4 landscape;margin:6mm;}
 }
@@ -180,21 +180,30 @@ function renderBlocks(name){
     grid.innerHTML+=`<div class="block-time">${t}</div>`+days.map(()=>`<div class="block-cell"></div>`).join("");
   });
   const cells=[...grid.children], dayMap={};days.forEach((d,i)=>dayMap[d]=i+1);
+  const toMin=t=>{const [h,m]=t.split(":").map(Number);return h*60+m;};
+
   rows.forEach(r=>{
     const dk=dayKey(r.Datum),col=dayMap[dk];if(!col)return;
-    const toMin=t=>{const [h,m]=t.split(":").map(Number);return h*60+m;};
     const sIdx=slots.indexOf(r.Start),eIdx=slots.indexOf(r.Slut);
     if(sIdx<0||eIdx<=sIdx)return;
     const firstCellIndex=(sIdx)*(1+days.length)+col,firstCell=cells[firstCellIndex];
     const block=document.createElement("div");block.className="block";
     block.style.background=colorFor(r);
-    block.innerHTML=`${emojiFor(r)} ${r.Aktivitet}<br>${r.Start||""}–${r.Slut||""}<br>Coach: ${r.Coach||"-"}`;
+    const duration=toMin(r.Slut)-toMin(r.Start);
+    if(duration<=30){
+      block.innerHTML=`${emojiFor(r)} ${r.Aktivitet||""} – ${r.Coach||"-"}`;
+    }else{
+      block.innerHTML=`${emojiFor(r)} ${r.Aktivitet||""}<br>${r.Start||""}–${r.Slut||""}<br>Coach: ${r.Coach||"-"}`;
+    }
     requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;block.style.height=(eIdx-sIdx)*cellH+"px";});
     firstCell.appendChild(block);
   });
+
+  const today=new Date();
+  const dateLabel=today.toLocaleDateString("sv-SE");
+  document.getElementById("viewTitle").textContent=`Veckoschema – ${name} – utskrivet ${dateLabel}`;
   document.getElementById("schemaContainer").style.display="none";
   document.getElementById("blockContainer").style.display="block";
-  document.getElementById("viewTitle").textContent=`Blockschema – ${name}`;
 }
 
 document.getElementById("btnCards").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderCards(n);};
