@@ -120,9 +120,11 @@
       try {
         const res = await fetch(url + "?t=" + Date.now());
         const json = await res.json();
+        console.log("Data hämtad:", json);
         DATA = json.data || [];
         buildNameButtons();
       } catch(e) {
+        console.error("Fel vid hämtning:", e);
         document.getElementById("selectView").innerHTML =
           "<p style='color:red'>Kunde inte ladda schemat.</p>";
       }
@@ -133,7 +135,7 @@
       const grid = document.getElementById("selectView");
       const names = [...new Set(DATA.map(r => r.Deltagare)
         .flatMap(n => n.split(/,|\/|;|\n| och /i).map(s => s.trim()))
-        .filter(Boolean))].sort();
+        .filter(n => n && n.toLowerCase() !== "alla"))].sort();
 
       grid.innerHTML = names.map(n => `
         <button class="name-btn" onclick="showSchedule('${n}')">
@@ -152,10 +154,15 @@
       document.getElementById("schemaTitle").textContent = `${namn} – dagens schema`;
 
       const today = new Date().toISOString().slice(0,10);
-      const rows = DATA.filter(r =>
-        (r.Deltagare || "").toLowerCase().includes(namn.toLowerCase()) &&
-        r.Datum.slice(0,10) === today
-      ).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
+
+      // Visa både egna aktiviteter och där Deltagare = "Alla"
+      const rows = DATA.filter(r => {
+        const deltagare = (r.Deltagare || "").toLowerCase();
+        return (
+          r.Datum.slice(0,10) === today &&
+          (deltagare.includes(namn.toLowerCase()) || deltagare === "alla")
+        );
+      }).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
 
       const out = rows.map(r => {
         const f = aktivitetFarger[r.Aktivitet] || {color:"#fff",emoji:""};
@@ -192,3 +199,4 @@
   </script>
 </body>
 </html>
+
