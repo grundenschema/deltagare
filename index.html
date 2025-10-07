@@ -2,51 +2,149 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
-  <title>Grunden DV – Test</title>
+  <title>Deltagarschema – Grunden DV</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: system-ui, sans-serif;
-      background: #f5f8ff;
+      background: #f7faff;
       color: #222;
-      text-align: center;
       margin: 0;
       padding: 20px;
+      text-align: center;
     }
-    h1 {
-      color: #004080;
+    h1 { color: #003366; margin-bottom: 10px; }
+    .name-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
+    button {
+      background: #e9f3ff;
+      border: 1px solid #bcd4ff;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 1.1rem;
+      cursor: pointer;
     }
-    pre {
-      text-align: left;
+    button:hover { background: #d4e9ff; }
+    .activity {
       background: #fff;
+      border-left: 10px solid #9ecbff;
       border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 900px;
-      margin: 20px auto;
-      overflow-x: auto;
-      font-size: 1rem;
+      margin: 10px auto;
+      padding: 10px;
+      max-width: 600px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: left;
     }
+    .activity h3 { margin: 0; font-size: 1.2rem; }
+    .activity .time { font-weight: bold; }
+    .day-heading {
+      background: #eef5ff;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-weight: bold;
+      margin: 20px auto 10px;
+      max-width: 600px;
+      text-align: left;
+    }
+    #backBtn {
+      display: none;
+      margin: 20px auto;
+      padding: 10px 20px;
+      border: none;
+      background: #003366;
+      color: white;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #backBtn:hover { background: #001f44; }
   </style>
 </head>
-
 <body>
-  <h1>Test av schema-data</h1>
-  <p>Om allt fungerar ska du se JSON-data här nedanför 👇</p>
-  <pre id="output">Hämtar data...</pre>
+  <h1>Deltagarschema</h1>
+  <div id="nameView">
+    <p>Välj deltagare:</p>
+    <div id="nameList" class="name-list">Laddar...</div>
+  </div>
+
+  <div id="scheduleView" style="display:none;">
+    <h2 id="personTitle"></h2>
+    <div id="schedule"></div>
+    <button id="backBtn">⬅️ Tillbaka</button>
+  </div>
 
   <script>
     const url = "https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
 
+    const aktivitetFarger = {
+      "Måndagsmöte":{color:"#AED6F1",emoji:"📅"}, "Gruppmöte":{color:"#7FB3D5",emoji:"👥"},
+      "Lunch":{color:"#F9E79F",emoji:"🍲"}, "Frukost":{color:"#FAD7A0",emoji:"🥐"},
+      "Ateljé":{color:"#F5CBA7",emoji:"🎨"}, "Musik":{color:"#D2B4DE",emoji:"🎶"},
+      "Pod":{color:"#A9CCE3",emoji:"🎙️"}, "Padel":{color:"#82E0AA",emoji:"🏓"},
+      "Lite av varje":{color:"#FADBD8",emoji:"✨"}, "Yoga":{color:"#D5F5E3",emoji:"🧘"},
+      "Gym":{color:"#A3E4D7",emoji:"🏋️‍♂️"}, "Film":{color:"#E6B0AA",emoji:"🎬"},
+      "Föreningsgruppen":{color:"#D6DBDF",emoji:"🤝"}, "Trummor":{color:"#F1948A",emoji:"🥁"},
+      "Återkoppling":{color:"#85C1E9",emoji:"🔄"}, "Medicin":{color:"#E59866",emoji:"💊"},
+      "Biljard":{color:"#A9DFBF",emoji:"🎱"}, "Spelgruppen":{color:"#F8C471",emoji:"🎲"},
+      "Sömnad":{color:"#F5EEF8",emoji:"🧵"}, "Filmgruppen":{color:"#E6B0AA",emoji:"🎬"},
+      "Musikquizz":{color:"#D2B4DE",emoji:"🎶"}, "Musikdokumentär":{color:"#D2B4DE",emoji:"🎶"}
+    };
+
+    let DATA = [];
+
     async function loadData() {
-      try {
-        const res = await fetch(url + "?t=" + Date.now());
-        const json = await res.json();
-        document.getElementById("output").textContent = JSON.stringify(json, null, 2);
-      } catch (err) {
-        document.getElementById("output").textContent = "Fel vid hämtning: " + err;
-      }
+      const res = await fetch(url + "?t=" + Date.now());
+      const json = await res.json();
+      DATA = json.data || [];
+      buildNameList();
     }
+
+    function parseList(str) {
+      return (str || "").split(/,|\/|;|\n| och /i).map(s => s.trim()).filter(Boolean);
+    }
+
+    function buildNameList() {
+      const names = [...new Set(DATA.flatMap(r => parseList(r.Deltagare)))].filter(n => n.toLowerCase() !== "alla").sort();
+      document.getElementById("nameList").innerHTML =
+        names.map(n => `<button onclick="showSchedule('${n}')">${n}</button>`).join("");
+    }
+
+    function showSchedule(namn) {
+      document.getElementById("nameView").style.display = "none";
+      document.getElementById("scheduleView").style.display = "block";
+      document.getElementById("personTitle").textContent = namn;
+
+      const rows = DATA.filter(r => {
+        const deltagare = (r.Deltagare || "").toLowerCase();
+        return deltagare.includes(namn.toLowerCase()) || deltagare === "alla";
+      }).sort((a,b)=>a.Datum.localeCompare(b.Datum) || (a.Start||"").localeCompare(b.Start||""));
+
+      const byDay = {};
+      rows.forEach(r => {
+        (byDay[r.Datum] = byDay[r.Datum] || []).push(r);
+      });
+
+      let html = "";
+      for (const d of Object.keys(byDay).sort()) {
+        const label = new Date(d).toLocaleDateString("sv-SE",{weekday:"long",day:"numeric",month:"long"});
+        html += `<div class="day-heading">${label}</div>`;
+        byDay[d].forEach(r => {
+          const akt = aktivitetFarger[r.Aktivitet] || {color:"#fff",emoji:""};
+          html += `
+            <div class="activity" style="border-left-color:${akt.color}">
+              <div class="time">${r.Start || ""}–${r.Slut || ""}</div>
+              <h3>${akt.emoji} ${r.Aktivitet || "Aktivitet"}</h3>
+              <div>Coach: ${r.Coach || "-"}</div>
+            </div>
+          `;
+        });
+      }
+      document.getElementById("schedule").innerHTML = html || "<p>Inget schema hittades.</p>";
+    }
+
+    document.getElementById("backBtn").onclick = () => {
+      document.getElementById("nameView").style.display = "block";
+      document.getElementById("scheduleView").style.display = "none";
+    };
 
     loadData();
   </script>
