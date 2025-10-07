@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Grunden DV – Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f5f8ff;
+      color: #222;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #004080;
+    }
+    pre {
+      text-align: left;
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 900px;
+      margin: 20px auto;
+      overflow-x: auto;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Test av schema-data</h1>
+  <p>Om allt fungerar ska du se JSON-data här nedanför 👇</p>
+  <pre id="output">Hämtar data...</pre>
+
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
+
+    async function loadData() {
+      try {
+        const res = await fetch(url + "?t=" + Date.now());
+        const json = await res.json();
+        document.getElementById("output").textContent = JSON.stringify(json, null, 2);
+      } catch (err) {
+        document.getElementById("output").textContent = "Fel vid hämtning: " + err;
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
