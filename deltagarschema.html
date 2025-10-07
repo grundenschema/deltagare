@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
-  <title>Deltagarschema – Testversion</title>
+  <title>Deltagarschema – Grunden DV</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -57,9 +57,10 @@
       padding: 16px; margin: 10px 0;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       font-size: 1.3rem;
+      border-left: 8px solid #9ecbff;
     }
     .time { font-weight: bold; }
-    .title { font-size: 1.4rem; margin-top: 4px; }
+    .title { font-size: 1.4rem; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
     .coach { font-size: 1.1rem; color: #555; }
 
     /* Tillbaka-knapp */
@@ -98,8 +99,21 @@
     /* === Datakälla === */
     const url = "https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
 
+    const aktivitetFarger = {
+      "Måndagsmöte": {color:"#AED6F1",emoji:"📅"}, "Gruppmöte":{color:"#7FB3D5",emoji:"👥"},
+      "Lunch":{color:"#F9E79F",emoji:"🍲"}, "Frukost":{color:"#FAD7A0",emoji:"🥐"},
+      "Ateljé":{color:"#F5CBA7",emoji:"🎨"}, "Musik":{color:"#D2B4DE",emoji:"🎶"},
+      "Pod":{color:"#A9CCE3",emoji:"🎙️"}, "Padel":{color:"#82E0AA",emoji:"🏓"},
+      "Yoga":{color:"#D5F5E3",emoji:"🧘"}, "Gym":{color:"#A3E4D7",emoji:"🏋️‍♂️"},
+      "Film":{color:"#E6B0AA",emoji:"🎬"}, "Föreningsgruppen":{color:"#D6DBDF",emoji:"🤝"},
+      "Trummor":{color:"#F1948A",emoji:"🥁"}, "Återkoppling":{color:"#85C1E9",emoji:"🔄"},
+      "Medicin":{color:"#E59866",emoji:"💊"}, "Biljard":{color:"#A9DFBF",emoji:"🎱"},
+      "Spelgruppen":{color:"#F8C471",emoji:"🎲"}, "Sömnad":{color:"#F5EEF8",emoji:"🧵"},
+      "Filmgruppen":{color:"#E6B0AA",emoji:"🎬"}, "Musikquizz":{color:"#D2B4DE",emoji:"🎶"},
+      "Musikdokumentär":{color:"#D2B4DE",emoji:"🎶"}, "Lite av varje":{color:"#FADBD8",emoji:"✨"}
+    };
+
     let DATA = [];
-    let deltagareLista = [];
 
     /* === Ladda data === */
     async function loadData() {
@@ -109,7 +123,8 @@
         DATA = json.data || [];
         buildNameButtons();
       } catch(e) {
-        document.getElementById("selectView").innerHTML = "<p style='color:red'>Kunde inte ladda schemat.</p>";
+        document.getElementById("selectView").innerHTML =
+          "<p style='color:red'>Kunde inte ladda schemat.</p>";
       }
     }
 
@@ -120,7 +135,6 @@
         .flatMap(n => n.split(/,|\/|;|\n| och /i).map(s => s.trim()))
         .filter(Boolean))].sort();
 
-      deltagareLista = names;
       grid.innerHTML = names.map(n => `
         <button class="name-btn" onclick="showSchedule('${n}')">
           <img src="bilder/${n.toLowerCase()}.jpg" alt="${n}" onerror="this.src='https://via.placeholder.com/70'">
@@ -129,7 +143,7 @@
       `).join('');
     }
 
-    /* === Visa schema för vald deltagare === */
+    /* === Kortvy för vald deltagare === */
     function showSchedule(namn) {
       document.getElementById("selectView").style.display = "none";
       document.getElementById("searchInput").style.display = "none";
@@ -140,16 +154,19 @@
       const today = new Date().toISOString().slice(0,10);
       const rows = DATA.filter(r =>
         (r.Deltagare || "").toLowerCase().includes(namn.toLowerCase()) &&
-        r.Datum.startsWith(today)
+        r.Datum.slice(0,10) === today
       ).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
 
-      const out = rows.map(r => `
-        <div class="activity-card">
-          <div class="time">${r.Start || ""}–${r.Slut || ""}</div>
-          <div class="title">${r.Aktivitet || "Aktivitet"}</div>
-          <div class="coach">Med: ${r.Coach || "-"}</div>
-        </div>
-      `).join('') || "<p>Inga aktiviteter idag.</p>";
+      const out = rows.map(r => {
+        const f = aktivitetFarger[r.Aktivitet] || {color:"#fff",emoji:""};
+        return `
+          <div class="activity-card" style="border-left-color:${f.color}">
+            <div class="time">${r.Start || ""}–${r.Slut || ""}</div>
+            <div class="title">${f.emoji} ${r.Aktivitet || "Aktivitet"}</div>
+            <div class="coach">Med: ${r.Coach || "-"}</div>
+          </div>
+        `;
+      }).join('') || "<p>Inga aktiviteter idag.</p>";
 
       document.getElementById("activities").innerHTML = out;
     }
