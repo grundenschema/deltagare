@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Deltagarschema – Testversion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f7faff;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      color: #222;
+    }
+    header img { height: 70px; margin-bottom: 10px; }
+    h1 { font-size: 1.8rem; color: #1a4a7a; margin-bottom: 20px; }
+
+    /* Sökfält */
+    #searchInput {
+      width: 90%; max-width: 400px;
+      padding: 12px; font-size: 1.2rem;
+      border-radius: 12px; border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    /* Namnknappar */
+    .name-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px; max-width: 800px; margin: 0 auto;
+    }
+    .name-btn {
+      background: #e9f3ff;
+      border: 2px solid #c9e0ff;
+      border-radius: 16px;
+      padding: 14px 8px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .name-btn:hover { background: #d4e9ff; }
+    .name-btn img {
+      width: 70px; height: 70px; border-radius: 50%;
+      object-fit: cover; margin-bottom: 6px;
+      border: 2px solid #bcd4ff; background: white;
+    }
+
+    /* Schema */
+    #schemaView { display: none; max-width: 700px; margin: 0 auto; text-align: left; }
+    .activity-card {
+      background: #fff; border-radius: 16px;
+      padding: 16px; margin: 10px 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      font-size: 1.3rem;
+    }
+    .time { font-weight: bold; }
+    .title { font-size: 1.4rem; margin-top: 4px; }
+    .coach { font-size: 1.1rem; color: #555; }
+
+    /* Tillbaka-knapp */
+    #btnBack {
+      display: none; margin: 30px auto;
+      padding: 14px 28px; font-size: 1.2rem;
+      border-radius: 12px; border: none;
+      background: #00509e; color: white;
+      cursor: pointer;
+    }
+    #btnBack:hover { background: #003f7a; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="Grunden DV">
+    <h1>Välj ditt namn för att se dagens schema</h1>
+  </header>
+
+  <!-- Sökfält -->
+  <input type="text" id="searchInput" placeholder="Sök ditt namn...">
+
+  <!-- Namnlista -->
+  <div id="selectView" class="name-grid"></div>
+
+  <!-- Schemaruta -->
+  <div id="schemaView">
+    <h2 id="schemaTitle"></h2>
+    <div id="activities"></div>
+  </div>
+
+  <button id="btnBack">⬅️ Tillbaka</button>
+
+  <script>
+    /* === Datakälla === */
+    const url = "https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
+
+    let DATA = [];
+    let deltagareLista = [];
+
+    /* === Ladda data === */
+    async function loadData() {
+      try {
+        const res = await fetch(url + "?t=" + Date.now());
+        const json = await res.json();
+        DATA = json.data || [];
+        buildNameButtons();
+      } catch(e) {
+        document.getElementById("selectView").innerHTML = "<p style='color:red'>Kunde inte ladda schemat.</p>";
+      }
+    }
+
+    /* === Skapa namnknappar === */
+    function buildNameButtons() {
+      const grid = document.getElementById("selectView");
+      const names = [...new Set(DATA.map(r => r.Deltagare)
+        .flatMap(n => n.split(/,|\/|;|\n| och /i).map(s => s.trim()))
+        .filter(Boolean))].sort();
+
+      deltagareLista = names;
+      grid.innerHTML = names.map(n => `
+        <button class="name-btn" onclick="showSchedule('${n}')">
+          <img src="bilder/${n.toLowerCase()}.jpg" alt="${n}" onerror="this.src='https://via.placeholder.com/70'">
+          ${n}
+        </button>
+      `).join('');
+    }
+
+    /* === Visa schema för vald deltagare === */
+    function showSchedule(namn) {
+      document.getElementById("selectView").style.display = "none";
+      document.getElementById("searchInput").style.display = "none";
+      document.getElementById("schemaView").style.display = "block";
+      document.getElementById("btnBack").style.display = "block";
+      document.getElementById("schemaTitle").textContent = `${namn} – dagens schema`;
+
+      const today = new Date().toISOString().slice(0,10);
+      const rows = DATA.filter(r =>
+        (r.Deltagare || "").toLowerCase().includes(namn.toLowerCase()) &&
+        r.Datum.startsWith(today)
+      ).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
+
+      const out = rows.map(r => `
+        <div class="activity-card">
+          <div class="time">${r.Start || ""}–${r.Slut || ""}</div>
+          <div class="title">${r.Aktivitet || "Aktivitet"}</div>
+          <div class="coach">Med: ${r.Coach || "-"}</div>
+        </div>
+      `).join('') || "<p>Inga aktiviteter idag.</p>";
+
+      document.getElementById("activities").innerHTML = out;
+    }
+
+    /* === Tillbaka === */
+    document.getElementById("btnBack").onclick = () => {
+      document.getElementById("selectView").style.display = "grid";
+      document.getElementById("searchInput").style.display = "block";
+      document.getElementById("schemaView").style.display = "none";
+      document.getElementById("btnBack").style.display = "none";
+    };
+
+    /* === Sökfunktion === */
+    document.getElementById("searchInput").addEventListener("input", e => {
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll(".name-btn").forEach(btn => {
+        btn.style.display = btn.textContent.toLowerCase().includes(q) ? "flex" : "none";
+      });
+    });
+
+    /* === Start === */
+    loadData();
+  </script>
+</body>
+</html>
