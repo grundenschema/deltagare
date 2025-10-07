@@ -12,7 +12,7 @@
 }
 body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-  margin:0 auto;max-width:1100px;padding:20px;background:#fafafa;
+  margin:0 auto;max-width:1400px;padding:20px;background:#fafafa;
 }
 header{text-align:center;margin-bottom:10px;}
 h1{margin:0;font-size:1.4rem;}
@@ -52,7 +52,7 @@ button:hover{background:#eee;}
 
 @media print{
   body{background:#fff;color:#000;font-size:9pt;margin:0;}
-  header,.toolbar,#backBtn{display:none !important;}
+  header,.toolbar{display:none !important;}
   #blockContainer{display:block !important;transform:scale(var(--print-scale,1));transform-origin:top left;}
   @page{size:A4 landscape;margin:6mm;}
 }
@@ -63,7 +63,7 @@ button:hover{background:#eee;}
 
 <div class="toolbar">
   <select id="nameSelect"><option value="">-- Välj deltagare --</option></select>
-  <button id="btnCards">Kortschema</button>
+  <button id="btnCards">Dagens schema</button>
   <button id="btnBlocks">Blockschema</button>
   <button id="btnPrint">🖨️ Skriv ut</button>
 </div>
@@ -98,6 +98,7 @@ const aktivitetFarger={
 function colorFor(r){return(aktivitetFarger[r.Aktivitet]||{color:"#F4F6F7"}).color;}
 function emojiFor(r){return(aktivitetFarger[r.Aktivitet]||{emoji:""}).emoji;}
 function dayKey(str){return String(str).slice(0,10);}
+function todayKey(){return new Date().toISOString().slice(0,10);}
 
 // 🧠 data
 let DATA=[];
@@ -107,6 +108,7 @@ async function loadData(){
     const json=await res.json();
     DATA=json.data||[];
     fillNameList();
+    autoOpenFromLink();
   }catch(e){console.error(e);}
 }
 loadData();
@@ -122,7 +124,7 @@ function fillNameList(){
     });
 }
 
-// 🍽️ Mio-regel: ta bort generella luncher om specifik finns
+// 🍽️ Mio-regel
 function applyMioRule(rows,name){
   return rows.filter(r=>{
     const isLunch=(r.Aktivitet||"").toLowerCase().includes("lunch");
@@ -137,33 +139,30 @@ function applyMioRule(rows,name){
   });
 }
 
-// 📋 kortschema
+// 📋 Dagens schema (kortvy)
 function renderCards(name){
+  const today=todayKey();
   const rows=applyMioRule(
     DATA.filter(r=>{
       const d=(r.Deltagare||"").toLowerCase();
-      return d.includes(name.toLowerCase())||d==="alla";
-    }),name).sort((a,b)=>a.Datum.localeCompare(b.Datum)||(a.Start||"").localeCompare(b.Start||""));
-  const grouped={};
-  rows.forEach(r=>{const k=dayKey(r.Datum);(grouped[k]=grouped[k]||[]).push(r);});
-  let html="";
-  Object.keys(grouped).forEach(k=>{
-    const label=new Intl.DateTimeFormat("sv-SE",{weekday:"long",day:"numeric",month:"long"}).format(new Date(k));
-    html+=`<h3>${label}</h3><div class="cards">`;
-    grouped[k].forEach(r=>{
-      const b=colorFor(r), e=emojiFor(r);
-      html+=`<div class="card" style="--band:${b}">
-        <h3>${e} ${r.Aktivitet||"Aktivitet"}</h3>
-        <div class="row">🕒 ${r.Start||""}–${r.Slut||""}</div>
-        <div class="row">🧑‍🏫 Coach: ${r.Coach||"-"}</div>
-      </div>`;
-    });
-    html+="</div>";
+      return (d.includes(name.toLowerCase())||d==="alla") && dayKey(r.Datum)===today;
+    }),name).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
+  const label=new Intl.DateTimeFormat("sv-SE",{weekday:"long",day:"numeric",month:"long"}).format(new Date(today));
+  let html=`<h3>${label}</h3><div class="cards">`;
+  if(!rows.length){html+="<p>Inga aktiviteter idag.</p>";}
+  rows.forEach(r=>{
+    const b=colorFor(r), e=emojiFor(r);
+    html+=`<div class="card" style="--band:${b}">
+      <h3>${e} ${r.Aktivitet||"Aktivitet"}</h3>
+      <div class="row">🕒 ${r.Start||""}–${r.Slut||""}</div>
+      <div class="row">🧑‍🏫 Coach: ${r.Coach||"-"}</div>
+    </div>`;
   });
-  document.getElementById("schemaContainer").innerHTML=html||"<p>Inga aktiviteter.</p>";
+  html+="</div>";
+  document.getElementById("schemaContainer").innerHTML=html;
   document.getElementById("schemaContainer").style.display="block";
   document.getElementById("blockContainer").style.display="none";
-  document.getElementById("viewTitle").textContent=`Kortschema – ${name}`;
+  document.getElementById("viewTitle").textContent=`Dagens schema – ${name}`;
 }
 
 // 🧱 blockschema
@@ -206,9 +205,34 @@ function renderBlocks(name){
   document.getElementById("blockContainer").style.display="block";
 }
 
+// 🔗 direktlänk via URL
+function getParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    namn: params.get("namn") || "",
+    vy: params.get("vy") || ""
+  };
+}
+function autoOpenFromLink() {
+  const { namn, vy } = getParams();
+  if (!namn) return;
+  const select = document.getElementById("nameSelect");
+  const trySelect = () => {
+    const option = [...select.options].find(o => o.value.toLowerCase() === namn.toLowerCase());
+    if (option) {
+      select.value = option.value;
+      if (vy === "block") renderBlocks(option.value);
+      else renderCards(option.value);
+    }
+  };
+  if (DATA.length) trySelect();
+  else setTimeout(trySelect, 800);
+}
+
 document.getElementById("btnCards").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderCards(n);};
 document.getElementById("btnBlocks").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderBlocks(n);};
 document.getElementById("btnPrint").onclick=()=>{window.print();};
 </script>
 </body>
 </html>
+
