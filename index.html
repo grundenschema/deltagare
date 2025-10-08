@@ -62,7 +62,7 @@ button:hover{background:#eee;}
 <body>
 <header>
   <h1>Deltagarschema</h1>
-  <div id="version">Version 2</div>
+  <div id="version">Version 3 (2025-10-08)</div>
 </header>
 
 <div class="toolbar">
@@ -121,7 +121,7 @@ loadData();
 function fillNameList(){
   const s=document.getElementById("nameSelect");
   s.innerHTML='<option value="">-- Välj deltagare --</option>';
-  [...new Set(DATA.map(r=>(r.Deltagare||"").split(/,|\/|;|\n/).map(x=>x.trim())).flat())]
+  [...new Set(DATA.map(r=>(r.Deltagare||"").split(/,|\/|;|\n/).map(x=>x.trim())).flat())] // ← ändrat: inget "-"
     .filter(x=>x&&x.toLowerCase()!=="alla")
     .sort().forEach(n=>{
       const o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o);
@@ -148,9 +148,7 @@ function renderCards(name){
     DATA.filter(r=>{
       const d=(r.Deltagare||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
       return (
-        d.split(/,|\/|;|\n|-/)
-         .map(x=>x.trim().toLowerCase())
-         .some(x=>x===name.toLowerCase()) ||
+        d.split(/,|\/|;|\n/).map(x=>x.trim().toLowerCase()).some(x=>x===name.toLowerCase()) || // ← ändrat: inget "-"
         d==="alla"
       ) && dayKey(r.Datum)===today;
     }),name).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
