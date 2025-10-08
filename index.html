@@ -66,6 +66,8 @@ button:hover{background:#eee;}
   <button id="btnCards">Dagens schema</button>
   <button id="btnBlocks">Blockschema</button>
   <button id="btnPrint">🖨️ Skriv ut</button>
+  <!-- 🔄 Ny knapp för manuell uppdatering -->
+  <button id="btnReload">🔄 Uppdatera från master</button>
 </div>
 
 <h2 id="viewTitle"></h2>
@@ -232,7 +234,10 @@ function autoOpenFromLink() {
 document.getElementById("btnCards").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderCards(n);};
 document.getElementById("btnBlocks").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderBlocks(n);};
 document.getElementById("btnPrint").onclick=()=>{window.print();};
+// 🔁 Manuell uppdatering från master
+document.getElementById("btnReload").onclick=()=>{loadData();};
 </script>
 </body>
 </html>
+
 
