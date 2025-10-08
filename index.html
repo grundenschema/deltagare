@@ -66,7 +66,6 @@ button:hover{background:#eee;}
   <button id="btnCards">Dagens schema</button>
   <button id="btnBlocks">Blockschema</button>
   <button id="btnPrint">🖨️ Skriv ut</button>
-  <!-- 🔄 Ny knapp för manuell uppdatering -->
   <button id="btnReload">🔄 Uppdatera från master</button>
 </div>
 
@@ -108,7 +107,16 @@ async function loadData(){
   try{
     const res=await fetch(url+"?t="+Date.now());
     const json=await res.json();
-    DATA=json.data||[];
+    // 🧹 Rensa dolda tecken i all data
+    DATA=(json.data||[]).map(r=>{
+      const cleanObj={};
+      for(const k in r){
+        cleanObj[k]=String(r[k]||"")
+          .replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g," ")
+          .trim();
+      }
+      return cleanObj;
+    });
     fillNameList();
     autoOpenFromLink();
   }catch(e){console.error(e);}
@@ -119,10 +127,18 @@ loadData();
 function fillNameList(){
   const s=document.getElementById("nameSelect");
   s.innerHTML='<option value="">-- Välj deltagare --</option>';
-  [...new Set(DATA.map(r=>(r.Deltagare||"").split(/,|\/|;|\n/).map(x=>x.trim())).flat())]
-    .filter(x=>x&&x.toLowerCase()!=="alla")
-    .sort().forEach(n=>{
-      const o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o);
+  [...new Set(DATA.map(r=>(r.Deltagare||"")
+    .replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g," ")
+    .split(/,|\/|;|\n| - | -|-\s*/)
+    .map(x => x.replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g," ").trim()))
+    .flat())]
+    .filter(x=>x && x.toLowerCase()!=="alla")
+    .sort()
+    .forEach(n=>{
+      const o=document.createElement("option");
+      o.value=n;
+      o.textContent=n;
+      s.appendChild(o);
     });
 }
 
@@ -234,10 +250,10 @@ function autoOpenFromLink() {
 document.getElementById("btnCards").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderCards(n);};
 document.getElementById("btnBlocks").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderBlocks(n);};
 document.getElementById("btnPrint").onclick=()=>{window.print();};
-// 🔁 Manuell uppdatering från master
 document.getElementById("btnReload").onclick=()=>{loadData();};
 </script>
 </body>
 </html>
+
 
 
