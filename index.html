@@ -16,6 +16,7 @@ body{
 }
 header{text-align:center;margin-bottom:10px;}
 h1{margin:0;font-size:1.4rem;}
+#version{font-size:.85rem;color:#666;margin-top:4px;} /* versionstext */
 select,button{
   font-size:1rem;padding:10px 14px;border-radius:10px;border:1px solid #ccc;
   background:#f8f8f8;cursor:pointer;
@@ -59,7 +60,10 @@ button:hover{background:#eee;}
 </style>
 </head>
 <body>
-<header><h1>Deltagarschema</h1></header>
+<header>
+  <h1>Deltagarschema</h1>
+  <div id="version">Version 1</div> <!-- 👈 versionstext -->
+</header>
 
 <div class="toolbar">
   <select id="nameSelect"><option value="">-- Välj deltagare --</option></select>
@@ -107,22 +111,11 @@ async function loadData(){
   try{
     const res=await fetch(url+"?t="+Date.now());
     const json=await res.json();
-    // 🧹 Rensa dolda tecken i all data
-    DATA=(json.data||[]).map(r=>{
-      const cleanObj={};
-      for(const k in r){
-        cleanObj[k]=String(r[k]||"")
-          .replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g," ")
-          .trim();
-      }
-      return cleanObj;
-    });
+    DATA=json.data||[];
     fillNameList();
     autoOpenFromLink();
-    console.log("✅ Data uppdaterad från master", new Date().toLocaleString());
-  }catch(e){
-    console.error("❌ Fel vid hämtning av data:", e);
-  }
+    console.log("✅ Data uppdaterad från master "+new Date().toLocaleString("sv-SE"));
+  }catch(e){console.error(e);}
 }
 loadData();
 
@@ -130,18 +123,10 @@ loadData();
 function fillNameList(){
   const s=document.getElementById("nameSelect");
   s.innerHTML='<option value="">-- Välj deltagare --</option>';
-  [...new Set(DATA.map(r=>(r.Deltagare||"")
-    .replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g," ")
-    .split(/,|\/|;|\n| - | -|-\s*/)
-    .map(x => x.replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g," ").trim()))
-    .flat())]
-    .filter(x=>x && x.toLowerCase()!=="alla")
-    .sort()
-    .forEach(n=>{
-      const o=document.createElement("option");
-      o.value=n;
-      o.textContent=n;
-      s.appendChild(o);
+  [...new Set(DATA.map(r=>(r.Deltagare||"").split(/,|\/|;|\n/).map(x=>x.trim())).flat())]
+    .filter(x=>x&&x.toLowerCase()!=="alla")
+    .sort().forEach(n=>{
+      const o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o);
     });
 }
 
@@ -165,8 +150,14 @@ function renderCards(name){
   const today=todayKey();
   const rows=applyMioRule(
     DATA.filter(r=>{
-      const d=(r.Deltagare||"").toLowerCase();
-      return (d.includes(name.toLowerCase())||d==="alla") && dayKey(r.Datum)===today;
+      const d=(r.Deltagare||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+      // fix: robustare namnmatchning
+      return (
+        d.split(/,|\/|;|\n|-/)
+         .map(x=>x.trim().toLowerCase())
+         .some(x=>x===name.toLowerCase()) ||
+        d==="alla"
+      ) && dayKey(r.Datum)===today;
     }),name).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
   const label=new Intl.DateTimeFormat("sv-SE",{weekday:"long",day:"numeric",month:"long"}).format(new Date(today));
   let html=`<h3>${label}</h3><div class="cards">`;
@@ -250,6 +241,7 @@ function autoOpenFromLink() {
   else setTimeout(trySelect, 800);
 }
 
+// 🧭 knappar
 document.getElementById("btnCards").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderCards(n);};
 document.getElementById("btnBlocks").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderBlocks(n);};
 document.getElementById("btnPrint").onclick=()=>{window.print();};
@@ -257,6 +249,7 @@ document.getElementById("btnReload").onclick=()=>{loadData();};
 </script>
 </body>
 </html>
+
 
 
 
