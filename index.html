@@ -119,7 +119,10 @@ async function loadData(){
     });
     fillNameList();
     autoOpenFromLink();
-  }catch(e){console.error(e);}
+    console.log("✅ Data uppdaterad från master", new Date().toLocaleString());
+  }catch(e){
+    console.error("❌ Fel vid hämtning av data:", e);
+  }
 }
 loadData();
 
@@ -254,6 +257,7 @@ document.getElementById("btnReload").onclick=()=>{loadData();};
 </script>
 </body>
 </html>
+
 
 
 
