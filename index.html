@@ -16,7 +16,7 @@ body{
 }
 header{text-align:center;margin-bottom:10px;}
 h1{margin:0;font-size:1.4rem;}
-#version{font-size:.85rem;color:#666;margin-top:4px;} /* versionstext */
+#version{font-size:.85rem;color:#666;margin-top:4px;}
 select,button{
   font-size:1rem;padding:10px 14px;border-radius:10px;border:1px solid #ccc;
   background:#f8f8f8;cursor:pointer;
@@ -62,7 +62,7 @@ button:hover{background:#eee;}
 <body>
 <header>
   <h1>Deltagarschema</h1>
-  <div id="version">Version 1</div> <!-- 👈 versionstext -->
+  <div id="version">Version 2</div>
 </header>
 
 <div class="toolbar">
@@ -71,6 +71,7 @@ button:hover{background:#eee;}
   <button id="btnBlocks">Blockschema</button>
   <button id="btnPrint">🖨️ Skriv ut</button>
   <button id="btnReload">🔄 Uppdatera från master</button>
+  <button id="btnCompare">🔍 Jämför mot master</button>
 </div>
 
 <h2 id="viewTitle"></h2>
@@ -83,7 +84,6 @@ button:hover{background:#eee;}
 <script>
 const url="https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
 
-// 🎨 färger och emojis
 const aktivitetFarger={
   "Måndagsmöte":{color:"#AED6F1",emoji:"📅"},"Gruppmöte":{color:"#7FB3D5",emoji:"👥"},
   "Lunch":{color:"#F9E79F",emoji:"🍲"},"Frukost":{color:"#FAD7A0",emoji:"🥐"},
@@ -105,7 +105,6 @@ function emojiFor(r){return(aktivitetFarger[r.Aktivitet]||{emoji:""}).emoji;}
 function dayKey(str){return String(str).slice(0,10);}
 function todayKey(){return new Date().toISOString().slice(0,10);}
 
-// 🧠 data
 let DATA=[];
 async function loadData(){
   try{
@@ -119,7 +118,6 @@ async function loadData(){
 }
 loadData();
 
-// fyll namnlista
 function fillNameList(){
   const s=document.getElementById("nameSelect");
   s.innerHTML='<option value="">-- Välj deltagare --</option>';
@@ -130,7 +128,6 @@ function fillNameList(){
     });
 }
 
-// 🍽️ Mio-regel
 function applyMioRule(rows,name){
   return rows.filter(r=>{
     const isLunch=(r.Aktivitet||"").toLowerCase().includes("lunch");
@@ -145,13 +142,11 @@ function applyMioRule(rows,name){
   });
 }
 
-// 📋 Dagens schema (kortvy)
 function renderCards(name){
   const today=todayKey();
   const rows=applyMioRule(
     DATA.filter(r=>{
       const d=(r.Deltagare||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-      // fix: robustare namnmatchning
       return (
         d.split(/,|\/|;|\n|-/)
          .map(x=>x.trim().toLowerCase())
@@ -177,7 +172,6 @@ function renderCards(name){
   document.getElementById("viewTitle").textContent=`Dagens schema – ${name}`;
 }
 
-// 🧱 blockschema
 function makeSlots(){const a=[];for(let h=8;h<=16;h++){a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);}a.push("16:30");return a;}
 function renderBlocks(name){
   const slots=makeSlots(), days=[...new Set(DATA.map(r=>dayKey(r.Datum)))].sort();
@@ -217,13 +211,9 @@ function renderBlocks(name){
   document.getElementById("blockContainer").style.display="block";
 }
 
-// 🔗 direktlänk via URL
 function getParams() {
   const params = new URLSearchParams(window.location.search);
-  return {
-    namn: params.get("namn") || "",
-    vy: params.get("vy") || ""
-  };
+  return { namn: params.get("namn") || "", vy: params.get("vy") || "" };
 }
 function autoOpenFromLink() {
   const { namn, vy } = getParams();
@@ -237,20 +227,37 @@ function autoOpenFromLink() {
       else renderCards(option.value);
     }
   };
-  if (DATA.length) trySelect();
-  else setTimeout(trySelect, 800);
+  if (DATA.length) trySelect(); else setTimeout(trySelect, 800);
 }
 
-// 🧭 knappar
+/* 🔍 Jämför master mot nuvarande DATA */
+async function compareWithMaster(){
+  try{
+    const res=await fetch(url+"?t="+Date.now());
+    const json=await res.json();
+    const master=json.data||[];
+    const missing=master.filter(m=>{
+      return !DATA.some(d=>
+        d.Datum===m.Datum &&
+        (d.Start||"")===(m.Start||"") &&
+        (d.Slut||"")===(m.Slut||"") &&
+        (d.Aktivitet||"")===(m.Aktivitet||"")
+      );
+    });
+    alert(missing.length
+      ? `⚠️ Skillnader hittade: ${missing.length} rader finns i master men inte i webben.\nExempel:\n${missing.slice(0,5).map(x=>`${x.Datum} ${x.Start}-${x.Slut} ${x.Aktivitet}`).join("\n")}`
+      : "✅ Webbsidan matchar master (inga skillnader funna).");
+  }catch(e){
+    alert("Kunde inte jämföra med master.");console.error(e);
+  }
+}
+
+/* Knappar */
 document.getElementById("btnCards").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderCards(n);};
 document.getElementById("btnBlocks").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderBlocks(n);};
 document.getElementById("btnPrint").onclick=()=>{window.print();};
 document.getElementById("btnReload").onclick=()=>{loadData();};
+document.getElementById("btnCompare").onclick=()=>{compareWithMaster();};
 </script>
 </body>
 </html>
-
-
-
-
-
