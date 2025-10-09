@@ -61,7 +61,7 @@ button:hover{background:#eee;}
 <body>
 <header>
   <h1>Deltagarschema</h1>
-  <div id="version">Version 4 (2025-10-09)</div>
+  <div id="version">Version 4.1 (2025-10-09)</div>
 </header>
 
 <div class="toolbar">
@@ -170,13 +170,16 @@ function renderCards(name){
 }
 
 function makeSlots(){const a=[];for(let h=8;h<=16;h++){a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);}a.push("16:30");return a;}
+
+/* 🔧 Enda ändringen – blockvyns filter matchar nu kortvyn */
 function renderBlocks(name){
   const slots=makeSlots(), days=[...new Set(DATA.map(r=>dayKey(r.Datum)))].sort();
-  // ✅ Ändringen nedan: gör att bindestreck också räknas som avgränsare
   const rows=applyMioRule(DATA.filter(r=>{
     const d=(r.Deltagare||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-    const tokens=d.split(/,|\/|;|-|\n/).map(x=>x.trim()).filter(Boolean);
-    return tokens.includes(name.toLowerCase())||d==="alla";
+    return (
+      d.split(/,|\/|;|\n/).map(x=>x.trim().toLowerCase()).some(x=>x===name.toLowerCase()) ||
+      d==="alla"
+    );
   }),name);
   const head=document.getElementById("blockHeader"), grid=document.getElementById("blockGrid");
   head.innerHTML="<div>Tid</div>"+days.map(d=>`<div>${new Intl.DateTimeFormat("sv-SE",{weekday:"short"}).format(new Date(d))}</div>`).join("");
@@ -259,3 +262,4 @@ document.getElementById("btnCompare").onclick=()=>{compareWithMaster();};
 </script>
 </body>
 </html>
+
