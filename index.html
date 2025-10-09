@@ -17,14 +17,12 @@ const aktivitetFarger={
   "Gåträning":{color:"#ABEBC6",emoji:"🚶‍♂️"},"Promenad":{color:"#ABEBC6",emoji:"🚶‍♀️"},
   "Baka":{color:"#FAD7A0",emoji:"🧁"},"Utflykt":{color:"#A9CCE3",emoji:"🚌"},
 };
-
 function colorFor(r){return(aktivitetFarger[r.Aktivitet]||{color:"#F4F6F7"}).color;}
 function emojiFor(r){return(aktivitetFarger[r.Aktivitet]||{emoji:""}).emoji;}
 function dayKey(str){return String(str).slice(0,10);}
 function todayKey(){return new Date().toISOString().slice(0,10);}
 
 let DATA=[];
-
 async function loadData(){
   try{
     const res=await fetch(url+"?t="+Date.now());
@@ -40,13 +38,10 @@ loadData();
 function fillNameList(){
   const s=document.getElementById("nameSelect");
   s.innerHTML='<option value="">-- Välj deltagare --</option>';
-  [...new Set(DATA.map(r=>(r.Deltagare||"").split(/,|\/|;|-|\n/).map(x=>x.trim())).flat())]
+  [...new Set(DATA.map(r=>(r.Deltagare||"").split(/,|\/|;|\n/).map(x=>x.trim())).flat())] // ← ändrat: inget "-"
     .filter(x=>x&&x.toLowerCase()!=="alla")
     .sort().forEach(n=>{
-      const o=document.createElement("option");
-      o.value=n;
-      o.textContent=n;
-      s.appendChild(o);
+      const o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o);
     });
 }
 
@@ -55,8 +50,7 @@ function applyMioRule(rows,name){
     const isLunch=(r.Aktivitet||"").toLowerCase().includes("lunch");
     const isAll=(r.Deltagare||"").trim().toLowerCase()==="alla";
     if(isLunch&&isAll){
-      const specific=rows.some(x=>
-        x.Datum===r.Datum&&x.Start===r.Start&&x.Slut===r.Slut&&
+      const specific=rows.some(x=>x.Datum===r.Datum&&x.Start===r.Start&&x.Slut===r.Slut&&
         (x.Aktivitet||"").toLowerCase().includes("lunch")&&
         (x.Deltagare||"").toLowerCase().includes(name.toLowerCase()));
       if(specific) return false;
@@ -69,18 +63,13 @@ function renderCards(name){
   const today=todayKey();
   const rows=applyMioRule(
     DATA.filter(r=>{
-      const d=(r.Deltagare||"").toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+      const d=(r.Deltagare||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
       return (
-        d.split(/,|\/|;|-|\n/)
-          .map(x=>x.trim().toLowerCase())
-          .some(x=>x===name.toLowerCase()) ||
+        d.split(/,|\/|;|\n/).map(x=>x.trim().toLowerCase()).some(x=>x===name.toLowerCase()) || // ← ändrat: inget "-"
         d==="alla"
       ) && dayKey(r.Datum)===today;
-    }),name)
-    .sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
-  const label=new Intl.DateTimeFormat("sv-SE",{weekday:"long",day:"numeric",month:"long"})
-    .format(new Date(today));
+    }),name).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
+  const label=new Intl.DateTimeFormat("sv-SE",{weekday:"long",day:"numeric",month:"long"}).format(new Date(today));
   let html=`<h3>${label}</h3><div class="cards">`;
   if(!rows.length){html+="<p>Inga aktiviteter idag.</p>";}
   rows.forEach(r=>{
@@ -98,54 +87,32 @@ function renderCards(name){
   document.getElementById("viewTitle").textContent=`Dagens schema – ${name}`;
 }
 
-function makeSlots(){
-  const a=[];
-  for(let h=8;h<=16;h++){
-    a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);
-  }
-  a.push("16:30");
-  return a;
-}
-
-/* ================================
-   renderBlocks – version 4 fix
-   ================================ */
+function makeSlots(){const a=[];for(let h=8;h<=16;h++){a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);}a.push("16:30");return a;}
 function renderBlocks(name){
   const slots=makeSlots(), days=[...new Set(DATA.map(r=>dayKey(r.Datum)))].sort();
-
-  // 🔧 Uppdaterad filtrering – samma logik som kortvyn
-  const rows = applyMioRule(DATA.filter(r => {
-    const d = (r.Deltagare || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-    const tokens = d.split(/,|\/|;|-|\n/).map(x => x.trim()).filter(Boolean);
-    return tokens.includes(name.toLowerCase()) || d.trim() === "alla";
-  }), name);
-
-  const head=document.getElementById("blockHeader"),
-        grid=document.getElementById("blockGrid");
-  head.innerHTML="<div>Tid</div>"+days.map(d=>
-    `<div>${new Intl.DateTimeFormat("sv-SE",{weekday:"short"}).format(new Date(d))}</div>`
-  ).join("");
-  grid.innerHTML="";
-  grid.style.gridTemplateColumns=`80px repeat(${days.length},1fr)`;
+  
+  // 🔧 enda ändringen här ↓
+  const rows=applyMioRule(DATA.filter(r=>{
+    const d=(r.Deltagare||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+    const tokens=d.split(/,|\/|;|-|\n/).map(x=>x.trim()).filter(Boolean);
+    return tokens.includes(name.toLowerCase())||d.trim()==="alla";
+  }),name);
+  
+  const head=document.getElementById("blockHeader"), grid=document.getElementById("blockGrid");
+  head.innerHTML="<div>Tid</div>"+days.map(d=>`<div>${new Intl.DateTimeFormat("sv-SE",{weekday:"short"}).format(new Date(d))}</div>`).join("");
+  grid.innerHTML="";grid.style.gridTemplateColumns=`80px repeat(${days.length},1fr)`;
   slots.forEach(t=>{
-    grid.innerHTML+=`<div class="block-time">${t}</div>`+
-      days.map(()=>`<div class="block-cell"></div>`).join("");
+    grid.innerHTML+=`<div class="block-time">${t}</div>`+days.map(()=>`<div class="block-cell"></div>`).join("");
   });
-  const cells=[...grid.children], dayMap={};
-  days.forEach((d,i)=>dayMap[d]=i+1);
+  const cells=[...grid.children], dayMap={};days.forEach((d,i)=>dayMap[d]=i+1);
   const toMin=t=>{const [h,m]=t.split(":").map(Number);return h*60+m;};
 
   rows.forEach(r=>{
-    const dk=dayKey(r.Datum),col=dayMap[dk];
-    if(!col)return;
+    const dk=dayKey(r.Datum),col=dayMap[dk];if(!col)return;
     const sIdx=slots.indexOf(r.Start),eIdx=slots.indexOf(r.Slut);
     if(sIdx<0||eIdx<=sIdx)return;
     const firstCellIndex=(sIdx)*(1+days.length)+col,firstCell=cells[firstCellIndex];
-    const block=document.createElement("div");
-    block.className="block";
+    const block=document.createElement("div");block.className="block";
     block.style.background=colorFor(r);
     const duration=toMin(r.Slut)-toMin(r.Start);
     if(duration<=30){
@@ -153,10 +120,7 @@ function renderBlocks(name){
     }else{
       block.innerHTML=`${emojiFor(r)} ${r.Aktivitet||""}<br>${r.Start||""}–${r.Slut||""}<br>Coach: ${r.Coach||"-"}`;
     }
-    requestAnimationFrame(()=>{
-      const cellH=firstCell.clientHeight||28;
-      block.style.height=(eIdx-sIdx)*cellH+"px";
-    });
+    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;block.style.height=(eIdx-sIdx)*cellH+"px";});
     firstCell.appendChild(block);
   });
 
@@ -171,22 +135,19 @@ function getParams() {
   const params = new URLSearchParams(window.location.search);
   return { namn: params.get("namn") || "", vy: params.get("vy") || "" };
 }
-
 function autoOpenFromLink() {
   const { namn, vy } = getParams();
   if (!namn) return;
   const select = document.getElementById("nameSelect");
   const trySelect = () => {
-    const option = [...select.options]
-      .find(o => o.value.toLowerCase() === namn.toLowerCase());
+    const option = [...select.options].find(o => o.value.toLowerCase() === namn.toLowerCase());
     if (option) {
       select.value = option.value;
       if (vy === "block") renderBlocks(option.value);
       else renderCards(option.value);
     }
   };
-  if (DATA.length) trySelect();
-  else setTimeout(trySelect, 800);
+  if (DATA.length) trySelect(); else setTimeout(trySelect, 800);
 }
 
 /* 🔍 Jämför master mot nuvarande DATA */
@@ -212,17 +173,12 @@ async function compareWithMaster(){
 }
 
 /* Knappar */
-document.getElementById("btnCards").onclick=()=>{
-  const n=document.getElementById("nameSelect").value;
-  if(n)renderCards(n);
-};
-document.getElementById("btnBlocks").onclick=()=>{
-  const n=document.getElementById("nameSelect").value;
-  if(n)renderBlocks(n);
-};
+document.getElementById("btnCards").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderCards(n);};
+document.getElementById("btnBlocks").onclick=()=>{const n=document.getElementById("nameSelect").value;if(n)renderBlocks(n);};
 document.getElementById("btnPrint").onclick=()=>{window.print();};
 document.getElementById("btnReload").onclick=()=>{loadData();};
 document.getElementById("btnCompare").onclick=()=>{compareWithMaster();};
 </script>
+
 
 
