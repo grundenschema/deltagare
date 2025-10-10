@@ -134,48 +134,42 @@ select{min-width:220px;background:#fff}
 
 /* Print */
 @media print{
-  body {
+  body{
     background:#fff;
     color:#000;
     font-size:9pt;
     margin:0;
   }
 
+  /* Göm sånt som aldrig ska med i utskrift */
   header,
   .toolbar,
   .helper-panels,
-  #nowContainer {
+  #nowContainer{
     display:none !important;
   }
 
+  /* Göm båda vyerna som standard */
   #schemaContainer,
-  #blockContainer {
+  #blockContainer{
     display:none !important;
     visibility:hidden !important;
   }
 
-  .compare-wrap {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .compare-item {
-    break-inside:avoid;
-    page-break-inside:avoid;
-  }
-
-  @page {
-    size:A4 landscape;
-    margin:6mm;
-  }
-
-  .print-visible {
+  /* ⬅️ Viktigt: högre specificitet än raden ovan */
+  #schemaContainer.print-visible,
+  #blockContainer.print-visible{
     display:block !important;
     visibility:visible !important;
     position:relative !important;
   }
+
+  .compare-wrap{ grid-template-columns: repeat(2, 1fr); }
+  .compare-item{ break-inside:avoid; page-break-inside:avoid; }
+
+  @page{ size:A4 landscape; margin:6mm; }
 }
 
-/* Responsiv */
 
 @media (max-width:760px){
   body{padding:8px}
