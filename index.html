@@ -726,6 +726,71 @@ document.getElementById("btnParticipantToday").onclick=()=>{
   document.getElementById("participantDay").style.display="block";
   renderCardsGeneric(name,false,document.getElementById("participantDay"));
 };
+document.getElementById("btnCoachWeek").onclick = () => {
+  const name = document.getElementById("coachSelect").value;
+  if (!name) { alert("Välj en coach."); return; }
+  document.getElementById("coachDay").style.display = "none";
+  document.getElementById("coachWeek").style.display = "block";
+  renderBlocksGeneric(name, true, document.getElementById("cBlockHeader"), document.getElementById("cBlockGrid"));
+};
+
+/* =========================
+   🖨️ UTSKRIFT – robust version (fungerar i Chrome, Edge, Firefox)
+========================= */
+function printScopeWithin(viewId) {
+  try {
+    // Ta bort eventuella gamla markeringar
+    document.querySelectorAll('.print-scope').forEach(e => e.classList.remove('print-visible'));
+
+    const view = document.getElementById(viewId);
+    if (!view) {
+      alert("Kunde inte hitta aktuell vy.");
+      return;
+    }
+
+    // Hitta första synliga print-scope i vyn
+    const scopes = [...view.querySelectorAll('.print-scope')];
+    const visible = scopes.find(n => {
+      const s = getComputedStyle(n);
+      return s.display !== "none" && s.visibility !== "hidden";
+    });
+
+    if (!visible) {
+      alert("Inget schema att skriva ut just nu.");
+      return;
+    }
+
+    // Markera rätt vy
+    visible.classList.add('print-visible');
+
+    // Vänta en liten stund så webbläsaren hinner rita om sidan
+    setTimeout(() => {
+      window.print();
+      // Rensa markering efter utskrift
+      setTimeout(() => visible.classList.remove('print-visible'), 1500);
+    }, 400);
+  } catch (err) {
+    console.error("Utskriftsfel:", err);
+    alert("Ett fel uppstod vid utskrift.");
+  }
+}
+
+// Koppla knappar till funktionen
+document.getElementById("btnPrintParticipant").onclick = () => printScopeWithin("participantView");
+document.getElementById("btnPrintCoach").onclick = () => printScopeWithin("coachView");
+document.getElementById("btnPrintNow").onclick = () => printScopeWithin("nowView");
+document.getElementById("btnPrintCompare").onclick = () => printScopeWithin("assistantView");
+
+/* =========================
+   START: visa Pågår nu
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  showView("nowView");
+  renderNow();
+});
+</script>
+</body>
+</html>
 
 document.getElementById("btnParticipantWeek").onclick=()=>{
   const name=document.getElementById("nameSelect").value;
@@ -744,54 +809,5 @@ document.getElementById("btnCoachToday").onclick=()=>{
   renderCardsGeneric(name,true,document.getElementById("coachDay"));
 };
 
-document.getElementById("btnCoachWeek").onclick=()=>{
-  const name=document.getElementById("coachSelect").value;
-  if(!name){ alert("Välj en coach."); return; }
-  document.getElementById("coachDay").style.display="none";
-  document.getElementById("coachWeek").style.display="block";
-  renderBlocksGeneric(name,true,document.getElementById("cBlockHeader"),document.getElementById("cBlockGrid"));
-};
-
-/* =========================
-   UTSKRIFT – endast aktivt schema
-========================= */
-function printScopeWithin(viewId){
-  // ta bort tidigare markörer
-  document.querySelectorAll('.print-scope').forEach(e=>e.classList.remove('print-visible'));
-  const view = document.getElementById(viewId);
-  if(!view){ window.print(); return; }
-
-  // hitta första synliga print-scope i view
-  const scopes = [...view.querySelectorAll('.print-scope')];
-  const visible = scopes.find(n=>{
-    const s = getComputedStyle(n);
-    return s.display!=="none" && s.visibility!=="hidden";
-  });
-  if(visible) visible.classList.add('print-visible');
-  setTimeout(()=>window.print(), 200);
-}
-
-document.getElementById("btnPrintParticipant").onclick=()=>printScopeWithin("participantView");
-document.getElementById("btnPrintCoach").onclick=()=>printScopeWithin("coachView");
-document.getElementById("btnPrintNow").onclick=()=>printScopeWithin("nowView");
-document.getElementById("btnPrintCompare").onclick=()=>printScopeWithin("assistantView");
-
-/* =========================
-   START: visa Pågår nu
-========================= */
-document.addEventListener("DOMContentLoaded",()=>{
-  showView("nowView");
-  renderNow();
-});
-  document.addEventListener("DOMContentLoaded",()=>{
-  showView("nowView");
-  renderNow();
-});
-</script>
-</body>
-</html>
-
-</script>
-</body>
 </html>
 
