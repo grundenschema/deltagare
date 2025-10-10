@@ -771,8 +771,11 @@ document.getElementById("btnPrint").onclick=()=>{
     return;
   }
 
-  // Starta utskrift
+ // Vänta lite så att layouten hinner synas i print-preview
+setTimeout(() => {
   window.print();
+}, 150);
+
 };
 
 /* LOGGA = START */
