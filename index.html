@@ -12,12 +12,12 @@
   --border:#ddd;
   --shadow:0 3px 10px rgba(0,0,0,.06);
   --radius:14px;
-  --blue:#3b82f6;
+  --blue:#9bb8f2; /* mjukare blå */
   --muted:#555;
   --header-bg:#f5f7fa;
   --chip-bg:#f8fafc;
   --chip-border:#cfd8e3;
-  --chip-active:#3b82f6;
+  --chip-active:#9bb8f2;
   --chip-text:#1f2937;
 }
 
@@ -32,28 +32,24 @@ body{
   padding:14px;
 }
 
-/* Header (logga + hemknapp) */
+/* Header (logga = hemknapp) */
 header{
-  display:flex;flex-direction:row;align-items:center;justify-content:space-between;
-  gap:6px;margin-bottom:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;margin-bottom:12px;cursor:pointer;
 }
-header img{height:60px;width:auto;cursor:pointer;}
-#backArrow{
-  font-size:1.8rem;cursor:pointer;color:var(--blue);margin-right:6px;
-  transform:rotate(180deg);user-select:none;
-}
+header img{height:60px;width:auto;}
 #clock{font-weight:600;color:#333;font-size:1.05rem;letter-spacing:.3px}
 
 /* Tabbar – mobil: 2x2, desktop: rad */
 .tab-bar{
-  display:grid; gap:10px; margin:8px 0 12px;
+  display:grid;gap:10px;margin:8px 0 12px;
 }
 button.tab{
   background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;
-  font-size:1.02rem; transition:.15s background,.15s color,.15s border-color; box-shadow:var(--shadow);
+  font-size:1.02rem;transition:.15s background,.15s color,.15s border-color;box-shadow:var(--shadow);
 }
 button.tab:hover{background:#eef3fb}
-button.tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+button.tab.active{background:var(--blue);color:#000;border-color:var(--blue);}
 @media (max-width:700px){
   .tab-bar{grid-template-columns:1fr 1fr;}
 }
@@ -61,7 +57,7 @@ button.tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
   .tab-bar{grid-template-columns:repeat(4,1fr);}
 }
 
-/* Kontroller under flikar */
+/* Selects & actions */
 .controls{
   display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin-bottom:10px;
 }
@@ -70,9 +66,11 @@ select, .btn{
 }
 .btn:hover{background:#eef3fb}
 .btn.primary{background:#fff;border-color:#cfd8e3}
-.btn.primary.active, .btn.primary:active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn.primary.active, .btn.primary:active{
+  background:var(--blue);color:#000;border-color:var(--blue);
+}
 
-/* Kortvy (dagsschema) */
+/* Cards (pågår/kommande och dagkort) */
 .cards{display:flex;flex-direction:column;gap:10px;max-width:1100px;margin:0 auto;}
 .card{
   position:relative;background:var(--card-bg);border:1px solid var(--border);
@@ -84,90 +82,118 @@ select, .btn{
 }
 .card h3{margin:0 0 6px;font-size:1.05rem}
 .card .row{font-size:.95rem;color:#222}
+.section-title{text-align:center;margin:10px 0 8px;font-weight:800;font-size:1.15rem;}
 
 /* Veckoschema – blocklayout */
+#blockContainer{display:none;margin-top:8px;}
 .block-header{
   display:grid;grid-template-columns:80px repeat(5,1fr);font-weight:800;font-size:.92rem;background:var(--header-bg);
   border-radius:10px 10px 0 0;text-transform:capitalize;
 }
-.block-header div{ text-align:center; padding:8px 0; }
-.block-grid{ display:grid; grid-template-columns:80px repeat(5,1fr); background:transparent; }
-.block-time{ font-size:.86rem; padding:4px 6px; text-align:right; color:#2b2b2b; }
-.block-cell{ position:relative; min-height:28px; background:transparent; border:none; }
+.block-header div{text-align:center;padding:8px 0;}
+.block-grid{display:grid;grid-template-columns:80px repeat(5,1fr);background:transparent;}
+.block-time{font-size:.86rem;padding:4px 6px;text-align:right;color:#2b2b2b;}
+.block-cell{position:relative;min-height:28px;background:transparent;border:none;}
 .block{
-  position:absolute; left:2px; right:2px; top:2px;
-  border-radius:10px; padding:6px 8px; line-height:1.25;
-  font-size:.82rem; color:#111; box-shadow:var(--shadow);
+  position:absolute;left:2px;right:2px;top:2px;
+  border-radius:10px;padding:6px 8px;line-height:1.25;
+  font-size:.82rem;color:#111;box-shadow:var(--shadow);
   border:1px solid rgba(0,0,0,.15);
-  word-break:break-word; overflow:hidden;
-  -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  word-break:break-word;overflow:hidden;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
 }
 .block .title{font-weight:700}
+
+/* Jämförelse (assistent) */
+.compare-wrap{
+  display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+}
+.compare-item{
+  background:#fff;border:1px solid var(--border);border-radius:14px;padding:8px;box-shadow:var(--shadow);
+}
+.compare-item h3{margin:6px 0 10px;text-align:center;font-size:1rem}
 
 /* Paneler + chips (assistent) */
 .panel{
   display:none;background:#fff;border:1px solid #cfd8e3;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.12);
-  padding:16px;margin:14px auto; max-width:1200px;
+  padding:16px;margin:14px auto;max-width:1200px;
 }
 .panel h2{margin:4px 0 10px;font-size:1.2rem}
-.chip-group{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-.chip-title{ font-weight:700; margin:10px 0 6px; }
-.chip{ display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  background:#fff; border:1px solid var(--chip-border); color:var(--chip-text);
-  border-radius:999px; padding:8px 14px; cursor:pointer; user-select:none;
-  transition: background .15s, border-color .15s, color .15s; font-size:.95rem; font-weight:500;
+.chip-group{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.chip-title{font-weight:700;margin:10px 0 6px;}
+.chip{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:#fff;border:1px solid var(--chip-border);color:var(--chip-text);
+  border-radius:999px;padding:8px 14px;cursor:pointer;user-select:none;
+  transition:background .15s,border-color .15s,color .15s;font-size:.95rem;font-weight:500;
 }
 .chip input{display:none;}
-.chip.active{ background:var(--chip-active); border-color:var(--chip-active); color:#fff; }
+.chip.active{background:var(--chip-active);border-color:var(--chip-active);color:#000;}
 
 /* Visningsytor (en per flik) */
-.view{ display:none; }
-.view.active{ display:block; }
-#viewTitle{ text-align:center; margin:10px 0 8px; font-weight:800; }
+.view{display:none;}
+.view.active{display:block;}
+#viewTitle{text-align:center;margin:10px 0 8px;font-weight:800;}
 
-/* Proffsig utskrift */
+/* Print – proffsig utskrift (endast schema) */
 @media print{
-  body{ background:#fff; color:#000; font-size:9pt; margin:0; }
-  header, .tab-bar, .controls, .panel, .dropdown-content { display:none !important; }
-  .view{ display:none !important; visibility:hidden !important; }
-  .print-visible{ display:block !important; visibility:visible !important; position:relative !important; }
-  .card, .compare-item{ break-inside:avoid; page-break-inside:avoid; }
-  .block{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  @page{ size:A4 landscape; margin:8mm; }
+  .print-header{
+    display:flex !important;justify-content:space-between;align-items:center;
+    border-bottom:1px solid #ccc;padding:8px 12px 6px;margin-bottom:14px;
+  }
+  .print-header img{height:28px;}
+  .print-header h2{
+    font-size:19pt;font-weight:800;margin:0;letter-spacing:.3px;text-align:center;flex:1;
+  }
+  .print-header .date{font-size:10pt;color:#333;text-align:right;}
+  body{
+    background:#fff;color:#000;font-size:10pt;line-height:1.4;margin:0;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  header,.tab-bar,.controls,.panel,.dropdown-content{display:none !important;}
+  .view{display:none !important;visibility:hidden !important;}
+  .print-visible{display:block !important;visibility:visible !important;position:relative !important;}
+  .block-time{font-size:9pt !important;padding:3px 6px !important;}
+  .block{
+    border-radius:6px;padding:6px 8px;font-size:9pt !important;line-height:1.2 !important;
+    min-height:30px !important;overflow:visible !important;white-space:normal !important;
+  }
+  @page{size:A4 landscape;margin:10mm;}
 }
-
-/* Små skärmar */
+/* Små skärmar – lite större klickytor */
 @media (max-width:700px){
-  body{ padding:10px; }
-  select, .btn{ width:100%; }
+  body{padding:10px;}
+  select,.btn{width:100%;}
 }
 </style>
 </head>
 
 <body>
-<header title="Tillbaka till start">
-  <span id="backArrow">➤</span>
-  <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="Grunden DV logotyp" id="homeLogo">
+<header title="Klicka för start (Pågår nu)">
+  <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+       alt="Grunden DV logotyp" id="homeLogo">
   <div id="clock"></div>
 </header>
 
 <!-- Flikar -->
 <div class="tab-bar">
-  <button id="tabParticipant" class="tab">👤 Deltagare</button>
-  <button id="tabCoach" class="tab">🧑‍🏫 Coach</button>
+  <button id="tabParticipant" class="tab">👤 Deltagarschema</button>
+  <button id="tabCoach" class="tab">🧑‍🏫 Coachschema</button>
   <button id="tabNow" class="tab active">🔔 Pågår nu</button>
-  <button id="tabAssistant" class="tab">🤖 Assistent</button>
+  <button id="tabAssistant" class="tab">🤖 Schemaassistent</button>
 </div>
+
 <!-- DELTAGARE-VY -->
 <div id="participantView" class="view">
   <div id="viewTitle">👤 Deltagarschema</div>
   <div class="controls">
     <select id="nameSelect"><option value="">-- Välj deltagare --</option></select>
-    <button id="btnParticipantToday" class="btn primary">☀️ Kortvy</button>
-    <button id="btnParticipantWeek" class="btn primary">📆 Veckovy</button>
+    <button id="btnNowParticipant" class="btn primary">🔔 Pågår nu</button>
+    <button id="btnParticipantToday" class="btn primary">📋 Veckans schema</button>
+    <button id="btnParticipantWeek" class="btn primary">🧾 Utskriftsschema</button>
     <button id="btnPrintParticipant" class="btn">🖨️ Skriv ut</button>
   </div>
-  <div id="participantDay" class="cards print-scope"></div>
+  <div id="participantNow" class="cards print-scope" style="display:none;"></div>
+  <div id="participantDay" class="cards print-scope" style="display:none;"></div>
   <div id="participantWeek" class="print-scope" style="display:none;">
     <div class="block-header" id="pBlockHeader"></div>
     <div class="block-grid" id="pBlockGrid"></div>
@@ -179,20 +205,22 @@ select, .btn{
   <div id="viewTitle">🧑‍🏫 Coachschema</div>
   <div class="controls">
     <select id="coachSelect"><option value="">-- Välj coach --</option></select>
-    <button id="btnCoachToday" class="btn primary">☀️ Kortvy</button>
-    <button id="btnCoachWeek" class="btn primary">📆 Veckovy</button>
+    <button id="btnNowCoach" class="btn primary">🔔 Pågår nu</button>
+    <button id="btnCoachToday" class="btn primary">📋 Veckans schema</button>
+    <button id="btnCoachWeek" class="btn primary">🧾 Utskriftsschema</button>
     <button id="btnPrintCoach" class="btn">🖨️ Skriv ut</button>
   </div>
-  <div id="coachDay" class="cards print-scope"></div>
+  <div id="coachNow" class="cards print-scope" style="display:none;"></div>
+  <div id="coachDay" class="cards print-scope" style="display:none;"></div>
   <div id="coachWeek" class="print-scope" style="display:none;">
     <div class="block-header" id="cBlockHeader"></div>
     <div class="block-grid" id="cBlockGrid"></div>
   </div>
 </div>
 
-<!-- PÅGÅR NU-VY -->
+<!-- PÅGÅR NU – ALLA -->
 <div id="nowView" class="view active">
-  <div id="viewTitle">🔔 Pågår just nu</div>
+  <div id="viewTitle">🔔 Pågår just nu (alla)</div>
   <div id="nowContainer" class="print-scope"></div>
   <div style="text-align:center;margin-top:10px;">
     <button id="btnPrintNow" class="btn">🖨️ Skriv ut</button>
@@ -201,7 +229,7 @@ select, .btn{
 
 <!-- ASSISTENT-VY -->
 <div id="assistantView" class="view">
-  <div id="viewTitle">🤖 Schemaassistenten</div>
+  <div id="viewTitle">🤖 Schemaassistent</div>
 
   <div id="comparePanel" class="panel">
     <h2>🔍 Jämför scheman</h2>
@@ -209,7 +237,7 @@ select, .btn{
     <div id="coachListCompare" class="chip-group"></div>
     <div class="chip-title">Deltagare</div>
     <div id="participantListCompare" class="chip-group"></div>
-    <div style="text-align:center; margin-top:12px;">
+    <div style="text-align:center;margin-top:12px;">
       <button id="btnShowCompare" class="btn primary">Visa valda scheman</button>
       <button id="btnPrintCompare" class="btn">🖨️ Skriv ut</button>
     </div>
@@ -236,20 +264,22 @@ select, .btn{
 
 <script>
 /* =========================
-   DATA & KONFIGURATION
+   DATA & KONFIG
 ========================= */
 const url="https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcrkBGFKVznDV2PRrUxIrN0q9c16VCgNQ7fFtrwBS/exec";
 
-/* Färger & emojis */
+/* Emoji & färg per aktivitet */
 const aktivitetFarger={
   "Måndagsmöte":{color:"#AED6F1",emoji:"📅"},
   "Gruppmöte":{color:"#7FB3D5",emoji:"👥"},
   "Lunch":{color:"#F9E79F",emoji:"🍲"},
   "Frukost":{color:"#FAD7A0",emoji:"🥐"},
+  "Morgonrutiner":{color:"#FAD7A0",emoji:"☀️"},
   "Ateljé":{color:"#F5CBA7",emoji:"🎨"},
   "Musik":{color:"#D2B4DE",emoji:"🎶"},
   "Pod":{color:"#A9CCE3",emoji:"🎙️"},
   "Padel":{color:"#82E0AA",emoji:"🏓"},
+  "Lite av varje":{color:"#FADBD8",emoji:"✨"},
   "Yoga":{color:"#D5F5E3",emoji:"🧘"},
   "Gym":{color:"#A3E4D7",emoji:"🏋️‍♂️"},
   "Film":{color:"#E6B0AA",emoji:"🎬"},
@@ -260,17 +290,31 @@ const aktivitetFarger={
   "Biljard":{color:"#A9DFBF",emoji:"🎱"},
   "Spelgruppen":{color:"#F8C471",emoji:"🎲"},
   "Sömnad":{color:"#F5EEF8",emoji:"🧵"},
+  "Filmgruppen":{color:"#E6B0AA",emoji:"🎬"},
+  "Musikquizz":{color:"#D2B4DE",emoji:"🎶"},
   "Utflykt":{color:"#A9CCE3",emoji:"🚌"},
+  "Uppstart":{color:"#AED6F1",emoji:"🌤️"},
   "Promenad":{color:"#ABEBC6",emoji:"🚶‍♀️"},
   "Baka":{color:"#FAD7A0",emoji:"🧁"},
   "Lokalvård":{color:"#E5E7E8",emoji:"🧹"},
+  "Öppen verkstad":{color:"#E5E7E8",emoji:"🧰"},
+  "Vocal":{color:"#E8DAEF",emoji:"🎤"},
   "Behandling":{color:"#FDEDEC",emoji:"💆‍♀️"},
   "Relax Massagestol":{color:"#FDEDEC",emoji:"💺"},
+  "Transkribering":{color:"#E8DAEF",emoji:"⌨️"},
+  "Lunchpromenad":{color:"#ABEBC6",emoji:"🚶‍♀️🍲"},
+  "Autentiskt relaterande":{color:"#D6DBDF",emoji:"🤝"},
+  "Handla":{color:"#E5E7E8",emoji:"🛒"},
+  "Foto":{color:"#E8DAEF",emoji:"📸"},
   "Kommunikation":{color:"#D6EAF8",emoji:"💬"},
+  "Kulturpromenad":{color:"#ABEBC6",emoji:"🏛️"},
   "Poesigrupp":{color:"#FDEBD0",emoji:"✍️"},
+  "Samtal":{color:"#FCF3CF",emoji:"💬"},
+  "Manusarbete":{color:"#E8DAEF",emoji:"📝"},
   "Gym Slottskogens Gym":{color:"#A3E4D7",emoji:"🏋️‍♂️"},
   "Avslappning":{color:"#D5F5E3",emoji:"🪷"},
-  "Fika, Ladda stol":{color:"#FAD7A0",emoji:"☕🔋"}
+  "Fika, Ladda stol":{color:"#FAD7A0",emoji:"☕🔋"},
+  "Ladda stol":{color:"#FAD7A0",emoji:"☕🔋"}
 };
 function colorFor(r){return(aktivitetFarger[r.Aktivitet]||{color:"#edf2f7"}).color;}
 function emojiFor(r){return(aktivitetFarger[r.Aktivitet]||{emoji:""}).emoji;}
@@ -280,6 +324,8 @@ function weekdayName(d){return ["söndag","måndag","tisdag","onsdag","torsdag",
 
 /* DATA */
 let DATA=[];
+
+/* Ladda data + init */
 async function loadData(){
   try{
     const res=await fetch(url+"?t="+Date.now());
@@ -290,9 +336,8 @@ async function loadData(){
   }catch(e){ console.error("Kunde inte hämta data:", e); }
 }
 loadData();
-/* =========================
-   KLOCKA
-========================= */
+
+/* Klocka */
 function updateClock(){
   const el=document.getElementById("clock");
   if(!el) return;
@@ -302,7 +347,7 @@ function updateClock(){
 setInterval(updateClock,1000); updateClock();
 
 /* =========================
-   LISTOR / URVAL
+   LISTOR / UTVAL
 ========================= */
 function uniqueTokens(field){
   return [...new Set(DATA.map(r=>(r[field]||"").split(/,|\/|;|\n/).map(x=>x.trim())).flat())]
@@ -358,7 +403,7 @@ function fillSickList(){
 }
 
 /* =========================
-   VY-HANTERING & NAVIGATION
+   VY-HANTERING & TABS
 ========================= */
 function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
@@ -369,213 +414,236 @@ function showView(id){
   if(id==="nowView") document.getElementById("tabNow").classList.add("active");
   if(id==="assistantView") document.getElementById("tabAssistant").classList.add("active");
 }
-document.getElementById("tabParticipant").onclick=()=>showView("participantView");
-document.getElementById("tabCoach").onclick=()=>showView("coachView");
-document.getElementById("tabNow").onclick=()=>{ showView("nowView"); renderNow(); };
-document.getElementById("tabAssistant").onclick=()=>showView("assistantView");
 
-/* Logga & pil = hem (pågår nu) */
+document.getElementById("tabParticipant").onclick=()=>{ showView("participantView"); };
+document.getElementById("tabCoach").onclick=()=>{ showView("coachView"); };
+document.getElementById("tabNow").onclick=()=>{ showView("nowView"); renderNow(); };
+document.getElementById("tabAssistant").onclick=()=>{ showView("assistantView"); };
+
+/* Loggan = hem (pågår nu) */
 document.getElementById("homeLogo").addEventListener("click",()=>{ showView("nowView"); renderNow(); });
-document.getElementById("backArrow").addEventListener("click",()=>{ showView("nowView"); renderNow(); });
 
 /* =========================
-   PÅGÅR NU (ALLA)
+   PÅGÅR NU (alla)
 ========================= */
 function renderNow(){
-  const cont = document.getElementById("nowContainer");
+  const cont=document.getElementById("nowContainer");
   const today=todayKey();
   const now=new Date();
-  const minsNow=now.getHours()*60 + now.getMinutes();
-  const all = DATA.filter(r=> dayKey(r.Datum)===today )
-    .sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
-
-  const ongo = all.filter(r=>{
+  const minsNow=now.getHours()*60+now.getMinutes();
+  const all=DATA.filter(r=>dayKey(r.Datum)===today).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
+  const ongo=all.filter(r=>{
     const [sh,sm]=(r.Start||"00:00").split(":").map(Number);
     const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
-    const s=sh*60+sm, e=eh*60+em;
+    const s=sh*60+sm,e=eh*60+em;
     return minsNow>=s && minsNow<=e;
   });
-  const next = all.filter(r=>{
+  const next=all.filter(r=>{
     const [sh,sm]=(r.Start||"00:00").split(":").map(Number);
     const s=sh*60+sm;
     return s>minsNow;
   });
-
-  const label = new Intl.DateTimeFormat("sv-SE",{ weekday:"long", day:"numeric", month:"long"}).format(now);
-  const time = now.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
-
-  let html = `<div class="section-title">⏱️ ${label} – kl. ${time}</div>`;
-  html += `<div class="section-title">🔔 Pågår nu</div>`;
-
-  if(!ongo.length)
-    html += `<div class="cards"><div class="card"><div class="row" style="text-align:center">Inga aktiviteter pågår just nu.</div></div></div>`;
+  const label=new Intl.DateTimeFormat("sv-SE",{weekday:"long",day:"numeric",month:"long"}).format(now);
+  const time=now.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
+  let html=`<div class="section-title">⏱️ ${label} – kl. ${time}</div>`;
+  html+=`<div class="section-title">🔔 Pågår nu</div>`;
+  if(!ongo.length) html+=`<div class="cards"><div class="card"><div class="row" style="text-align:center">Inga aktiviteter pågår just nu.</div></div></div>`;
   else{
-    html += `<div class="cards">` + ongo.map(r => `
+    html+=`<div class="cards">`+ongo.map(r=>`
       <div class="card" style="--band:${colorFor(r)}">
         <h3>${emojiFor(r)} ${r.Aktivitet||"Aktivitet"}</h3>
         <div class="row">🕒 ${r.Start||""}–${r.Slut||""}</div>
         <div class="row">🧑‍🏫 ${r.Coach||"-"}</div>
         <div class="row">👥 ${r.Deltagare||"-"}</div>
-      </div>`).join("") + `</div>`;
+      </div>`).join("")+`</div>`;
   }
-
-  html += `<div class="section-title">⏭️ Kommande idag</div>`;
-  if(!next.length)
-    html += `<div class="cards"><div class="card"><div class="row" style="text-align:center">Inget mer planerat idag.</div></div></div>`;
+  html+=`<div class="section-title">⏭️ Kommande idag</div>`;
+  if(!next.length) html+=`<div class="cards"><div class="card"><div class="row" style="text-align:center">Inget mer planerat idag.</div></div></div>`;
   else{
-    html += `<div class="cards">` + next.map(r => `
+    html+=`<div class="cards">`+next.map(r=>`
       <div class="card" style="--band:${colorFor(r)}">
         <h3>${emojiFor(r)} ${r.Aktivitet||"Aktivitet"}</h3>
         <div class="row">🕒 ${r.Start||""}–${r.Slut||""}</div>
         <div class="row">🧑‍🏫 ${r.Coach||"-"}</div>
         <div class="row">👥 ${r.Deltagare||"-"}</div>
-      </div>`).join("") + `</div>`;
+      </div>`).join("")+`</div>`;
   }
-
-  cont.innerHTML = html;
+  cont.innerHTML=html;
 }
 /* =========================
-   BLOCKSCHEMA – gemensam logik
+   KORTVY & BLOCKVY
 ========================= */
-function shortenName(name){
-  if(!name) return "";
-  const parts=name.trim().split(" ");
-  if(parts.join("").length>12 && parts.length>1) return parts[0][0]+"."+parts.slice(1).join(" ");
-  return name;
-}
-function pickShortest(names,count=2){
-  return names.sort((a,b)=>a.length-b.length).slice(0,count);
-}
-function compactList(names,count=2){
-  if(names.length<=count) return names.join(", ");
-  const short=pickShortest(names,count);
-  return `${short.join(", ")} +${names.length-short.length}`;
-}
-
-/* Format för block */
-function formatBlock(r,isCoach){
-  const start=r.Start||"", end=r.Slut||"", activity=r.Aktivitet||"";
-  const duration=(()=>{
-    const [sh,sm]=(start||"0:0").split(":").map(Number);
-    const [eh,em]=(end||"0:0").split(":").map(Number);
-    return (eh*60+em)-(sh*60+sm);
-  })();
-  const bg=colorFor(r);
-  const emoji=emojiFor(r);
-
-  const deltagare=splitNames(r.Deltagare||"");
-  const coacher=splitNames(r.Coach||"");
-
-  // 30-minuterspass
-  if(duration<=30){
-    const shortNames=isCoach?compactList(deltagare):compactList(coacher);
-    const label=isCoach?`👥 ${shortNames}`:`🧑‍🏫 ${shortNames}`;
-    return `<div class="block" style="background:${bg}">
-      ${activity} – ${label}
-    </div>`;
-  }
-
-  // Längre pass
-  let namnLista=isCoach?deltagare:coacher;
-  let namnText="";
-  if(namnLista.length>10){
-    const vis=namnLista.slice(0,3).join(", ");
-    namnText=`${vis} +${namnLista.length-3}`;
-  }else namnText=namnLista.join(", ");
-
-  const label=isCoach?`👥 ${namnText}`:`🧑‍🏫 ${namnText}`;
-  return `<div class="block" style="background:${bg}">
-    <div class="title">🕒 ${start}–${end}</div>
-    ${emoji} ${activity}<br>${label}
-  </div>`;
-}
-
-/* Rendera block */
-function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
-  const all=DATA.filter(r=>{
-    const list=isCoach?splitNames(r.Coach):splitNames(r.Deltagare);
-    return list.includes(name);
-  });
-  if(!all.length){gridEl.innerHTML="<div style='padding:10px;'>Inga aktiviteter.</div>";return;}
-
-  const days=[1,2,3,4,5];
-  headerEl.innerHTML="<div></div>"+days.map(d=>`<div>${weekdayName(d)}</div>`).join("");
-  const hours=[];
-  for(let h=8;h<=16;h++) hours.push(h+":00",h+":30");
-
-  gridEl.innerHTML="";
-  hours.forEach(time=>{
-    const row=document.createElement("div");
-    row.className="block-time";
-    row.textContent=time;
-    gridEl.appendChild(row);
-
-    days.forEach(day=>{
-      const cell=document.createElement("div");
-      cell.className="block-cell";
-      const today=new Date();
-      const monday=new Date(today.setDate(today.getDate()-today.getDay()+day));
-      const dateKey=monday.toISOString().slice(0,10);
-      const matches=all.filter(r=>dayKey(r.Datum)===dateKey && r.Start===time);
-      matches.forEach(r=>{
-        const blockHTML=formatBlock(r,isCoach);
-        cell.insertAdjacentHTML("beforeend",blockHTML);
-      });
-      gridEl.appendChild(cell);
-    });
-  });
-}
-
-/* =========================
-   DAGSVY (kortvy)
-========================= */
-function renderDayView(name,isCoach,container){
+function renderCardsGeneric(name,isCoach,targetEl){
   const today=todayKey();
-  const list=DATA.filter(r=>{
-    const names=isCoach?splitNames(r.Coach):splitNames(r.Deltagare);
-    return dayKey(r.Datum)===today && names.includes(name);
-  }).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
-  if(!list.length){container.innerHTML="<div class='card'><div class='row'>Inget planerat idag.</div></div>";return;}
-  container.innerHTML=list.map(r=>`
-    <div class="card" style="--band:${colorFor(r)}">
+  const field=isCoach?"Coach":"Deltagare";
+  const rows=DATA.filter(r=>{
+    const list=splitNames(r[field]||"");
+    return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) ||
+           (r[field]||"").trim().toLowerCase()==="alla";
+  }).filter(r=>dayKey(r.Datum)===today)
+    .sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
+  let html=`<div class='cards'>`;
+  if(!rows.length) html+="<div class='card'><div class='row'>Inga aktiviteter idag.</div></div>";
+  rows.forEach(r=>{
+    html+=`<div class="card" style="--band:${colorFor(r)}">
       <h3>${emojiFor(r)} ${r.Aktivitet||"Aktivitet"}</h3>
       <div class="row">🕒 ${r.Start||""}–${r.Slut||""}</div>
       <div class="row">${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}</div>
-    </div>`).join("");
+    </div>`;
+  });
+  html+="</div>";
+  targetEl.innerHTML=html;
+}
+
+/* BLOCKVY (Utskriftsschema) */
+function makeSlots(){
+  const a=[];
+  for(let h=8;h<=16;h++){
+    a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);
+  }
+  a.push("16:30");
+  return a;
+}
+function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
+  const slots=makeSlots();
+  const days=["måndag","tisdag","onsdag","torsdag","fredag"];
+  const field=isCoach?"Coach":"Deltagare";
+  const rows=DATA.filter(r=>{
+    const list=splitNames(r[field]||"");
+    return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) ||
+           (r[field]||"").trim().toLowerCase()==="alla";
+  });
+  headerEl.innerHTML="<div>Tid</div>"+days.map(d=>`<div>${d}</div>`).join("");
+  gridEl.innerHTML="";
+  gridEl.style.gridTemplateColumns=`80px repeat(${days.length},1fr)`;
+  slots.forEach(t=>{
+    gridEl.innerHTML+=`<div class='block-time'>${t}</div>`+days.map(()=>`<div class='block-cell'></div>`).join("");
+  });
+  const cells=[...gridEl.children];
+  rows.forEach(r=>{
+    const d=new Date(r.Datum);
+    let wd=d.getDay(); if(wd===0||wd===6) return;
+    const col=(wd-1)+1;
+    const sIdx=slots.indexOf(r.Start),eIdx=slots.indexOf(r.Slut);
+    if(sIdx<0||eIdx<=sIdx) return;
+    const firstCellIndex=sIdx*(1+days.length)+col,firstCell=cells[firstCellIndex];
+    const block=document.createElement("div");
+    block.className="block"; block.style.background=colorFor(r);
+    const [sh,sm]=(r.Start||"00:00").split(":").map(Number);
+    const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
+    const duration=(eh*60+em)-(sh*60+sm);
+    const deltagareList=(r.Deltagare||"").split(",").map(x=>x.trim()).sort((a,b)=>a.length-b.length).join(", ");
+    if(duration>30){
+      block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
+        ${emojiFor(r)} ${r.Aktivitet||""}<br>
+        ${isCoach?"👥 "+deltagareList:"🧑‍🏫 "+(r.Coach||"-")}`;
+    }else{
+      block.innerHTML=`${emojiFor(r)} ${r.Aktivitet||""} – ${isCoach?"👥 "+deltagareList:"🧑‍🏫 "+(r.Coach||"-")}`;
+    }
+    requestAnimationFrame(()=>{
+      const cellH=firstCell.clientHeight||28;
+      block.style.height=(eIdx-sIdx)*cellH+"px";
+    });
+    firstCell.appendChild(block);
+  });
 }
 
 /* =========================
-   KNAPPHANTERING
+   KNAPPAR
 ========================= */
 document.getElementById("btnParticipantToday").onclick=()=>{
   const name=document.getElementById("nameSelect").value;
   if(!name){alert("Välj en deltagare.");return;}
   document.getElementById("participantWeek").style.display="none";
+  document.getElementById("participantNow").style.display="none";
   document.getElementById("participantDay").style.display="block";
-  renderDayView(name,false,document.getElementById("participantDay"));
+  renderCardsGeneric(name,false,document.getElementById("participantDay"));
 };
 document.getElementById("btnParticipantWeek").onclick=()=>{
   const name=document.getElementById("nameSelect").value;
   if(!name){alert("Välj en deltagare.");return;}
   document.getElementById("participantDay").style.display="none";
+  document.getElementById("participantNow").style.display="none";
   document.getElementById("participantWeek").style.display="block";
   renderBlocksGeneric(name,false,document.getElementById("pBlockHeader"),document.getElementById("pBlockGrid"));
 };
-
+document.getElementById("btnNowParticipant").onclick=()=>{
+  const name=document.getElementById("nameSelect").value;
+  if(!name){alert("Välj en deltagare.");return;}
+  document.getElementById("participantDay").style.display="none";
+  document.getElementById("participantWeek").style.display="none";
+  document.getElementById("participantNow").style.display="block";
+  renderNowFor(name,false,document.getElementById("participantNow"));
+};
 document.getElementById("btnCoachToday").onclick=()=>{
   const name=document.getElementById("coachSelect").value;
   if(!name){alert("Välj en coach.");return;}
   document.getElementById("coachWeek").style.display="none";
+  document.getElementById("coachNow").style.display="none";
   document.getElementById("coachDay").style.display="block";
-  renderDayView(name,true,document.getElementById("coachDay"));
+  renderCardsGeneric(name,true,document.getElementById("coachDay"));
 };
 document.getElementById("btnCoachWeek").onclick=()=>{
   const name=document.getElementById("coachSelect").value;
   if(!name){alert("Välj en coach.");return;}
   document.getElementById("coachDay").style.display="none";
+  document.getElementById("coachNow").style.display="none";
   document.getElementById("coachWeek").style.display="block";
   renderBlocksGeneric(name,true,document.getElementById("cBlockHeader"),document.getElementById("cBlockGrid"));
 };
+document.getElementById("btnNowCoach").onclick=()=>{
+  const name=document.getElementById("coachSelect").value;
+  if(!name){alert("Välj en coach.");return;}
+  document.getElementById("coachDay").style.display="none";
+  document.getElementById("coachWeek").style.display="none";
+  document.getElementById("coachNow").style.display="block";
+  renderNowFor(name,true,document.getElementById("coachNow"));
+};
+
+/* =========================
+   INDIVIDUELL PÅGÅR NU
+========================= */
+function renderNowFor(name,isCoach,target){
+  const today=todayKey();
+  const field=isCoach?"Coach":"Deltagare";
+  const now=new Date();
+  const minsNow=now.getHours()*60+now.getMinutes();
+  const rows=DATA.filter(r=>{
+    const list=splitNames(r[field]||"");
+    return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) &&
+           dayKey(r.Datum)===today;
+  }).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
+  const ongo=rows.filter(r=>{
+    const [sh,sm]=(r.Start||"00:00").split(":").map(Number);
+    const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
+    const s=sh*60+sm,e=eh*60+em;
+    return minsNow>=s && minsNow<=e;
+  });
+  const next=rows.filter(r=>{
+    const [sh,sm]=(r.Start||"00:00").split(":").map(Number);
+    return sh*60+sm>minsNow;
+  });
+  let html=`<div class="section-title">🔔 Pågår nu</div>`;
+  if(!ongo.length) html+="<div class='card'><div class='row'>Inget just nu.</div></div>";
+  else{
+    ongo.forEach(r=>{
+      html+=`<div class="card" style="--band:${colorFor(r)}">
+        <h3>${emojiFor(r)} ${r.Aktivitet}</h3>
+        <div class="row">🕒 ${r.Start}–${r.Slut}</div>
+        <div class="row">${isCoach?"👥 "+r.Deltagare:"🧑‍🏫 "+r.Coach}</div>
+      </div>`;
+    });
+  }
+  html+=`<div class="section-title">⏭️ Kommande idag</div>`;
+  next.forEach(r=>{
+    html+=`<div class="card" style="--band:${colorFor(r)}">
+      <h3>${emojiFor(r)} ${r.Aktivitet}</h3>
+      <div class="row">🕒 ${r.Start}–${r.Slut}</div>
+      <div class="row">${isCoach?"👥 "+r.Deltagare:"🧑‍🏫 "+r.Coach}</div>
+    </div>`;
+  });
+  target.innerHTML=html;
+}
 
 /* =========================
    UTSKRIFT
@@ -587,19 +655,26 @@ function printScopeWithin(viewId){
   const scopes=[...view.querySelectorAll('.print-scope')];
   const visible=scopes.find(n=>{
     const s=getComputedStyle(n);
-    return s.display!=="none" && s.visibility!=="hidden";
+    return s.display!=="none"&&s.visibility!=="hidden";
   });
   if(visible) visible.classList.add('print-visible');
-  setTimeout(()=>window.print(),200);
+
+  /* Sätt rubrik */
+  const header=document.createElement("div");
+  header.className="print-header";
+  const nameSel=document.querySelector("#nameSelect").value||
+                 document.querySelector("#coachSelect").value||"";
+  const today=new Date().toLocaleDateString("sv-SE");
+  header.innerHTML=`<img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" height="28">
+                     <h2>Veckoschema – ${nameSel} – ${today}</h2>
+                     <div class="date">${today}</div>`;
+  visible.prepend(header);
+
+  setTimeout(()=>window.print(),300);
 }
 
-document.getElementById("btnPrintParticipant").onclick=()=>printScopeWithin("participantView");
-document.getElementById("btnPrintCoach").onclick=()=>printScopeWithin("coachView");
-document.getElementById("btnPrintNow").onclick=()=>printScopeWithin("nowView");
-document.getElementById("btnPrintCompare").onclick=()=>printScopeWithin("assistantView");
-
 /* =========================
-   START: visa Pågår nu
+   START
 ========================= */
 document.addEventListener("DOMContentLoaded",()=>{
   showView("nowView");
@@ -608,3 +683,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
