@@ -134,54 +134,54 @@ select, .btn{
 #viewTitle{ text-align:center; margin:10px 0 8px; font-weight:800; }
 /* Print – proffsig utskrift */
 @media print {
+  .print-header {
+    display:flex !important;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #ccc;
+    padding:8px 12px 6px;
+    margin-bottom:14px;
+  }
+  .print-header img { height:28px; }
+  .print-header h2 {
+    font-size:18pt;
+    font-weight:800;
+    margin:0;
+    letter-spacing:0.3px;
+  }
+  .print-header .date {
+    font-size:10pt;
+    color:#333;
+  }
+
   body {
     background:#fff;
     color:#000;
-    font-size:9pt;
+    font-size:10pt;
+    line-height:1.4;
     margin:0;
-  }
-
-  /* Dölj allt som inte ska skrivas ut */
-  header,
-  .tab-bar,
-  .controls,
-  .panel,
-  .dropdown-content {
-    display:none !important;
-  }
-
-  /* Visa alltid aktiv vy eller markerad print-yta */
-  .view.active,
-  .print-visible {
-    display:block !important;
-    visibility:visible !important;
-    position:relative !important;
-  }
-
-  /* Kort och jämförelseblock får inte brytas mitt på sidan */
-  .card,
-  .compare-item {
-    break-inside:avoid;
-    page-break-inside:avoid;
-  }
-
-  /* Behåll färger i block vid utskrift */
-  .block {
     -webkit-print-color-adjust:exact;
     print-color-adjust:exact;
   }
 
-  /* Skriv ut emoji-symboler korrekt */
-  body, .block, .card, .compare-item {
-    font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif !important;
+  header, .tab-bar, .controls, .panel, .dropdown-content { display:none !important; }
+  .view { display:none !important; visibility:hidden !important; }
+  .print-visible { display:block !important; visibility:visible !important; position:relative !important; }
+
+  .block-time { font-size:9pt !important; padding:3px 6px !important; }
+  .block {
+    border-radius:6px;
+    padding:6px 8px;
+    font-size:9pt !important;
+    line-height:1.2 !important;
+    min-height:30px !important;
+    overflow:visible !important;
+    white-space:normal !important;
   }
 
-  /* Utskriftsformat A4 liggande */
-  @page {
-    size:A4 landscape;
-    margin:8mm;
-  }
-} /* ← den här stänger @media print */
+  @page { size:A4 landscape; margin:10mm; }
+}
+
 
 /* Små skärmar – lite större klickytor */
 @media (max-width:700px){
@@ -539,48 +539,90 @@ function renderCardsGeneric(name,isCoach,targetEl){
   html+="</div>";
   targetEl.innerHTML=html;
 }
-
 /* =========================
-   VECKA (BLOCK, LIGGANDE)
+   VECKA (BLOCK, LIGGANDE) – förbättrad version med +X fler
 ========================= */
-function makeSlots(){const a=[];for(let h=8;h<=16;h++){a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);}a.push("16:30");return a;}
-function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
-  const slots=makeSlots();
-  const days=["måndag","tisdag","onsdag","torsdag","fredag"];
-  const field=isCoach?"Coach":"Deltagare";
-  const rows=DATA.filter(r=>{
-    const list=splitNames(r[field]||"");
-    return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) || (r[field]||"").trim().toLowerCase()==="alla";
+function makeSlots() {
+  const a = [];
+  for (let h = 8; h <= 16; h++) {
+    a.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`);
+  }
+  a.push("16:30");
+  return a;
+}
+
+function renderBlocksGeneric(name, isCoach, headerEl, gridEl) {
+  const slots = makeSlots();
+  const days = ["måndag", "tisdag", "onsdag", "torsdag", "fredag"];
+  const field = isCoach ? "Coach" : "Deltagare";
+
+  const rows = DATA.filter(r => {
+    const list = splitNames(r[field] || "");
+    return (
+      list.map(x => x.toLowerCase()).includes(name.toLowerCase()) ||
+      (r[field] || "").trim().toLowerCase() === "alla"
+    );
   });
 
-  headerEl.innerHTML="<div>Tid</div>"+days.map(d=>`<div>${d}</div>`).join("");
-  gridEl.innerHTML="";gridEl.style.gridTemplateColumns=`80px repeat(${days.length},1fr)`;
-  slots.forEach(t=>{gridEl.innerHTML+=`<div class='block-time'>${t}</div>`+days.map(()=>`<div class='block-cell'></div>`).join("");});
-  const cells=[...gridEl.children];
+  // Bygg tabellhuvudet
+  headerEl.innerHTML = "<div>Tid</div>" + days.map(d => `<div>${d}</div>`).join("");
+  gridEl.innerHTML = "";
+  gridEl.style.gridTemplateColumns = `80px repeat(${days.length}, 1fr)`;
 
-  rows.forEach(r=>{
-    const d=new Date(r.Datum);
-    let wd=d.getDay(); if(wd===0||wd===6) return;
-    const col=(wd-1)+1;
-    const sIdx=slots.indexOf(r.Start), eIdx=slots.indexOf(r.Slut);
-    if(sIdx<0||eIdx<=sIdx) return;
-    const firstCellIndex=sIdx*(1+days.length)+col, firstCell=cells[firstCellIndex];
-    const block=document.createElement("div");
-    block.className="block"; block.style.background=colorFor(r);
+  // Skapa tidsrader
+  slots.forEach(t => {
+    gridEl.innerHTML +=
+      `<div class='block-time'>${t}</div>` +
+      days.map(() => `<div class='block-cell'></div>`).join("");
+  });
 
-    const [sh,sm]=(r.Start||"00:00").split(":").map(Number);
-    const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
-    const duration=(eh*60+em)-(sh*60+sm);
+  const cells = [...gridEl.children];
+  const emoji = "📘"; // enhetlig emoji för alla aktiviteter
 
-    if(duration>30){
-      block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
-        ${emojiFor(r)} ${r.Aktivitet||""}<br>
-        ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
-    }else{
-      block.innerHTML=`${emojiFor(r)} ${r.Aktivitet||""} – ${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}`;
+  // Rita block för varje aktivitet
+  rows.forEach(r => {
+    const d = new Date(r.Datum);
+    let wd = d.getDay();
+    if (wd === 0 || wd === 6) return; // hoppa över helg
+    const col = (wd - 1) + 1;
+    const sIdx = slots.indexOf(r.Start), eIdx = slots.indexOf(r.Slut);
+    if (sIdx < 0 || eIdx <= sIdx) return;
+
+    const firstCellIndex = sIdx * (1 + days.length) + col;
+    const firstCell = cells[firstCellIndex];
+    const block = document.createElement("div");
+    block.className = "block";
+    block.style.background = colorFor(r);
+
+    const [sh, sm] = (r.Start || "00:00").split(":").map(Number);
+    const [eh, em] = (r.Slut || "00:00").split(":").map(Number);
+    const duration = (eh * 60 + em) - (sh * 60 + sm);
+
+    // Hantera deltagarlista
+    const deltagare = splitNames(r.Deltagare || "-");
+    const maxVisas = duration <= 30 ? 1 : 2; // 1 vid kort pass, annars 2
+    const visade = deltagare.slice(0, maxVisas);
+    const fler = deltagare.length - visade.length;
+
+    // Innehåll i blocket
+    if (duration <= 30) {
+      // Kort pass: visa bara aktivitet + 1 namn
+      block.innerHTML = `${emoji} ${r.Aktivitet || ""}<br>👥 ${visade.join(", ")}${
+        fler > 0 ? " +" + fler : ""
+      }`;
+    } else {
+      // Längre pass: visa tid, aktivitet, namn, +X fler
+      block.innerHTML = `<div class="title">🕒 ${r.Start}–${r.Slut}</div>
+        ${emoji} ${r.Aktivitet || ""}<br>
+        👥 ${visade.join(", ")}${fler > 0 ? " +" + fler + " fler" : ""}`;
     }
 
-    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;block.style.height=(eIdx-sIdx)*cellH+"px";});
+    // Dynamisk höjd baserat på antal tidsrader
+    requestAnimationFrame(() => {
+      const cellH = firstCell.clientHeight || 28;
+      block.style.height = (eIdx - sIdx) * cellH + "px";
+    });
+
     firstCell.appendChild(block);
   });
 }
@@ -588,7 +630,8 @@ function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
 /* =========================
    ASSISTENT – Jämför
 ========================= */
-document.getElementById("btnOpenCompare").onclick=()=>{
+document.getElementById("btnOpenCompare").onclick = () => {
+
   document.getElementById("comparePanel").style.display="block";
   document.getElementById("sickPanel").style.display="none";
   document.getElementById("compareOutput").style.display="none";
@@ -771,9 +814,8 @@ document.getElementById("btnCoachWeek").onclick = () => {
   document.getElementById("coachWeek").style.display = "block";
   renderBlocksGeneric(name, true, document.getElementById("cBlockHeader"), document.getElementById("cBlockGrid"));
 };
-
 /* =========================
-   🖨️ UTSKRIFT – robust version (fungerar i Chrome, Edge, Firefox)
+   🖨️ UTSKRIFT – med logga, rubrik och datum (robust version)
 ========================= */
 function printScopeWithin(viewId) {
   try {
@@ -798,22 +840,62 @@ function printScopeWithin(viewId) {
       return;
     }
 
-    // Markera rätt vy
+    // Markera rätt vy för utskrift
     visible.classList.add('print-visible');
+
+    // 🧩 Skapa temporärt rubrikhuvud
+    const printHeader = document.createElement('div');
+    printHeader.className = 'print-header';
+    const today = new Date().toLocaleDateString('sv-SE', {
+      weekday: 'long
+
+    printHeader.className = 'print-header';
+    const today = new Date().toLocaleDateString('sv-SE', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // Bestäm rubrik beroende på vy
+    let title = "Veckoschema";
+    if (viewId === "coachView") {
+      const name = document.getElementById("coachSelect").value || "";
+      title = `Veckoschema – ${name}`;
+    } else if (viewId === "participantView") {
+      const name = document.getElementById("nameSelect").value || "";
+      title = `Veckoschema – ${name}`;
+    } else if (viewId === "nowView") {
+      title = "Pågår nu";
+    } else if (viewId === "assistantView") {
+      title = "Jämförelse av scheman";
+    }
+
+    // Lägg in logga, rubrik och datum
+    printHeader.innerHTML = `
+      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="Grunden DV logotyp">
+      <h2>${title}</h2>
+      <div class="date">${today}</div>
+    `;
+    document.body.prepend(printHeader);
 
     // Vänta en liten stund så webbläsaren hinner rita om sidan
     setTimeout(() => {
       window.print();
-      // Rensa markering efter utskrift
-      setTimeout(() => visible.classList.remove('print-visible'), 1500);
+
+      // Rensa markeringar och ta bort rubriken efter utskrift
+      setTimeout(() => {
+        visible.classList.remove('print-visible');
+        printHeader.remove();
+      }, 1200);
     }, 400);
+
   } catch (err) {
     console.error("Utskriftsfel:", err);
     alert("Ett fel uppstod vid utskrift.");
   }
 }
 
-// Koppla utskriftsknappar
+/* =========================
+   KOPPLA UTSKRIFTSKNAPPAR
+========================= */
 document.getElementById("btnPrintParticipant").onclick = () => printScopeWithin("participantView");
 document.getElementById("btnPrintCoach").onclick = () => printScopeWithin("coachView");
 document.getElementById("btnPrintNow").onclick = () => printScopeWithin("nowView");
