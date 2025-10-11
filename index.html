@@ -132,7 +132,6 @@ select, .btn{
 .view{ display:none; }
 .view.active{ display:block; }
 #viewTitle{ text-align:center; margin:10px 0 8px; font-weight:800; }
-
 /* Print – proffsig utskrift */
 @media print {
   body {
@@ -184,91 +183,6 @@ select, .btn{
   }
 } /* ← den här stänger @media print */
 
-  /* ================================
-     🗓️ Förbättrad veckoschema-layout vid utskrift
-     ================================ */
-
-  /* Behåll rutnätet men ge mer luft */
-  .block-header {
-    display:grid !important;
-    grid-template-columns:80px repeat(5,1fr) !important;
-    background:#f5f7fa !important;
-    border-bottom:1px solid #ccc !important;
-    font-weight:700 !important;
-    font-size:0.9rem !important;
-    text-align:center !important;
-    page-break-after:avoid !important;
-  }
-
-  .block-header div {
-    padding:6px 4px !important;
-    border-left:1px solid #ddd !important;
-  }
-
-  .block-grid {
-    display:grid !important;
-    grid-template-columns:80px repeat(5,1fr) !important;
-    grid-auto-rows:30px !important;
-    border:1px solid #ddd !important;
-  }
-
-  .block-time {
-    text-align:right !important;
-    padding-right:6px !important;
-    font-size:0.8rem !important;
-    border-bottom:1px solid #eee !important;
-    border-right:1px solid #ddd !important;
-  }
-
-  .block-cell {
-    position:relative !important;
-    min-height:30px !important;
-    border-bottom:1px solid #eee !important;
-    border-right:1px solid #eee !important;
-    overflow:visible !important;
-  }
-
-  .block {
-    position:absolute !important;
-    left:2px !important;
-    right:2px !important;
-    top:2px !important;
-    border:1px solid rgba(0,0,0,.15) !important;
-    border-radius:6px !important;
-    padding:4px 6px !important;
-    font-size:0.8rem !important;
-    line-height:1.2 !important;
-    word-break:break-word !important;
-    overflow:hidden !important;
-  }
-
-  .block .title {
-    font-weight:600 !important;
-    display:block !important;
-    margin-bottom:2px !important;
-  }
-
-  /* Lägg till lite luft mellan block */
-  .block + .block {
-    margin-top:2px !important;
-  }
-
-  /* Visa full deltagarlista vid utskrift */
-  .block[data-full]::after {
-    content: attr(data-full);
-    display:block;
-    white-space:pre-line;
-    margin-top:2px;
-    font-size:0.78rem;
-  }
-
-  /* Utskriftsformat A4 liggande */
-  @page {
-    size:A4 landscape;
-    margin:8mm;
-  }
-}
-
 /* Små skärmar – lite större klickytor */
 @media (max-width:700px){
   body{ padding:10px; }
@@ -279,10 +193,18 @@ select, .btn{
 
 <body>
 <header title="Klicka för start (Pågår nu)">
-  <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="Grunden DV logotyp" id="homeLogo">
+  <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+       alt="Grunden DV logotyp" id="homeLogo">
   <div id="clock"></div>
 </header>
 
+<!-- Flikar -->
+<div class="tab-bar">
+  <button id="tabParticipant" class="tab">👤 Deltagare</button>
+  <button id="tabCoach" class="tab">🧑‍🏫 Coach</button>
+  <button id="tabNow" class="tab active">🔔 Pågår nu</button>
+  <button id="tabAssistant" class="tab">🤖 Assistent</button>
+</div>
 
 <!-- DELTAGARE-VY -->
 <div id="participantView" class="view">
