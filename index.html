@@ -261,6 +261,23 @@ select, .btn{
   </div>
 
   <div id="compareOutput" class="print-scope" style="display:none;"></div>
+
+  <div id="sickPanel" class="panel">
+    <h2>🩺 Hitta ersättare</h2>
+    <div class="controls">
+      <select id="sickCoachSelect"><option value="">-- Välj sjuk coach --</option></select>
+      <label style="display:inline-flex;gap:8px;align-items:center;">
+        <input type="checkbox" id="chkFullWeek" checked> Visa hela veckan
+      </label>
+    </div>
+    <div id="sickResult"></div>
+  </div>
+
+  <div class="controls" style="justify-content:center;margin-top:8px;">
+    <button id="btnOpenCompare" class="btn primary">🔍 Öppna jämförelse</button>
+    <button id="btnOpenSick" class="btn primary">🩺 Öppna ersättare</button>
+  </div>
+</div>
 <script>
 /* =========================
    DATA & KONFIG
@@ -409,7 +426,15 @@ function renderNow(){
     return sh*60+sm>minsNow;
   });
 
-  cont.innerHTML=ongo./* =========================
+  cont.innerHTML=ongo.length
+    ? ongo.map(r=>makeCard(r)).join("")
+    : `<div class="card" style="--band:#ccc"><div class="row" style="text-align:center">Inga aktiviteter pågår just nu.</div></div>`;
+  upcoming.innerHTML=next.length
+    ? next.map(r=>makeCard(r)).join("")
+    : `<div class="card" style="--band:#ccc"><div class="row" style="text-align:center">Inget mer planerat idag.</div></div>`;
+}
+function makeCard(r){
+  const f=aktivitetFarger[r./* =========================
    VECKANS SCHEMA
 ========================= */
 function renderBlocksGeneric(name,isCoach,headEl,gridEl){
@@ -598,15 +623,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
-
-    ? ongo.map(r=>makeCard(r)).join("")
-    : `<div class="card" style="--band:#ccc"><div class="row" style="text-align:center">Inga aktiviteter pågår just nu.</div></div>`;
-  upcoming.innerHTML=next.length
-    ? next.map(r=>makeCard(r)).join("")
-    : `<div class="card" style="--band:#ccc"><div class="row" style="text-align:center">Inget mer planerat idag.</div></div>`;
-}
-function makeCard(r){
-  const f=aktivitetFarger[r.Aktivitet]||{color:"#ddd",emoji:"❔"};
+Aktivitet]||{color:"#ddd",emoji:"❔"};
   return `
   <div class="card" style="--band:${f.color}">
     <h3>${f.emoji} ${r.Aktivitet}</h3>
@@ -615,20 +632,3 @@ function makeCard(r){
     <div class="row">👥 ${r.Deltagare}</div>
   </div>`;
 }
-
-  <div id="sickPanel" class="panel">
-    <h2>🩺 Hitta ersättare</h2>
-    <div class="controls">
-      <select id="sickCoachSelect"><option value="">-- Välj sjuk coach --</option></select>
-      <label style="display:inline-flex;gap:8px;align-items:center;">
-        <input type="checkbox" id="chkFullWeek" checked> Visa hela veckan
-      </label>
-    </div>
-    <div id="sickResult"></div>
-  </div>
-
-  <div class="controls" style="justify-content:center;margin-top:8px;">
-    <button id="btnOpenCompare" class="btn primary">🔍 Öppna jämförelse</button>
-    <button id="btnOpenSick" class="btn primary">🩺 Öppna ersättare</button>
-  </div>
-</div>
