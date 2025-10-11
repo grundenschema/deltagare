@@ -847,14 +847,13 @@ function printScopeWithin(viewId) {
     const printHeader = document.createElement('div');
     printHeader.className = 'print-header';
     const today = new Date().toLocaleDateString('sv-SE', {
-      weekday: 'long
-
-    printHeader.className = 'print-header';
-    const today = new Date().toLocaleDateString('sv-SE', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
 
-    // Bestäm rubrik beroende på vy
+    // Bestäm titel beroende på vy
     let title = "Veckoschema";
     if (viewId === "coachView") {
       const name = document.getElementById("coachSelect").value || "";
@@ -876,7 +875,7 @@ function printScopeWithin(viewId) {
     `;
     document.body.prepend(printHeader);
 
-    // Vänta en liten stund så webbläsaren hinner rita om sidan
+    // Vänta lite så sidan hinner ritas upp innan utskrift
     setTimeout(() => {
       window.print();
 
@@ -884,7 +883,7 @@ function printScopeWithin(viewId) {
       setTimeout(() => {
         visible.classList.remove('print-visible');
         printHeader.remove();
-      }, 1200);
+      }, 1000);
     }, 400);
 
   } catch (err) {
