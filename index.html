@@ -563,6 +563,7 @@ function renderBlocksGeneric(name, isCoach, headerEl, gridEl) {
   const days = ["måndag", "tisdag", "onsdag", "torsdag", "fredag"];
   const field = isCoach ? "Coach" : "Deltagare";
 
+  // Filtrera fram aktiviteter för rätt person
   const rows = DATA.filter(r => {
     const list = splitNames(r[field] || "");
     return (
@@ -583,48 +584,55 @@ function renderBlocksGeneric(name, isCoach, headerEl, gridEl) {
       days.map(() => `<div class='block-cell'></div>`).join("");
   });
 
-  
+  // 🧩 Viktig rad – behövs för att emoji och block ska hamna rätt
+  const cells = [...gridEl.children];
 
   // Rita block för varje aktivitet
-rows.forEach(r => {
-  const d = new Date(r.Datum);
-  let wd = d.getDay();
-  if (wd === 0 || wd === 6) return;
-  const col = (wd - 1) + 1;
-  const sIdx = slots.indexOf(r.Start), eIdx = slots.indexOf(r.Slut);
-  if (sIdx < 0 || eIdx <= sIdx) return;
+  rows.forEach(r => {
+    const d = new Date(r.Datum);
+    let wd = d.getDay();
+    if (wd === 0 || wd === 6) return; // hoppa över helger
 
-  const firstCellIndex = sIdx * (1 + days.length) + col;
-  const firstCell = cells[firstCellIndex];
-  const block = document.createElement("div");
-  block.className = "block";
-  block.style.background = colorFor(r);
+    const col = (wd - 1) + 1;
+    const sIdx = slots.indexOf(r.Start);
+    const eIdx = slots.indexOf(r.Slut);
+    if (sIdx < 0 || eIdx <= sIdx) return;
 
-  const [sh, sm] = (r.Start || "00:00").split(":").map(Number);
-  const [eh, em] = (r.Slut || "00:00").split(":").map(Number);
-  const duration = (eh * 60 + em) - (sh * 60 + sm);
+    const firstCellIndex = sIdx * (1 + days.length) + col;
+    const firstCell = cells[firstCellIndex];
+    const block = document.createElement("div");
+    block.className = "block";
+    block.style.background = colorFor(r);
 
-  const deltagare = splitNames(r.Deltagare || "-");
-  const maxVisas = duration <= 30 ? 1 : 2;
-  const visade = deltagare.slice(0, maxVisas);
-  const fler = deltagare.length - visade.length;
+    const emoji = emojiFor(r); // ✅ nu syns emoji
+    const [sh, sm] = (r.Start || "00:00").split(":").map(Number);
+    const [eh, em] = (r.Slut || "00:00").split(":").map(Number);
+    const duration = (eh * 60 + em) - (sh * 60 + sm);
 
-  if (duration <= 30) {
-    block.innerHTML = `${emojiFor(r)} ${r.Aktivitet || ""}<br>👥 ${visade.join(", ")}${fler > 0 ? " +" + fler : ""}`;
-  } else {
-    block.innerHTML = `<div class="title">🕒 ${r.Start}–${r.Slut}</div>
-      ${emojiFor(r)} ${r.Aktivitet || ""}<br>
-      👥 ${visade.join(", ")}${fler > 0 ? " +" + fler + " fler" : ""}`;
-  }
+    const deltagare = splitNames(r.Deltagare || "-");
+    const maxVisas = duration <= 30 ? 1 : 2;
+    const visade = deltagare.slice(0, maxVisas);
+    const fler = deltagare.length - visade.length;
 
-  requestAnimationFrame(() => {
-    const cellH = firstCell.clientHeight || 28;
-    block.style.height = (eIdx - sIdx) * cellH + "px";
+    // Bygg innehållet i blocket
+    if (duration <= 30) {
+      block.innerHTML = `${emoji} ${r.Aktivitet || ""}<br>
+        👥 ${visade.join(", ")}${fler > 0 ? " +" + fler : ""}`;
+    } else {
+      block.innerHTML = `<div class="title">🕒 ${r.Start}–${r.Slut}</div>
+        ${emoji} ${r.Aktivitet || ""}<br>
+        👥 ${visade.join(", ")}${fler > 0 ? " +" + fler + " fler" : ""}`;
+    }
+
+    // Anpassa höjden efter antal tidsrader
+    requestAnimationFrame(() => {
+      const cellH = firstCell.clientHeight || 28;
+      block.style.height = (eIdx - sIdx) * cellH + "px";
+    });
+
+    firstCell.appendChild(block);
   });
-
-  firstCell.appendChild(block);
-});
-
+}
 
     // Innehåll i blocket
     if (duration <= 30) {
