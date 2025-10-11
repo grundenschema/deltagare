@@ -820,7 +820,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 function printScopeWithin(viewId) {
   try {
     // Ta bort eventuella gamla markeringar
-    document.querySelectorAll('.print-scope').forEach(e => e.classList.remove('print-visible'));
+    document.querySelectorAll('.print-scope, .view').forEach(e => e.classList.remove('print-visible'));
 
     const view = document.getElementById(viewId);
     if (!view) {
@@ -840,7 +840,8 @@ function printScopeWithin(viewId) {
       return;
     }
 
-    // Markera rätt vy för utskrift
+    // Markera rätt vy + dess innehåll för utskrift
+    view.classList.add('print-visible');
     visible.classList.add('print-visible');
 
     // 🧩 Skapa temporärt rubrikhuvud
@@ -882,6 +883,7 @@ function printScopeWithin(viewId) {
       // Rensa markeringar och ta bort rubriken efter utskrift
       setTimeout(() => {
         visible.classList.remove('print-visible');
+        view.classList.remove('print-visible');
         printHeader.remove();
       }, 1000);
     }, 400);
@@ -895,6 +897,7 @@ function printScopeWithin(viewId) {
 /* =========================
    KOPPLA UTSKRIFTSKNAPPAR
 ========================= */
+
 document.getElementById("btnPrintParticipant").onclick = () => printScopeWithin("participantView");
 document.getElementById("btnPrintCoach").onclick = () => printScopeWithin("coachView");
 document.getElementById("btnPrintNow").onclick = () => printScopeWithin("nowView");
