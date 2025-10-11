@@ -172,6 +172,18 @@ select, .btn{
     print-color-adjust:exact;
   }
 
+  /* Skriv ut emoji-symboler korrekt */
+  body, .block, .card, .compare-item {
+    font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif !important;
+  }
+
+  /* Utskriftsformat A4 liggande */
+  @page {
+    size:A4 landscape;
+    margin:8mm;
+  }
+} /* ← den här stänger @media print */
+
   /* ================================
      🗓️ Förbättrad veckoschema-layout vid utskrift
      ================================ */
