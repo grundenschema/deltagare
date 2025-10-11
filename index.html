@@ -956,9 +956,11 @@ document.getElementById("btnCoachToday").onclick = () => {
    START: visa Pågår nu
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
+  loadData();        // 👈 Lägg till den här raden
   showView("nowView");
   renderNow();
 });
+
 </script>
 </body>
 </html>
