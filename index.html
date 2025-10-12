@@ -913,6 +913,22 @@ document.getElementById("btnCoachWeek").onclick=()=>{
 };
 
 /* =====================================================
+   Aktivera utskriftsknappar
+   ===================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  const buttons = {
+    btnPrintParticipant: "Deltagarschema",
+    btnPrintCoach: "Coachschema",
+    btnPrintNow: "Pågår nu",
+    btnPrintCompare: "Jämförelse"
+  };
+  Object.entries(buttons).forEach(([id, title]) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("click", () => printSchema(title));
+  });
+});
+
+/* =====================================================
    Förbered utskriftsrubrik
    ===================================================== */
 function preparePrintHeader(titleText, personName) {
