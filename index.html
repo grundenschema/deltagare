@@ -792,22 +792,23 @@ document.head.appendChild(style);
 // huvudfunktion
 function printScopeWithin(viewId) {
   // ta bort tidigare markörer
-  document.querySelectorAll('.print-scope').forEach(e => e.classList.remove('print-visible'));
+  document.querySelectorAll(".print-scope").forEach(e => e.classList.remove("print-visible"));
   const view = document.getElementById(viewId);
   if (!view) { window.print(); return; }
 
-  // hitta första synliga print-scope i view
-  const scopes = [...view.querySelectorAll('.print-scope')];
-  const visible = scopes.find(n => {
+  // hitta första synliga print-scope i view (eller fallback)
+  const scopes = [...view.querySelectorAll(".print-scope")];
+  let visible = scopes.find(n => {
     const s = getComputedStyle(n);
     return s.display !== "none" && s.visibility !== "hidden";
-  });
+  }) || scopes[0]; // fallback om ingen synlig hittas
 
   // visa rubrik endast för blockschema (coach + deltagare)
   const showHeader = (viewId === "participantView" || viewId === "coachView");
-  const name = viewId === "participantView"
-    ? document.getElementById("nameSelect").value
-    : viewId === "coachView"
+  const name =
+    viewId === "participantView"
+      ? document.getElementById("nameSelect").value
+      : viewId === "coachView"
       ? document.getElementById("coachSelect").value
       : "";
 
@@ -819,16 +820,18 @@ function printScopeWithin(viewId) {
         weekday: "long",
         year: "numeric",
         month: "long",
-        day: "numeric",
+        day: "numeric"
       });
     document.getElementById("printHeader").style.display = "flex";
   } else {
     document.getElementById("printHeader").style.display = "none";
   }
 
+  // markera rätt område
+  if (visible) visible.classList.add("print-visible");
+
   // skriv ut
-  if (visible) visible.classList.add('print-visible');
-  setTimeout(() => window.print(), 200);
+  setTimeout(() => window.print(), 250);
 
   // göm rubrik efteråt
   setTimeout(() => {
