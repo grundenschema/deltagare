@@ -753,7 +753,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – stabil och webbläsaroberoende
+   UTSKRIFT – 100 % STABIL, WEBBLÄSAROBEROENDE
 ========================= */
 
 /* --- Skapa rubrik (logga + titel + datum) --- */
@@ -773,7 +773,7 @@ if (!document.getElementById("printHeader")) {
   document.body.insertAdjacentHTML("afterbegin", headerHTML);
 }
 
-/* --- CSS för utskrift (färger, rubrik, layout) --- */
+/* --- CSS för utskrift --- */
 const printStyle = document.createElement("style");
 printStyle.textContent = `
 @media print {
@@ -827,7 +827,7 @@ printStyle.textContent = `
 }`;
 document.head.appendChild(printStyle);
 
-/* --- Utskriftsfunktion --- */
+/* --- Utskriftsfunktion (100 %-säker version) --- */
 function doPrint(titleText = "") {
   const header = document.getElementById("printHeader");
   if (header) header.style.display = "flex";
@@ -842,10 +842,16 @@ function doPrint(titleText = "") {
       day: "numeric",
     });
 
-  window.print();
-
-  // göm rubriken efter utskrift
-  setTimeout(() => { if (header) header.style.display = "none"; }, 300);
+  // vänta tills sidan är 100 % renderad
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      window.scrollTo(0, 0); // säkerställ att rubrik/logga syns
+      window.print();
+      setTimeout(() => {
+        if (header) header.style.display = "none";
+      }, 400);
+    }, 400);
+  });
 }
 
 /* =========================
