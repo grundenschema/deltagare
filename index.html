@@ -715,70 +715,109 @@ function renderSick(){
   document.getElementById("sickResult").innerHTML = html;
 }
 
-/* =========================
-   KNAPPKOPPLINGAR – DELTAGARE/COACH
-========================= */
-document.getElementById("btnParticipantToday").onclick=()=>{
-  const name=document.getElementById("nameSelect").value;
-  if(!name){ alert("Välj en deltagare."); return; }
-  // visa dag, dölj vecka
-  document.getElementById("participantWeek").style.display="none";
-  document.getElementById("participantDay").style.display="block";
-  renderCardsGeneric(name,false,document.getElementById("participantDay"));
-};
-
-document.getElementById("btnParticipantWeek").onclick=()=>{
-  const name=document.getElementById("nameSelect").value;
-  if(!name){ alert("Välj en deltagare."); return; }
-  // visa vecka, dölj dag
-  document.getElementById("participantDay").style.display="none";
-  document.getElementById("participantWeek").style.display="block";
-  renderBlocksGeneric(name,false,document.getElementById("pBlockHeader"),document.getElementById("pBlockGrid"));
-};
-
-document.getElementById("btnCoachToday").onclick = () => {
-  const name = document.getElementById("coachSelect").value;
-  if (!name) { alert("Välj en coach."); return; }
-  document.getElementById("coachWeek").style.display = "none";
-  document.getElementById("coachDay").style.display = "block";
-  renderCardsGeneric(name, true, document.getElementById("coachDay"));
-};
-
 document.getElementById("btnCoachWeek").onclick = () => {
   const name = document.getElementById("coachSelect").value;
   if (!name) { alert("Välj en coach."); return; }
   document.getElementById("coachDay").style.display = "none";
   document.getElementById("coachWeek").style.display = "block";
-  renderBlocksGeneric(name, true, document.getElementById("cBlockHeader"), document.getElementById("cBlockGrid"));
+  renderBlocksGeneric(
+    name,
+    true,
+    document.getElementById("cBlockHeader"),
+    document.getElementById("cBlockGrid")
+  );
 };
 
-* UTSKRIFT */
-document.getElementById("btnPrint").onclick=()=>{
-  document.querySelectorAll('.print-scope').forEach(e=>e.classList.remove('print-visible'));
-  const sc=document.getElementById("schemaContainer");
-  const blocks=document.getElementById("blockContainer");
+/* =========================
+   UTSKRIFT – ren, stabil version
+========================= */
 
-  if(blocks.style.display==="block"){
-    blocks.classList.add("print-visible");
-  } else if(sc.style.display==="block" && sc.dataset.view==="compare"){
-    sc.classList.add("print-visible");
-  } else if(sc.style.display==="block"){
-    sc.classList.add("print-visible");
-  } else{
-    alert("Öppna ett schema först (Vecka, Dagens eller Jämförelse).");
-    return;
+/* Skapa rubrik (logga + titel + datum) om den saknas */
+if (!document.getElementById("printHeader")) {
+  const headerHTML = `
+    <div class="print-header" id="printHeader" style="display:none;">
+      <img
+        src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+        alt="Grunden DV logotyp"
+        style="height:20pt;margin-right:10px;"
+      />
+      <div>
+        <h2 id="printTitle" style="font-size:20pt;font-weight:800;margin:0;"></h2>
+        <div id="printDate" style="font-size:11pt;color:#333;"></div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML("afterbegin", headerHTML);
+}
+
+/* CSS för utskriftsrubriken */
+const printStyle = document.createElement("style");
+printStyle.textContent = `
+@media print {
+  .print-header {
+    display:flex !important;
+    align-items:flex-end;
+    gap:12px;
+    border-bottom:1px solid #ccc;
+    padding:8px 12px 12px;
+    margin-bottom:20px;
   }
 
-  setTimeout(()=>{window.print();},150);
-};
+  /* Luft mellan rubrik och schema */
+  .print-header::after {
+    content:"";
+    display:block;
+    height:16px;
+    width:100%;
+  }
 
-/* LOGGA = START */
-document.querySelector("header img").addEventListener("click",()=>showNowAndNext());
+  .print-header img { height:20pt; margin-right:10px; }
+  .print-header h2 { font-size:20pt; font-weight:800; margin:0; }
+  .print-header .date { font-size:11pt; color:#333; }
 
-/* Auto-uppdatering av Pågår nu */
-setInterval(()=>{ 
-  if(document.getElementById("nowContainer").style.display==="block") showNowAndNext();
-},60000);
+  /* Dölj allt onödigt vid utskrift */
+  header, .tab-bar, .controls, .panel, .btn, #clock, .print-buttons {
+    display:none !important;
+  }
+
+  body {
+    background:#fff;
+    color:#000;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  @page { size:A4 landscape; margin:10mm; }
+}`;
+document.head.appendChild(printStyle);
+
+/* Enkel utskriftsfunktion */
+function doPrint(titleText = "") {
+  const header = document.getElementById("printHeader");
+  header.style.display = "flex";
+
+  document.getElementById("printTitle").textContent = "Schema – " + (titleText || "");
+  document.getElementById("printDate").textContent =
+    "Utskriftsdatum: " +
+    new Date().toLocaleDateString("sv-SE", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+  // Utskriftsdialog – körs direkt på knapptryck
+  window.print();
+}
+
+/* =========================
+   START: visa Pågår nu
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof showView === "function" && typeof renderNow === "function") {
+    showView("nowView");
+    renderNow();
+  }
+});
 </script>
 </body>
 </html>
