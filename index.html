@@ -729,40 +729,45 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – STABIL OCH KORREKT VERSION
-   Skriver ut endast schemat (inte knappar)
+   UTSKRIFT – STABIL VERSION (HITTAR ALLA SCHEMAN)
 ========================= */
 function doPrint(titleText = "") {
   try {
-    // 1. Hitta aktuell vy (coach, deltagare, pågår nu eller jämförelse)
+    // 1. Hitta aktiv vy
     const views = ["participantView", "coachView", "nowView", "assistantView"];
     const visibleView = views
       .map(id => document.getElementById(id))
-      .find(v => v && v.style.display !== "none");
+      .find(v => v && v.classList.contains("active"));
 
-    // 2. Hitta själva schemadelen inom vyn
+    // 2. Hitta själva schemainnehållet
     let content = "";
     if (visibleView) {
-      const subSections = [
-        visibleView.querySelector("#pBlockGrid"),
-        visibleView.querySelector("#cBlockGrid"),
+      const possibleSections = [
+        visibleView.querySelector("#participantWeek"),
+        visibleView.querySelector("#coachWeek"),
+        visibleView.querySelector("#participantDay"),
+        visibleView.querySelector("#coachDay"),
+        visibleView.querySelector("#compareOutput"),
+        visibleView.querySelector("#nowContainer"),
         visibleView.querySelector(".block-grid"),
         visibleView.querySelector(".cards")
       ];
-      const activeSection = subSections.find(s => s && s.offsetParent !== null);
+      const activeSection = possibleSections.find(
+        s => s && getComputedStyle(s).display !== "none"
+      );
       content = activeSection ? activeSection.outerHTML : visibleView.innerHTML;
     } else {
       content = document.body.innerHTML;
     }
 
-    // 3. Skapa ett nytt, separat utskriftsfönster
+    // 3. Skapa ett nytt fönster
     const printWin = window.open("", "_blank", "width=1200,height=800");
     if (!printWin) {
       alert("Tillåt popup-fönster för att kunna skriva ut.");
       return;
     }
 
-    // 4. Formatera datum (svensk stil)
+    // 4. Sätt datum i svensk form
     const dateText = new Date().toLocaleDateString("sv-SE", {
       weekday: "long",
       year: "numeric",
@@ -770,7 +775,7 @@ function doPrint(titleText = "") {
       day: "numeric",
     });
 
-    // 5. Skriv ut HTML till nytt fönster
+    // 5. Skriv innehåll till det nya fönstret
     printWin.document.open();
     printWin.document.write(`<!DOCTYPE html>
 <html lang="sv">
@@ -839,6 +844,7 @@ document.getElementById("btnPrintCoach").onclick = () =>
   doPrint(document.getElementById("coachSelect").value || "");
 
 document.getElementById("btnPrintNow").onclick = () => doPrint("Pågår nu");
+
 document.getElementById("btnPrintCompare").onclick = () => doPrint("Jämförelse");
 
 /* =========================
