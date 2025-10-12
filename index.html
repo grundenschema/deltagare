@@ -731,10 +731,10 @@ document.getElementById("btnCoachWeek").onclick = () => {
 
 
 /* =========================
-   UTSKRIFT – minimal, stabil version
+   UTSKRIFT – säker, stabil version (alla webbläsare)
 ========================= */
 function doPrint(titleText = "") {
-  // Visa rubrik temporärt
+  // skapa rubrik tillfälligt
   let header = document.getElementById("printHeader");
   if (!header) {
     header = document.createElement("div");
@@ -747,9 +747,12 @@ function doPrint(titleText = "") {
     header.style.marginBottom = "20px";
     header.innerHTML = `
       <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-           alt="Grunden DV logotyp" style="height:20pt;margin-right:10px;">
+           alt="Grunden DV logotyp"
+           style="height:20pt;margin-right:10px;">
       <div>
-        <h2 style="font-size:20pt;font-weight:800;margin:0;">Schema – ${titleText}</h2>
+        <h2 style="font-size:20pt;font-weight:800;margin:0;">
+          Schema – ${titleText}
+        </h2>
         <div style="font-size:11pt;color:#333;">
           Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
             weekday: "long",
@@ -762,15 +765,23 @@ function doPrint(titleText = "") {
     document.body.prepend(header);
   }
 
-  // Kör utskrift (helt standard)
-  window.print();
+  // ge sidan tid att renderas innan print
+  setTimeout(() => {
+    try {
+      window.print();
+    } catch (err) {
+      alert("Utskrift kunde inte startas: " + err.message);
+    }
+  }, 300);
 
-  // Ta bort rubriken efteråt
-  setTimeout(() => header.remove(), 1000);
+  // ta bort rubriken efteråt
+  setTimeout(() => {
+    if (header && header.parentNode) header.remove();
+  }, 1500);
 }
 
 /* =========================
-   KOPPLA KNAPPAR
+   KOPPLA UTSKRIFTSKNAPPAR
 ========================= */
 document.getElementById("btnPrintParticipant").onclick = () =>
   doPrint(document.getElementById("nameSelect").value || "");
