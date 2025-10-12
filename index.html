@@ -728,124 +728,72 @@ document.getElementById("btnCoachWeek").onclick = () => {
   );
 };
 
-/* =========================
-   UTSKRIFT – STABIL VERSION (MED CSS-KOPIERING)
-========================= */
+<!-- =========================
+     UTSKRIFT – FÖRENKLAD OCH STABIL VERSION
+     (samma sida, behåller layout och färger)
+========================= -->
+<script>
 function doPrint(titleText = "") {
   try {
-    // 1. Hitta aktiv vy
-    const views = ["participantView", "coachView", "nowView", "assistantView"];
-    const visibleView = views
-      .map(id => document.getElementById(id))
-      .find(v => v && v.classList.contains("active"));
-
-    // 2. Hitta själva schemainnehållet
-    let content = "";
-    if (visibleView) {
-      const possibleSections = [
-        visibleView.querySelector("#participantWeek"),
-        visibleView.querySelector("#coachWeek"),
-        visibleView.querySelector("#participantDay"),
-        visibleView.querySelector("#coachDay"),
-        visibleView.querySelector("#compareOutput"),
-        visibleView.querySelector("#nowContainer"),
-        visibleView.querySelector(".block-grid"),
-        visibleView.querySelector(".cards")
-      ];
-      const activeSection = possibleSections.find(
-        s => s && getComputedStyle(s).display !== "none"
-      );
-      content = activeSection ? activeSection.outerHTML : visibleView.innerHTML;
-    } else {
-      content = document.body.innerHTML;
-    }
-
-    // 3. Skapa ett nytt fönster
-    const printWin = window.open("", "_blank", "width=1200,height=800");
-    if (!printWin) {
-      alert("Tillåt popup-fönster för att kunna skriva ut.");
+    // Hitta vilken vy som är aktiv (deltagare, coach, pågår nu, assistent)
+    const visibleView = document.querySelector(".view.active");
+    if (!visibleView) {
+      alert("Ingen aktiv vy att skriva ut.");
       return;
     }
 
-    // 4. Kopiera CSS från huvudfönstret
-    const styles = Array.from(document.styleSheets)
-      .map(sheet => {
-        try {
-          return Array.from(sheet.cssRules)
-            .map(rule => rule.cssText)
-            .join("\n");
-        } catch {
-          return "";
-        }
-      })
-      .join("\n");
+    // Hitta själva schemat (kort eller block)
+    const printTarget =
+      visibleView.querySelector(".print-scope") ||
+      visibleView.querySelector(".cards") ||
+      visibleView.querySelector(".block-grid");
 
-    // 5. Formatera datum (svensk stil)
-    const dateText = new Date().toLocaleDateString("sv-SE", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-    // 6. Skriv HTML till nytt fönster
-    printWin.document.open();
-    printWin.document.write(`<!DOCTYPE html>
-<html lang="sv">
-<head>
-  <meta charset="UTF-8">
-  <title>Schema – ${titleText}</title>
-  <style>
-    ${styles}
-
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      margin: 15mm;
-      background: #fff;
-      color: #000;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+    if (!printTarget) {
+      alert("Inget schema att skriva ut.");
+      return;
     }
-    .header {
-      display: flex;
-      align-items: flex-end;
-      gap: 12px;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
-      margin-bottom: 18px;
-    }
-    .header img { height: 20pt; margin-right: 10px; }
-    .header h2 { font-size: 20pt; font-weight: 800; margin: 0; }
-    .header .date { font-size: 11pt; color: #333; }
-    @page { size: A4 landscape; margin: 10mm; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-         alt="Grunden DV logotyp">
-    <div>
-      <h2>Schema – ${titleText}</h2>
-      <div class="date">Utskriftsdatum: ${dateText}</div>
-    </div>
-  </div>
-  ${content}
-  <script>
-    window.onload = function() {
-      window.focus();
-      setTimeout(function() {
-        window.print();
-        window.close();
-      }, 400);
-    };
-  <\/script>
-</body>
-</html>`);
-    printWin.document.close();
 
+    // Skapa rubrik med logga och datum
+    const headerHTML = `
+      <div class="print-header" style="
+        display:flex;justify-content:space-between;align-items:center;
+        border-bottom:1px solid #ccc;padding:8px 12px;margin-bottom:14px;">
+        <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" 
+             alt="Grunden DV logotyp" style="height:28px;">
+        <div style="text-align:right">
+          <h2 style="font-size:18pt;font-weight:800;margin:0;">
+            Schema – ${titleText || "Grunden DV"}
+          </h2>
+          <div style="font-size:10pt;color:#333;">
+            Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Markera vilken del som ska skrivas ut
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("print-visible"));
+    printTarget.classList.add("print-visible");
+
+    // Lägg till rubrik (tas bort efter utskrift)
+    const tempHeader = document.createElement("div");
+    tempHeader.innerHTML = headerHTML;
+    printTarget.prepend(tempHeader);
+
+    // Vänta lite så layouten hinner ritas upp
+    setTimeout(() => {
+      window.print();
+      printTarget.classList.remove("print-visible");
+      tempHeader.remove();
+    }, 500);
   } catch (err) {
     console.error("Fel vid utskrift:", err);
-    alert("Ett fel uppstod vid utskrift. Se konsolen för detaljer.");
+    alert("Ett fel uppstod vid utskrift.");
   }
 }
 
@@ -873,4 +821,3 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
-
