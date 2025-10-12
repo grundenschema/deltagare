@@ -774,53 +774,6 @@ document.getElementById("btnCoachWeek").onclick=()=>{
 };
 
 /* =========================
-   UTSKRIFT – endast aktivt schema
-========================= */
-
-// Skapar en snygg utskriftsrubrik med logga och datum
-function preparePrintHeader(titleText) {
-  let hdr = document.querySelector(".print-header");
-  if (!hdr) {
-    hdr = document.createElement("div");
-    hdr.className = "print-header";
-    hdr.innerHTML = `
-      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-           alt="Grunden DV logotyp" style="height:28px;">
-      <h2>${titleText || "Schema"}</h2>
-      <div class="date">${new Date().toLocaleDateString("sv-SE", {
-        weekday:"long", year:"numeric", month:"long", day:"numeric"
-      })}</div>`;
-    document.body.prepend(hdr);
-  } else {
-    hdr.querySelector("h2").textContent = titleText || "Schema";
-    hdr.querySelector(".date").textContent = new Date().toLocaleDateString("sv-SE", {
-      weekday:"long", year:"numeric", month:"long", day:"numeric"
-    });
-  }
-}
-
-/* =========================
-   UTSKRIFT – bara skriv ut aktiv vy
-========================= */
-function printSchema(title){
-  const hdr = document.querySelector(".print-header") || document.createElement("div");
-  hdr.className = "print-header";
-  hdr.innerHTML = `
-    <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="logga">
-    <h2>${title || "Schema"}</h2>
-    <div class="date">${new Date().toLocaleDateString("sv-SE",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>`;
-  document.body.prepend(hdr);
-  window.print();
-}
-
-// Knappar kopplade till utskrift
-document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤 Deltagarschema");
-document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
-document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
-document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelse");
-
-<script>
-/* =========================
    UTSKRIFT – säker version
 ========================= */
 function printSchema(title){
@@ -830,7 +783,8 @@ function printSchema(title){
     hdr = document.createElement("div");
     hdr.className = "print-header";
     hdr.innerHTML = `
-      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="logga" style="height:28px;">
+      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" 
+           alt="logga" style="height:28px;">
       <h2>${title || "Schema"}</h2>
       <div class="date">${new Date().toLocaleDateString("sv-SE",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>`;
     document.body.prepend(hdr);
@@ -843,6 +797,30 @@ document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤
 document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
 document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
 document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelse");
+
+/* =========================
+   UTSKRIFTS-CSS – tvingar visning av allt
+========================= */
+const style = document.createElement("style");
+style.textContent = `
+@media print {
+  header, .tab-bar, button { display:none !important; }
+  body {
+    background:#fff !important;
+    color:#000 !important;
+    font-size:10pt !important;
+    margin:0 !important;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+  }
+  .view, .cards, .block-grid, .block-header, .print-scope {
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+  }
+  @page { size:A4 landscape; margin:10mm; }
+}`;
+document.head.appendChild(style);
 
 /* =========================
    START: visa Pågår nu
