@@ -729,7 +729,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – STABIL VERSION (HITTAR ALLA SCHEMAN)
+   UTSKRIFT – STABIL VERSION (MED CSS-KOPIERING)
 ========================= */
 function doPrint(titleText = "") {
   try {
@@ -767,7 +767,20 @@ function doPrint(titleText = "") {
       return;
     }
 
-    // 4. Sätt datum i svensk form
+    // 4. Kopiera CSS från huvudfönstret
+    const styles = Array.from(document.styleSheets)
+      .map(sheet => {
+        try {
+          return Array.from(sheet.cssRules)
+            .map(rule => rule.cssText)
+            .join("\n");
+        } catch {
+          return "";
+        }
+      })
+      .join("\n");
+
+    // 5. Formatera datum (svensk stil)
     const dateText = new Date().toLocaleDateString("sv-SE", {
       weekday: "long",
       year: "numeric",
@@ -775,7 +788,7 @@ function doPrint(titleText = "") {
       day: "numeric",
     });
 
-    // 5. Skriv innehåll till det nya fönstret
+    // 6. Skriv HTML till nytt fönster
     printWin.document.open();
     printWin.document.write(`<!DOCTYPE html>
 <html lang="sv">
@@ -783,6 +796,8 @@ function doPrint(titleText = "") {
   <meta charset="UTF-8">
   <title>Schema – ${titleText}</title>
   <style>
+    ${styles}
+
     body {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       margin: 15mm;
@@ -821,7 +836,7 @@ function doPrint(titleText = "") {
       setTimeout(function() {
         window.print();
         window.close();
-      }, 300);
+      }, 400);
     };
   <\/script>
 </body>
@@ -844,7 +859,6 @@ document.getElementById("btnPrintCoach").onclick = () =>
   doPrint(document.getElementById("coachSelect").value || "");
 
 document.getElementById("btnPrintNow").onclick = () => doPrint("Pågår nu");
-
 document.getElementById("btnPrintCompare").onclick = () => doPrint("Jämförelse");
 
 /* =========================
@@ -859,3 +873,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
