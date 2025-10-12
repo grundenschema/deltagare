@@ -241,9 +241,6 @@ select, .btn {
   body { padding:10px; }
   select, .btn { width:100%; }
 }
-/* =========================
-   Utskrift – skriv bara ut aktivt schema
-========================= */
 @media print {
   /* Dölj navigering, knappar, flikar och header */
   header, .tab-bar, button.btn, .controls {
@@ -263,58 +260,50 @@ select, .btn {
     height: auto !important;
   }
 
-  /* Visa allt innehåll i block och kort */
-  .block, .card, .compare-item {
-    position: static !important;
-    overflow: visible !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* 🔧 Tillåt blockceller att växa och minska */
-  .block-cell {
-    height: auto !important;
-    min-height: 20px !important;
-    overflow: visible !important;
-  }
-
-  /* 💡 Komprimera layouten vid utskrift */
-  .block {
-    font-size: 0.75rem !important;
-    line-height: 1.1 !important;
-    padding: 3px 5px !important;
-  }
-
-  /* 🕒 Gör halvtimmar hälften så höga som timmar */
-  .block-grid {
-    grid-auto-rows: 20px !important; /* varje rad = halvtimme */
-  }
-
-  .block-time {
-    font-size: 0.65rem !important;
-    padding: 1px 4px !important;
-  }
-
-  /* Behåll färger och layout */
+  /* Fyll ut sidan bättre */
   body {
-    transform: scale(0.9);
-    transform-origin: top left;
     background: #fff !important;
     color: #000 !important;
     font-size: 10pt;
     margin: 0;
+    padding: 0;
+    width: 100%;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* A4 liggande */
+  /* Block och kort fyller hela bredden */
+  .cards, .block-grid, .compare-wrap {
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  /* Block ska inte komprimeras för mycket */
+  .block {
+    font-size: 0.8rem !important;
+    line-height: 1.2 !important;
+    padding: 5px 6px !important;
+    overflow: visible !important;
+  }
+
+  .block-time {
+    font-size: 0.75rem !important;
+    padding: 2px 4px !important;
+  }
+
+  /* Se till att rutnätet fyller bredden på A4 */
+  .block-header,
+  .block-grid {
+    grid-template-columns: 70px repeat(5, 1fr) !important;
+  }
+
+  /* Liggande A4 och mindre marginaler */
   @page {
     size: A4 landscape;
-    margin: 10mm;
+    margin: 6mm;
   }
 }
+
 
 </style>
 </head>
