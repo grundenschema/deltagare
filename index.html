@@ -730,7 +730,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 
 /* =========================
    UTSKRIFT – STABIL, SÄKER VERSION
-   Skriver ut endast schemat, utan knappar
+   Skriver ut endast schemat (inte knappar)
 ========================= */
 function doPrint(titleText = "") {
   try {
@@ -829,3 +829,29 @@ function doPrint(titleText = "") {
     alert("Ett fel uppstod vid utskrift. Se konsolen för detaljer.");
   }
 }
+
+/* =========================
+   KOPPLA UTSKRIFTSKNAPPAR
+========================= */
+document.getElementById("btnPrintParticipant").onclick = () =>
+  doPrint(document.getElementById("nameSelect").value || "");
+
+document.getElementById("btnPrintCoach").onclick = () =>
+  doPrint(document.getElementById("coachSelect").value || "");
+
+document.getElementById("btnPrintNow").onclick = () => doPrint("Pågår nu");
+document.getElementById("btnPrintCompare").onclick = () => doPrint("Jämförelse");
+
+/* =========================
+   START: visa Pågår nu
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof showView === "function" && typeof renderNow === "function") {
+    showView("nowView");
+    renderNow();
+  }
+});
+</script>
+</body>
+</html>
+
