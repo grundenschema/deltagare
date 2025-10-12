@@ -779,20 +779,52 @@ function preparePrintHeader(titleText) {
   }
 }
 
-// Startar utskrift med fördröjning för att DOM ska hinna uppdateras
-function printSchema(title) {
-  preparePrintHeader(title);
-  setTimeout(() => window.print(), 300);
+/* =========================
+   UTSKRIFT – endast aktivt schema
+========================= */
+
+// Skapa rubrik med logga och datum
+function preparePrintHeader(titleText) {
+  let hdr = document.querySelector(".print-header");
+  if (!hdr) {
+    hdr = document.createElement("div");
+    hdr.className = "print-header";
+    hdr.innerHTML = `
+      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+           alt="Grunden DV logotyp" style="height:28px;">
+      <h2>${titleText || "Schema"}</h2>
+      <div class="date"></div>`;
+    document.body.prepend(hdr);
+  }
+  hdr.querySelector(".date").textContent = new Date().toLocaleDateString("sv-SE", {
+    weekday:"long", year:"numeric", month:"long", day:"numeric"
+  });
+  hdr.querySelector("h2").textContent = titleText || "Schema";
 }
 
-// Knappar kopplade till respektive vy
+// Hitta aktiv vy och markera för utskrift
+function printSchema(title) {
+  preparePrintHeader(title);
+  document.querySelectorAll('.print-scope').forEach(e=>e.classList.remove('print-visible'));
+  const activeView = document.querySelector('.view.active');
+  if (activeView) {
+    activeView.querySelectorAll('.print-scope').forEach(el=>{
+      if (el.offsetParent !== null) el.classList.add('print-visible');
+    });
+  }
+  setTimeout(()=>window.print(),300);
+  setTimeout(()=>document.querySelectorAll('.print-visible')
+    .forEach(e=>e.classList.remove('print-visible')),2000);
+}
+
+// Knappar
 document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤 Deltagarschema");
 document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
 document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
-document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelse");
+document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelsescheman");
 
-// CSS-förslag för .print-header (lägg i <style>-delen)
-const style = document.createElement('style');
+/* Extra CSS för rubrik */
+const style = document.createElement("style");
 style.textContent = `
 @media print {
   .print-header {
@@ -808,7 +840,6 @@ style.textContent = `
     font-size:18pt;
     font-weight:800;
     margin:0;
-    letter-spacing:0.3px;
   }
   .print-header .date {
     font-size:10pt;
