@@ -756,33 +756,66 @@ document.getElementById("btnCoachWeek").onclick=()=>{
 /* =========================
    UTSKRIFT – endast aktivt schema
 ========================= */
-function printScopeWithin(viewId){
-  document.querySelectorAll('.print-scope').forEach(e=>e.classList.remove('print-visible'));
 
-  const view = document.getElementById(viewId);
-  if (!view) {
-    window.print();
-    return;
+// Skapar en snygg utskriftsrubrik med logga och datum
+function preparePrintHeader(titleText) {
+  let hdr = document.querySelector(".print-header");
+  if (!hdr) {
+    hdr = document.createElement("div");
+    hdr.className = "print-header";
+    hdr.innerHTML = `
+      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+           alt="Grunden DV logotyp" style="height:28px;">
+      <h2>${titleText || "Schema"}</h2>
+      <div class="date">${new Date().toLocaleDateString("sv-SE", {
+        weekday:"long", year:"numeric", month:"long", day:"numeric"
+      })}</div>`;
+    document.body.prepend(hdr);
+  } else {
+    hdr.querySelector("h2").textContent = titleText || "Schema";
+    hdr.querySelector(".date").textContent = new Date().toLocaleDateString("sv-SE", {
+      weekday:"long", year:"numeric", month:"long", day:"numeric"
+    });
   }
-
-  const visibleScopes = [...view.querySelectorAll('.print-scope')].filter(el => el.offsetParent !== null);
-
-  if (visibleScopes.length === 0) {
-    alert("Inget schema att skriva ut – visa ett schema först!");
-    return;
-  }
-
-  visibleScopes.forEach(el => el.classList.add('print-visible'));
-  setTimeout(() => window.print(), 300);
-  setTimeout(() => {
-    document.querySelectorAll('.print-visible').forEach(e => e.classList.remove('print-visible'));
-  }, 2000);
 }
 
-document.getElementById("btnPrintParticipant").onclick = () => printScopeWithin("participantView");
-document.getElementById("btnPrintCoach").onclick = () => printScopeWithin("coachView");
-document.getElementById("btnPrintNow").onclick = () => printScopeWithin("nowView");
-document.getElementById("btnPrintCompare").onclick = () => printScopeWithin("assistantView");
+// Startar utskrift med fördröjning för att DOM ska hinna uppdateras
+function printSchema(title) {
+  preparePrintHeader(title);
+  setTimeout(() => window.print(), 300);
+}
+
+// Knappar kopplade till respektive vy
+document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤 Deltagarschema");
+document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
+document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
+document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelse");
+
+// CSS-förslag för .print-header (lägg i <style>-delen)
+const style = document.createElement('style');
+style.textContent = `
+@media print {
+  .print-header {
+    display:flex !important;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #ccc;
+    padding:8px 12px 6px;
+    margin-bottom:14px;
+  }
+  .print-header img { height:28px; }
+  .print-header h2 {
+    font-size:18pt;
+    font-weight:800;
+    margin:0;
+    letter-spacing:0.3px;
+  }
+  .print-header .date {
+    font-size:10pt;
+    color:#333;
+  }
+}`;
+document.head.appendChild(style);
 
 /* =========================
    START: visa Pågår nu
@@ -794,3 +827,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
