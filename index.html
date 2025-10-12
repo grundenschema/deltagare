@@ -753,7 +753,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – 100 % STABIL, WEBBLÄSAROBEROENDE
+   UTSKRIFT – robust och beprövad version
 ========================= */
 
 /* --- Skapa rubrik (logga + titel + datum) --- */
@@ -803,8 +803,8 @@ printStyle.textContent = `
   }
 
   body {
-    background:#fff !important;
-    color:#000 !important;
+    background:#fff;
+    color:#000;
     -webkit-print-color-adjust:exact !important;
     print-color-adjust:exact !important;
   }
@@ -815,8 +815,8 @@ printStyle.textContent = `
     print-color-adjust: exact !important;
   }
 
-  /* Dölj allt onödigt UI vid utskrift */
-  header, .tab-bar, .controls, .panel, #clock, #viewTitle, .btn {
+  /* Dölj knappar, menyer osv. */
+  button, .controls, .tab-bar, header {
     display:none !important;
   }
 
@@ -827,10 +827,10 @@ printStyle.textContent = `
 }`;
 document.head.appendChild(printStyle);
 
-/* --- Utskriftsfunktion (100 %-säker version) --- */
+/* --- Utskriftsfunktion --- */
 function doPrint(titleText = "") {
   const header = document.getElementById("printHeader");
-  if (header) header.style.display = "flex";
+  header.style.display = "flex";
 
   document.getElementById("printTitle").textContent = "Schema – " + (titleText || "");
   document.getElementById("printDate").textContent =
@@ -842,47 +842,37 @@ function doPrint(titleText = "") {
       day: "numeric",
     });
 
-  // vänta tills sidan är 100 % renderad
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      window.scrollTo(0, 0); // säkerställ att rubrik/logga syns
-      window.print();
-      setTimeout(() => {
-        if (header) header.style.display = "none";
-      }, 400);
-    }, 400);
-  });
+  // Kör utskrift – direkt och synligt
+  window.scrollTo(0, 0);
+  window.print();
 }
 
 /* =========================
    KOPPLA UTSKRIFTSKNAPPAR
 ========================= */
-document.getElementById("btnPrintParticipant").onclick = () => {
-  const name = document.getElementById("nameSelect").value || "";
-  doPrint(name);
-};
-
-document.getElementById("btnPrintCoach").onclick = () => {
-  const name = document.getElementById("coachSelect").value || "";
-  doPrint(name);
-};
-
-document.getElementById("btnPrintNow").onclick = () => {
-  doPrint("Pågår nu");
-};
-
-document.getElementById("btnPrintCompare").onclick = () => {
-  doPrint("Jämförelse");
-};
+document.addEventListener("click", (ev) => {
+  if (ev.target.matches("#btnPrintParticipant")) {
+    const name = document.getElementById("nameSelect")?.value || "";
+    doPrint(name);
+  }
+  if (ev.target.matches("#btnPrintCoach")) {
+    const name = document.getElementById("coachSelect")?.value || "";
+    doPrint(name);
+  }
+  if (ev.target.matches("#btnPrintNow")) doPrint("Pågår nu");
+  if (ev.target.matches("#btnPrintCompare")) doPrint("Jämförelse");
+});
 
 /* =========================
    START: visa Pågår nu
 ========================= */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
   if (typeof showView === "function" && typeof renderNow === "function") {
     showView("nowView");
     renderNow();
   }
+  console.log("✅ Scriptet kördes hela vägen till slutet");
+  alert("Test: scriptet är aktivt och kan skriva ut");
 });
 </script>
 </body>
