@@ -1099,28 +1099,29 @@ window.addEventListener("load", () => {
 });
 
 
-/* =====================================================
-   FÖRBERED UTSKRIFTSRUBRIK
-   ===================================================== */
 function preparePrintHeader(titleText, personName) {
-  // Ta bort eventuell gammal rubrik
-  document.querySelector(".print-header")?.remove();
+  document.querySelector(".print-header")?.remove(); // ta bort gammal rubrik
 
-  // Skapa ny rubrik
   const hdr = document.createElement("div");
   hdr.className = "print-header";
-  hdr.innerHTML = `
-    <h2>Schema – ${personName || titleText || "Okänd"}</h2>
-    <div class="date">
-      Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      })}
-    </div>`;
+
+  const now = new Date();
+  const datum = now.toLocaleDateString("sv-SE", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+
+  // Beräkna veckonummer (ISO-standard)
+  const tmp = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const dayNum = tmp.getUTCDay() || 7;
+  tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+  const vecka = Math.ceil((((tmp - yearStart) / 86400000) + 1) / 7);
+
+  hdr.textContent = `Schema – ${personName || titleText || "Okänd"} – Vecka ${vecka} – ${datum}`;
   document.body.prepend(hdr);
 }
-
 
 /* =====================================================
    UTFÖR UTSKRIFT
