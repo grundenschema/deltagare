@@ -241,11 +241,20 @@ select, .btn {
   body { padding:10px; }
   select, .btn { width:100%; }
 }
+
+/* =========================
+   Utskrift – optimerad layout
+========================= */
 @media print {
   /* Dölj navigering, knappar, flikar och header */
   header, .tab-bar, button.btn, .controls {
     display: none !important;
     visibility: hidden !important;
+  }
+
+  /* Dölj gamla vy-rubriken (Coachschema/Deltagarschema osv.) */
+  #viewTitle {
+    display: none !important;
   }
 
   /* Visa endast aktiv vy – hela innehållet */
@@ -260,7 +269,21 @@ select, .btn {
     height: auto !important;
   }
 
-  /* Fyll ut sidan bättre */
+  /* Ny rubrik överst på sidan */
+  .print-header {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .print-header h2 {
+    font-size: 1.4rem;
+    margin: 0;
+  }
+  .print-header .date {
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  /* Grundlayout för utskrift */
   body {
     background: #fff !important;
     color: #000 !important;
@@ -297,12 +320,19 @@ select, .btn {
     grid-template-columns: 70px repeat(5, 1fr) !important;
   }
 
-  /* Liggande A4 och mindre marginaler */
+  /* Fyll hela sidans höjd mellan 08:00–16:30 */
+  .block-grid {
+    height: 100vh !important;                   /* fyller hela utskriftsytan */
+    grid-auto-rows: calc(100vh / 18) !important; /* 17 halvtimmar + buffert */
+  }
+
+  /* Liggande A4 och små marginaler */
   @page {
     size: A4 landscape;
     margin: 6mm;
   }
 }
+
 
 
 </style>
