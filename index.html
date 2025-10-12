@@ -752,19 +752,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
   renderBlocksGeneric(name, true, document.getElementById("cBlockHeader"), document.getElementById("cBlockGrid"));
 };
 
-/* =========================
-   UTSKRIFTSKNAPPAR (läggs till i HTML)
-========================= */
-const printButtonsHTML = `
-<div class="print-buttons" style="margin:16px 0;">
-  <button onclick="doPrint(document.getElementById('nameSelect').value)">🧍 Deltagarschema</button>
-  <button onclick="doPrint(document.getElementById('coachSelect').value)">🧑‍🏫 Coachschema</button>
-  <button onclick="doPrint('Pågår nu')">🕒 Pågår nu</button>
-  <button onclick="doPrint('Jämförelse')">⚖️ Jämförelse</button>
-</div>`;
-document.body.insertAdjacentHTML("beforeend", printButtonsHTML);
-
-/* UTSKRIFT */
+* UTSKRIFT */
 document.getElementById("btnPrint").onclick=()=>{
   document.querySelectorAll('.print-scope').forEach(e=>e.classList.remove('print-visible'));
   const sc=document.getElementById("schemaContainer");
