@@ -134,18 +134,38 @@ select, .btn{
 .view.active{ display:block; }
 #viewTitle{ text-align:center; margin:10px 0 8px; font-weight:800; }
 
-/* Print – proffsig utskrift av just schemat */
-@media print{
-  body{ background:#fff; color:#000; font-size:9pt; margin:0; }
-  header, .tab-bar, .controls, .panel, .dropdown-content { display:none !important; }
-  /* Dölj alla vyer som standard */
-  .view{ display:none !important; visibility:hidden !important; }
-  /* Visa exakt den vy vi valt att skriva ut */
-  .print-visible{ display:block !important; visibility:visible !important; position:relative !important; }
-  .card, .compare-item{ break-inside:avoid; page-break-inside:avoid; }
-  .block{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  @page{ size:A4 landscape; margin:8mm; }
+/* =========================
+   UTSKRIFT – ny version
+========================= */
+@media print {
+  header, .tab-bar, .controls, button { display:none !important; }
+  body {
+    background:#fff;
+    color:#000;
+    font-size:10pt;
+    margin:0;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .view { display:block !important; visibility:visible !important; }
+  .print-header {
+    display:flex !important;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #ccc;
+    padding:8px 12px 6px;
+    margin-bottom:14px;
+  }
+  .print-header img { height:28px; }
+  .print-header h2 {
+    font-size:18pt;
+    font-weight:800;
+    margin:0;
+  }
+  .print-header .date { font-size:10pt; color:#333; }
+  @page { size:A4 landscape; margin:10mm; }
 }
+
 
 /* Små skärmar – lite större klickytor */
 @media (max-width:700px){
@@ -784,7 +804,6 @@ function preparePrintHeader(titleText) {
 ========================= */
 
 function preparePrintHeader(titleText) {
-  // Skapa rubrik högst upp
   let hdr = document.querySelector(".print-header");
   if (!hdr) {
     hdr = document.createElement("div");
@@ -803,53 +822,18 @@ function preparePrintHeader(titleText) {
 }
 
 function printSchema(title) {
-  // Visa rubriken
   preparePrintHeader(title);
-
-  // Visa aktuell vy i utskriften
+  // Visa endast aktuell vy
   const allViews = document.querySelectorAll('.view');
   allViews.forEach(v => v.style.display = "none");
-  const activeView = document.querySelector('.view.active');
-  if (activeView) activeView.style.display = "block";
-
-  // Tillåt färger, emojis etc
-  const style = document.createElement('style');
-  style.textContent = `
-    @media print {
-      header, .tab-bar, .controls, button { display:none !important; }
-      .print-header {
-        display:flex !important;
-        justify-content:space-between;
-        align-items:center;
-        border-bottom:1px solid #ccc;
-        padding:8px 12px 6px;
-        margin-bottom:14px;
-      }
-      .print-header img { height:28px; }
-      .print-header h2 {
-        font-size:18pt;
-        font-weight:800;
-        margin:0;
-      }
-      .print-header .date { font-size:10pt; color:#333; }
-      body {
-        background:#fff;
-        color:#000;
-        font-size:10pt;
-        -webkit-print-color-adjust:exact;
-        print-color-adjust:exact;
-      }
-      @page { size:A4 landscape; margin:10mm; }
-    }`;
-  document.head.appendChild(style);
+  const active = document.querySelector('.view.active');
+  if (active) active.style.display = "block";
 
   // Starta utskrift
-  setTimeout(() => window.print(), 400);
+  setTimeout(() => window.print(), 300);
 
-  // Återställ vyn efteråt
-  setTimeout(() => {
-    allViews.forEach(v => v.style.display = "");
-  }, 2000);
+  // Återställ vyer efteråt
+  setTimeout(() => allViews.forEach(v => v.style.display = ""), 2000);
 }
 
 // Knappar
