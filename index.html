@@ -736,12 +736,12 @@ document.getElementById("btnParticipantWeek").onclick=()=>{
   renderBlocksGeneric(name,false,document.getElementById("pBlockHeader"),document.getElementById("pBlockGrid"));
 };
 
-document.getElementById("btnCoachToday").onclick=()=>{
-  const name=document.getElementById("coachSelect").value;
-  if(!name){ alert("Välj en coach."); return; }
-  document.getElementById("coachWeek").style.display="none";
-  document.getElementById("coachDay").style.display="block";
-  renderCardsGeneric(name,true,document.getElementById("coachDay"));
+document.getElementById("btnCoachToday").onclick = () => {
+  const name = document.getElementById("coachSelect").value;
+  if (!name) { alert("Välj en coach."); return; }
+  document.getElementById("coachWeek").style.display = "none";
+  document.getElementById("coachDay").style.display = "block";
+  renderCardsGeneric(name, true, document.getElementById("coachDay"));
 };
 
 document.getElementById("btnCoachWeek").onclick = () => {
@@ -753,44 +753,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – aktivt schema + rubrik för blockschema
-========================= */
-
-// skapa rubrik (endast en gång)
-if (!document.getElementById("printHeader")) {
-  const headerHTML = `
-  <div class="print-header" id="printHeader" style="display:none;">
-    <img
-      src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-      alt="Grunden DV logotyp"
-      style="height:20pt; margin-right:10px;"
-    />
-    <div>
-      <h2 id="printTitle" style="font-size:20pt; font-weight:800; margin:0;"></h2>
-      <div id="printDate" style="font-size:11pt; color:#333;"></div>
-    </div>
-  </div>`;
-  document.body.insertAdjacentHTML("afterbegin", headerHTML);
-}
-
-// CSS för utskriftsrubriken
-const style = document.createElement("style");
-style.textContent = `
-@media print {
-  .print-header {
-    display: flex !important;
-    align-items: flex-end;
-    gap: 12px;
-    border-bottom: 1px solid #ccc;
-    padding: 8px 12px 12px;
-    margin-bottom: 20px;
-  }
-}
-`;
-document.head.appendChild(style);
-
-/* =========================
-   UTSKRIFT – komplett och stabil version
+   UTSKRIFT – stabil, färdig version
 ========================= */
 
 // skapa rubrik (endast en gång)
@@ -811,8 +774,8 @@ if (!document.getElementById("printHeader")) {
 }
 
 // CSS för rubriken vid utskrift
-const style = document.createElement("style");
-style.textContent = `
+const printStyle = document.createElement("style");
+printStyle.textContent = `
 @media print {
   .print-header {
     display: flex !important;
@@ -822,9 +785,19 @@ style.textContent = `
     padding: 8px 12px 12px;
     margin-bottom: 20px;
   }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .view, .cards, .block-grid, .block-header {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 `;
-document.head.appendChild(style);
+document.head.appendChild(printStyle);
 
 /* =========================
    PRINTFUNKTION – robust för alla vyer
@@ -840,14 +813,13 @@ function printScopeWithin(viewId) {
   }
 
   // hitta det schema som faktiskt visas
-  let visible = null;
   const scopes = [...view.querySelectorAll(".print-scope")];
-  visible = scopes.find(el => {
+  const visible = scopes.find(el => {
     const s = getComputedStyle(el);
     return s.display !== "none" && s.visibility !== "hidden";
   }) || scopes[0];
 
-  // rubrik och datum
+  // sätt rubrik och datum
   const showHeader = (viewId === "participantView" || viewId === "coachView");
   const name =
     viewId === "participantView"
@@ -874,7 +846,7 @@ function printScopeWithin(viewId) {
   // markera synlig del
   if (visible) visible.classList.add("print-visible");
 
-  // vänta lite för att rubrik + layout ska ritas ut
+  // vänta så layout hinner ritas ut
   setTimeout(() => {
     window.print();
     document.getElementById("printHeader").style.display = "none";
@@ -883,7 +855,7 @@ function printScopeWithin(viewId) {
 }
 
 /* =========================
-   KOPPLING TILL KNAPPAR
+   KOPPLA KNAPPAR
 ========================= */
 document.getElementById("btnPrintParticipant").onclick = () => printScopeWithin("participantView");
 document.getElementById("btnPrintCoach").onclick = () => printScopeWithin("coachView");
