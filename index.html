@@ -382,3 +382,132 @@ window.addEventListener("load",()=>{
 </script>
 </body>
 </html>
+<script>
+/* =========================
+   Utskriftsrubrik
+========================= */
+function preparePrintHeader(titleText, personName) {
+  document.querySelector(".print-header")?.remove();
+  const hdr = document.createElement("div");
+  hdr.className = "print-header";
+  const datum = new Date().toLocaleDateString("sv-SE", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+  hdr.innerHTML = `<h2>Schema – ${personName || titleText || "Okänd"} – ${datum}</h2>`;
+  document.body.prepend(hdr);
+}
+
+/* =========================
+   Utskriftsfunktion
+========================= */
+function printSchema(title, personName) {
+  preparePrintHeader(title, personName);
+  const activeView = document.querySelector(".view.active");
+  if (activeView) activeView.classList.add("print-visible");
+  setTimeout(() => window.print(), 300);
+  setTimeout(() => {
+    document.querySelectorAll(".print-visible").forEach(el => el.classList.remove("print-visible"));
+    document.querySelector(".print-header")?.remove();
+  }, 1500);
+}
+
+/* =========================
+   Blockrendering (för utskrift & vy)
+========================= */
+function makeSlots() {
+  const a = [];
+  for (let h = 8; h <= 16; h++) {
+    a.push(`${String(h).padStart(2, "0")}:00`, `${String(h).padStart(2, "0")}:30`);
+  }
+  a.push("16:30");
+  return a;
+}
+
+function renderBlocksGeneric(name, isCoach, headerEl, gridEl) {
+  const slots = makeSlots();
+  const days = ["måndag", "tisdag", "onsdag", "torsdag", "fredag"];
+  const field = isCoach ? "Coach" : "Deltagare";
+  const rows = DATA.filter(r => {
+    const list = splitNames(r[field] || "");
+    return (list.map(x => x.toLowerCase()).includes(name.toLowerCase())) ||
+      (r[field] || "").trim().toLowerCase() === "alla";
+  });
+
+  // Rubriker
+  headerEl.innerHTML = "<div>Tid</div>" + days.map(d => `<div>${d}</div>`).join("");
+  gridEl.innerHTML = "";
+  gridEl.style.gridTemplateColumns = `80px repeat(${days.length},1fr)`;
+
+  // Tidsrader
+  slots.forEach(t => {
+    gridEl.innerHTML += `<div class='block-time'>${t}</div>` +
+      days.map(() => `<div class='block-cell'></div>`).join("");
+  });
+
+  const cells = [...gridEl.children];
+
+  // Fyll block
+  rows.forEach(r => {
+    const d = new Date(r.Datum);
+    let wd = d.getDay();
+    if (wd === 0 || wd === 6) return;
+    const col = (wd - 1) + 1;
+    const sIdx = slots.indexOf(r.Start),
+      eIdx = slots.indexOf(r.Slut);
+    if (sIdx < 0 || eIdx <= sIdx) return;
+
+    const firstCellIndex = sIdx * (1 + days.length) + col;
+    const firstCell = cells[firstCellIndex];
+    const block = document.createElement("div");
+    block.className = "block";
+    block.style.background = colorFor(r);
+
+    const [sh, sm] = (r.Start || "00:00").split(":").map(Number);
+    const [eh, em] = (r.Slut || "00:00").split(":").map(Number);
+    const duration = (eh * 60 + em) - (sh * 60 + sm);
+
+    // Textinnehåll
+    block.innerHTML = `${emojiFor(r)} ${r.Aktivitet || ""}<br>${isCoach ? "👥 " + (r.Deltagare || "-") : "🧑‍🏫 " + (r.Coach || "-")}`;
+
+    // Blockhöjd
+    requestAnimationFrame(() => {
+      const rowH = 24; // matchar .block-grid radhöjd (30 min)
+      const total = (duration / 30) * rowH;
+      block.style.height = total + "px";
+    });
+
+    firstCell.appendChild(block);
+  });
+}
+
+/* =========================
+   Aktivera utskrift på knappar
+========================= */
+window.addEventListener("load", () => {
+  const buttons = {
+    btnPrintParticipant: "Deltagarschema",
+    btnPrintCoach: "Coachschema",
+    btnPrintNow: "Pågår nu",
+    btnPrintCompare: "Jämförelse"
+  };
+
+  Object.entries(buttons).forEach(([id, title]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("click", () => {
+        let personName = "";
+        const activeView = document.querySelector(".view.active");
+        if (activeView?.id === "participantView")
+          personName = document.getElementById("nameSelect")?.value || "";
+        else if (activeView?.id === "coachView")
+          personName = document.getElementById("coachSelect")?.value || "";
+        printSchema(title, personName);
+      });
+    }
+  });
+});
+</script>
+</body>
+</html>
