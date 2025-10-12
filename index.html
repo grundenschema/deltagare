@@ -783,8 +783,8 @@ function preparePrintHeader(titleText) {
    UTSKRIFT – endast aktivt schema
 ========================= */
 
-// Skapa rubrik med logga och datum
 function preparePrintHeader(titleText) {
+  // Skapa rubrik högst upp
   let hdr = document.querySelector(".print-header");
   if (!hdr) {
     hdr = document.createElement("div");
@@ -796,25 +796,60 @@ function preparePrintHeader(titleText) {
       <div class="date"></div>`;
     document.body.prepend(hdr);
   }
+  hdr.querySelector("h2").textContent = titleText || "Schema";
   hdr.querySelector(".date").textContent = new Date().toLocaleDateString("sv-SE", {
     weekday:"long", year:"numeric", month:"long", day:"numeric"
   });
-  hdr.querySelector("h2").textContent = titleText || "Schema";
 }
 
-// Hitta aktiv vy och markera för utskrift
 function printSchema(title) {
+  // Visa rubriken
   preparePrintHeader(title);
-  document.querySelectorAll('.print-scope').forEach(e=>e.classList.remove('print-visible'));
+
+  // Visa aktuell vy i utskriften
+  const allViews = document.querySelectorAll('.view');
+  allViews.forEach(v => v.style.display = "none");
   const activeView = document.querySelector('.view.active');
-  if (activeView) {
-    activeView.querySelectorAll('.print-scope').forEach(el=>{
-      if (el.offsetParent !== null) el.classList.add('print-visible');
-    });
-  }
-  setTimeout(()=>window.print(),300);
-  setTimeout(()=>document.querySelectorAll('.print-visible')
-    .forEach(e=>e.classList.remove('print-visible')),2000);
+  if (activeView) activeView.style.display = "block";
+
+  // Tillåt färger, emojis etc
+  const style = document.createElement('style');
+  style.textContent = `
+    @media print {
+      header, .tab-bar, .controls, button { display:none !important; }
+      .print-header {
+        display:flex !important;
+        justify-content:space-between;
+        align-items:center;
+        border-bottom:1px solid #ccc;
+        padding:8px 12px 6px;
+        margin-bottom:14px;
+      }
+      .print-header img { height:28px; }
+      .print-header h2 {
+        font-size:18pt;
+        font-weight:800;
+        margin:0;
+      }
+      .print-header .date { font-size:10pt; color:#333; }
+      body {
+        background:#fff;
+        color:#000;
+        font-size:10pt;
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+      }
+      @page { size:A4 landscape; margin:10mm; }
+    }`;
+  document.head.appendChild(style);
+
+  // Starta utskrift
+  setTimeout(() => window.print(), 400);
+
+  // Återställ vyn efteråt
+  setTimeout(() => {
+    allViews.forEach(v => v.style.display = "");
+  }, 2000);
 }
 
 // Knappar
@@ -822,31 +857,6 @@ document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤
 document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
 document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
 document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelsescheman");
-
-/* Extra CSS för rubrik */
-const style = document.createElement("style");
-style.textContent = `
-@media print {
-  .print-header {
-    display:flex !important;
-    justify-content:space-between;
-    align-items:center;
-    border-bottom:1px solid #ccc;
-    padding:8px 12px 6px;
-    margin-bottom:14px;
-  }
-  .print-header img { height:28px; }
-  .print-header h2 {
-    font-size:18pt;
-    font-weight:800;
-    margin:0;
-  }
-  .print-header .date {
-    font-size:10pt;
-    color:#333;
-  }
-}`;
-document.head.appendChild(style);
 
 /* =========================
    START: visa Pågår nu
@@ -858,4 +868,3 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
-
