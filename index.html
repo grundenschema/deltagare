@@ -729,7 +729,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – STABIL, SÄKER VERSION
+   UTSKRIFT – STABIL OCH KORREKT VERSION
    Skriver ut endast schemat (inte knappar)
 ========================= */
 function doPrint(titleText = "") {
@@ -770,10 +770,9 @@ function doPrint(titleText = "") {
       day: "numeric",
     });
 
-    // 5. Skriv hela dokumentet till det nya fönstret
+    // 5. Skriv ut HTML till nytt fönster
     printWin.document.open();
-    printWin.document.write(`
-<!DOCTYPE html>
+    printWin.document.write(`<!DOCTYPE html>
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
@@ -819,11 +818,11 @@ function doPrint(titleText = "") {
         window.close();
       }, 300);
     };
-  </script>
+  <\/script>
 </body>
-</html>
-    `);
+</html>`);
     printWin.document.close();
+
   } catch (err) {
     console.error("Fel vid utskrift:", err);
     alert("Ett fel uppstod vid utskrift. Se konsolen för detaljer.");
@@ -854,4 +853,3 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
-
