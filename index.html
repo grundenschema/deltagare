@@ -773,40 +773,17 @@ document.getElementById("btnCoachWeek").onclick=()=>{
   renderBlocksGeneric(name,true,document.getElementById("cBlockHeader"),document.getElementById("cBlockGrid"));
 };
 
-/* =========================
-   UTSKRIFT – proffsig version
-========================= */
-function preparePrintHeader(titleText) {
-  let hdr = document.querySelector(".print-header");
-  if (!hdr) {
-    hdr = document.createElement("div");
-    hdr.className = "print-header";
-    hdr.innerHTML = `
-      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-           alt="Grunden DV logotyp" style="height:28px;">
-      <h2>${titleText || "Schema"}</h2>
-      <div class="date">${new Date().toLocaleDateString("sv-SE", {
-        weekday:"long", year:"numeric", month:"long", day:"numeric"
-      })}</div>`;
-    document.body.prepend(hdr);
-  } else {
-    hdr.querySelector("h2").textContent = titleText || "Schema";
-    hdr.querySelector(".date").textContent = new Date().toLocaleDateString("sv-SE", {
-      weekday:"long", year:"numeric", month:"long", day:"numeric"
-    });
-  }
-}
+</style>
 
-/* =========================
-   UTSKRIFT – stående layout
-========================= */
+<!-- =========================
+     UTSKRIFT – stående layout
+========================= -->
+<style>
 @media print {
-  /* Dölj navigation och knappar */
   header, .tab-bar, .controls, button {
     display: none !important;
   }
 
-  /* Grundstil för utskrift */
   body {
     background: #fff !important;
     color: #000 !important;
@@ -816,13 +793,11 @@ function preparePrintHeader(titleText) {
     print-color-adjust: exact;
   }
 
-  /* Visa aktiv vy */
   .view.print-visible {
     display: block !important;
     visibility: visible !important;
   }
 
-  /* Utskriftsrubrik */
   .print-header {
     display: flex !important;
     justify-content: space-between;
@@ -831,9 +806,7 @@ function preparePrintHeader(titleText) {
     padding: 8px 12px 6px;
     margin-bottom: 14px;
   }
-  .print-header img {
-    height: 28px;
-  }
+  .print-header img { height: 28px; }
   .print-header h2 {
     font-size: 16pt;
     font-weight: 800;
@@ -844,7 +817,6 @@ function preparePrintHeader(titleText) {
     color: #333;
   }
 
-  /* Schemaceller */
   .block-time {
     font-size: 9pt !important;
     padding: 3px 6px !important;
@@ -858,7 +830,6 @@ function preparePrintHeader(titleText) {
     white-space: normal !important;
   }
 
-  /* Sidformat */
   @page {
     size: A4 portrait;
     margin: 10mm;
