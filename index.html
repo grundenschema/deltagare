@@ -273,31 +273,34 @@ select, .btn {
     print-color-adjust: exact;
   }
 
-  /* 🔧 Tillåt blockceller att växa */
+  /* 🔧 Tillåt blockceller att växa och minska */
   .block-cell {
     height: auto !important;
-    min-height: 40px !important;
+    min-height: 20px !important;
     overflow: visible !important;
   }
 
-  /* 💡 Lägg till detta: komprimera layouten vid utskrift */
+  /* 💡 Komprimera layouten vid utskrift */
   .block {
     font-size: 0.75rem !important;
     line-height: 1.1 !important;
-    padding: 4px 6px !important;
+    padding: 3px 5px !important;
   }
 
-  .block-cell {
-    min-height: 24px !important;
+  /* 🕒 Gör halvtimmar hälften så höga som timmar */
+  .block-grid {
+    grid-auto-rows: 20px !important; /* varje rad = halvtimme */
   }
 
-  body {
-    transform: scale(0.9);
-    transform-origin: top left;
+  .block-time {
+    font-size: 0.65rem !important;
+    padding: 1px 4px !important;
   }
 
   /* Behåll färger och layout */
   body {
+    transform: scale(0.9);
+    transform-origin: top left;
     background: #fff !important;
     color: #000 !important;
     font-size: 10pt;
