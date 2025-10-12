@@ -729,89 +729,48 @@ document.getElementById("btnCoachWeek").onclick = () => {
   );
 };
 
+
 /* =========================
-   UTSKRIFT – ren och stabil version
+   UTSKRIFT – minimal, stabil version
 ========================= */
-
-/* Skapa rubrik (logga + titel + datum) om den saknas */
-if (!document.getElementById("printHeader")) {
-  const headerHTML = `
-    <div class="print-header" id="printHeader" style="display:none;">
-      <img
-        src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-        alt="Grunden DV logotyp"
-        style="height:20pt;margin-right:10px;"
-      />
-      <div>
-        <h2 id="printTitle" style="font-size:20pt;font-weight:800;margin:0;"></h2>
-        <div id="printDate" style="font-size:11pt;color:#333;"></div>
-      </div>
-    </div>`;
-  document.body.insertAdjacentHTML("afterbegin", headerHTML);
-}
-
-/* CSS för utskriftsrubriken */
-const printStyle = document.createElement("style");
-printStyle.textContent = `
-@media print {
-  .print-header {
-    display:flex !important;
-    align-items:flex-end;
-    gap:12px;
-    border-bottom:1px solid #ccc;
-    padding:8px 12px 12px;
-    margin-bottom:20px;
-  }
-
-  /* Luft mellan rubrik och schema */
-  .print-header::after {
-    content:"";
-    display:block;
-    height:16px;
-    width:100%;
-  }
-
-  .print-header img { height:20pt; margin-right:10px; }
-  .print-header h2 { font-size:20pt; font-weight:800; margin:0; }
-  .print-header .date { font-size:11pt; color:#333; }
-
-  /* Dölj allt onödigt vid utskrift */
-  header, .tab-bar, .controls, .panel, .btn, #clock {
-    display:none !important;
-  }
-
-  body {
-    background:#fff;
-    color:#000;
-    -webkit-print-color-adjust:exact;
-    print-color-adjust:exact;
-  }
-
-  @page { size:A4 landscape; margin:10mm; }
-}`;
-document.head.appendChild(printStyle);
-
-/* Enkel utskriftsfunktion – fungerar i Chrome */
 function doPrint(titleText = "") {
-  const header = document.getElementById("printHeader");
-  header.style.display = "flex";
+  // Visa rubrik temporärt
+  let header = document.getElementById("printHeader");
+  if (!header) {
+    header = document.createElement("div");
+    header.id = "printHeader";
+    header.style.display = "flex";
+    header.style.alignItems = "flex-end";
+    header.style.gap = "12px";
+    header.style.borderBottom = "1px solid #ccc";
+    header.style.padding = "8px 12px 12px";
+    header.style.marginBottom = "20px";
+    header.innerHTML = `
+      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+           alt="Grunden DV logotyp" style="height:20pt;margin-right:10px;">
+      <div>
+        <h2 style="font-size:20pt;font-weight:800;margin:0;">Schema – ${titleText}</h2>
+        <div style="font-size:11pt;color:#333;">
+          Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+          })}
+        </div>
+      </div>`;
+    document.body.prepend(header);
+  }
 
-  document.getElementById("printTitle").textContent = "Schema – " + (titleText || "");
-  document.getElementById("printDate").textContent =
-    "Utskriftsdatum: " +
-    new Date().toLocaleDateString("sv-SE", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-  // Kör utskriften direkt (kräver popup-tillstånd)
+  // Kör utskrift (helt standard)
   window.print();
+
+  // Ta bort rubriken efteråt
+  setTimeout(() => header.remove(), 1000);
 }
 
 /* =========================
-   KOPPLA UTSKRIFTSKNAPPAR
+   KOPPLA KNAPPAR
 ========================= */
 document.getElementById("btnPrintParticipant").onclick = () =>
   doPrint(document.getElementById("nameSelect").value || "");
@@ -834,4 +793,3 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
-
