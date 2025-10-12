@@ -773,10 +773,8 @@ document.getElementById("btnCoachWeek").onclick=()=>{
   renderBlocksGeneric(name,true,document.getElementById("cBlockHeader"),document.getElementById("cBlockGrid"));
 };
 
-</style>
-
 <!-- =========================
-     UTSKRIFT – stående layout
+     UTSKRIFT – liggande layout
 ========================= -->
 <style>
 @media print {
@@ -831,16 +829,30 @@ document.getElementById("btnCoachWeek").onclick=()=>{
   }
 
   @page {
-    size: A4 portrait;
+    size: A4 landscape;
     margin: 10mm;
   }
 }
 </style>
 
 <script>
-/* =========================
-   UTSKRIFT – endast aktiv vy
-========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  showView("nowView");
+  renderNow();
+
+  // Koppla knappar efter att sidan laddats
+  const buttons = {
+    btnPrintParticipant: "👤 Deltagarschema",
+    btnPrintCoach: "🧑‍🏫 Coachschema",
+    btnPrintNow: "🔔 Pågår nu",
+    btnPrintCompare: "🤖 Jämförelse"
+  };
+  for (const [id, title] of Object.entries(buttons)) {
+    const el = document.getElementById(id);
+    if (el) el.onclick = () => printSchema(title);
+  }
+});
+
 function preparePrintHeader(titleText) {
   let hdr = document.querySelector(".print-header");
   if (!hdr) {
@@ -864,32 +876,15 @@ function preparePrintHeader(titleText) {
 
 function printSchema(title) {
   preparePrintHeader(title);
-
-  const allViews = document.querySelectorAll('.view');
+  const allViews = document.querySelectorAll(".view");
   allViews.forEach(v => v.classList.remove("active"));
-  const active = document.querySelector('.view.active');
+  const active = document.querySelector(".view.active");
   if (active) active.classList.add("print-visible");
-
   setTimeout(() => window.print(), 200);
-
   setTimeout(() => {
-    document.querySelectorAll('.print-visible').forEach(e => e.classList.remove('print-visible'));
+    document.querySelectorAll(".print-visible").forEach(e => e.classList.remove("print-visible"));
   }, 2000);
 }
-
-// Knappar för utskrift
-document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤 Deltagarschema");
-document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
-document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
-document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelse");
-
-/* =========================
-   START: visa Pågår nu
-========================= */
-document.addEventListener("DOMContentLoaded",()=>{
-  showView("nowView");
-  renderNow();
-});
 </script>
 
 </body>
