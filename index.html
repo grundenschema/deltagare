@@ -729,97 +729,103 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – STABIL, FÄRDIG VERSION
-   Skriver bara ut själva schemat (inte knappar)
+   UTSKRIFT – STABIL, SÄKER VERSION
+   Skriver ut endast schemat, utan knappar
 ========================= */
 function doPrint(titleText = "") {
-  // Hitta aktiv vy
-  const views = ["participantView", "coachView", "nowView", "assistantView"];
-  const visibleView = views
-    .map(id => document.getElementById(id))
-    .find(v => v && v.style.display !== "none");
+  try {
+    // 1. Hitta aktuell vy (coach, deltagare, pågår nu eller jämförelse)
+    const views = ["participantView", "coachView", "nowView", "assistantView"];
+    const visibleView = views
+      .map(id => document.getElementById(id))
+      .find(v => v && v.style.display !== "none");
 
-  // Försök hitta själva schemadelen inom aktiv vy
-  let content = "";
-  if (visibleView) {
-    const subSections = [
-      visibleView.querySelector("#pBlockGrid"),
-      visibleView.querySelector("#cBlockGrid"),
-      visibleView.querySelector("#nowView"),
-      visibleView.querySelector(".block-grid"),
-      visibleView.querySelector(".cards")
-    ];
-    const activeSection = subSections.find(s => s && s.offsetParent !== null);
-    content = activeSection ? activeSection.outerHTML : visibleView.innerHTML;
-  } else {
-    content = document.body.innerHTML;
-  }
+    // 2. Hitta själva schemadelen inom vyn
+    let content = "";
+    if (visibleView) {
+      const subSections = [
+        visibleView.querySelector("#pBlockGrid"),
+        visibleView.querySelector("#cBlockGrid"),
+        visibleView.querySelector(".block-grid"),
+        visibleView.querySelector(".cards")
+      ];
+      const activeSection = subSections.find(s => s && s.offsetParent !== null);
+      content = activeSection ? activeSection.outerHTML : visibleView.innerHTML;
+    } else {
+      content = document.body.innerHTML;
+    }
 
-  // Skapa nytt utskriftsfönster
-  const printWin = window.open("", "_blank", "width=1200,height=800");
-  if (!printWin) {
-    alert("Tillåt popup-fönster för att kunna skriva ut.");
-    return;
-  }
+    // 3. Skapa ett nytt, separat utskriftsfönster
+    const printWin = window.open("", "_blank", "width=1200,height=800");
+    if (!printWin) {
+      alert("Tillåt popup-fönster för att kunna skriva ut.");
+      return;
+    }
 
-  const dateText = new Date().toLocaleDateString("sv-SE", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+    // 4. Formatera datum (svensk stil)
+    const dateText = new Date().toLocaleDateString("sv-SE", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
 
-  // Skriv HTML-innehåll till det nya fönstret
-  printWin.document.write(`
-  <html lang="sv">
-  <head>
-    <meta charset="UTF-8">
-    <title>Schema – ${titleText}</title>
-    <style>
-      body {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-        margin: 15mm;
-        background: #fff;
-        color: #000;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .header {
-        display: flex;
-        align-items: flex-end;
-        gap: 12px;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 10px;
-        margin-bottom: 18px;
-      }
-      .header img { height: 20pt; margin-right: 10px; }
-      .header h2 { font-size: 20pt; font-weight: 800; margin: 0; }
-      .header .date { font-size: 11pt; color: #333; }
-      @page { size: A4 landscape; margin: 10mm; }
-    </style>
-  </head>
-  <body>
-    <div class="header">
-      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-           alt="Grunden DV logotyp">
-      <div>
-        <h2>Schema – ${titleText}</h2>
-        <div class="date">Utskriftsdatum: ${dateText}</div>
-      </div>
+    // 5. Skriv hela dokumentet till det nya fönstret
+    printWin.document.open();
+    printWin.document.write(`
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Schema – ${titleText}</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 15mm;
+      background: #fff;
+      color: #000;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .header {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+    .header img { height: 20pt; margin-right: 10px; }
+    .header h2 { font-size: 20pt; font-weight: 800; margin: 0; }
+    .header .date { font-size: 11pt; color: #333; }
+    @page { size: A4 landscape; margin: 10mm; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+         alt="Grunden DV logotyp">
+    <div>
+      <h2>Schema – ${titleText}</h2>
+      <div class="date">Utskriftsdatum: ${dateText}</div>
     </div>
-    ${content}
-    <script>
-      window.onload = function() {
-        window.focus();
-        setTimeout(() => { 
-          window.print(); 
-          window.close(); 
-        }, 250);
-      };
-    <\/script>
-  </body>
-  </html>
-  `);
-
-  printWin.document.close();
+  </div>
+  ${content}
+  <script>
+    window.onload = function() {
+      window.focus();
+      setTimeout(function() {
+        window.print();
+        window.close();
+      }, 300);
+    };
+  </script>
+</body>
+</html>
+    `);
+    printWin.document.close();
+  } catch (err) {
+    console.error("Fel vid utskrift:", err);
+    alert("Ett fel uppstod vid utskrift. Se konsolen för detaljer.");
+  }
 }
