@@ -773,8 +773,9 @@ document.getElementById("btnCoachWeek").onclick=()=>{
   renderBlocksGeneric(name,true,document.getElementById("cBlockHeader"),document.getElementById("cBlockGrid"));
 };
 
-     UTSKRIFT – liggande layout
-========================= -->
+   /* =====================================================
+   UTSKRIFT – liggande layout
+   ===================================================== */
 <style>
 @media print {
   /* Dölj navigation och knappar */
@@ -843,9 +844,9 @@ document.getElementById("btnCoachWeek").onclick=()=>{
 </style>
 
 <script>
-/* =========================
+/* =====================================================
    START + UTSKRIFT
-========================= */
+   ===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   // Sätt startvy om funktioner finns
   if (typeof showView === "function") showView("nowView");
@@ -864,9 +865,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* =========================
+/* =====================================================
    Skapa rubrik för utskrift
-========================= */
+   ===================================================== */
 function preparePrintHeader(titleText) {
   let hdr = document.querySelector(".print-header");
   if (!hdr) {
@@ -894,9 +895,9 @@ function preparePrintHeader(titleText) {
   }
 }
 
-/* =========================
+/* =====================================================
    Utskriftsfunktion
-========================= */
+   ===================================================== */
 function printSchema(title) {
   preparePrintHeader(title);
 
@@ -911,6 +912,10 @@ function printSchema(title) {
       .forEach(el => el.classList.remove("print-visible"));
   }, 1500);
 }
+
+/* =====================================================
+   SLUT PÅ SCRIPT
+   ===================================================== */
 </script>
 
 </body>
