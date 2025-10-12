@@ -778,10 +778,12 @@ document.getElementById("btnCoachWeek").onclick=()=>{
 ========================= -->
 <style>
 @media print {
+  /* Dölj navigation och knappar */
   header, .tab-bar, .controls, button {
     display: none !important;
   }
 
+  /* Grundstil */
   body {
     background: #fff !important;
     color: #000 !important;
@@ -791,11 +793,13 @@ document.getElementById("btnCoachWeek").onclick=()=>{
     print-color-adjust: exact;
   }
 
+  /* Endast aktiv vy skrivs ut */
   .view.print-visible {
     display: block !important;
     visibility: visible !important;
   }
 
+  /* Utskriftsrubrik */
   .print-header {
     display: flex !important;
     justify-content: space-between;
@@ -815,6 +819,7 @@ document.getElementById("btnCoachWeek").onclick=()=>{
     color: #333;
   }
 
+  /* Schemaceller */
   .block-time {
     font-size: 9pt !important;
     padding: 3px 6px !important;
@@ -828,6 +833,7 @@ document.getElementById("btnCoachWeek").onclick=()=>{
     white-space: normal !important;
   }
 
+  /* Liggande A4 */
   @page {
     size: A4 landscape;
     margin: 10mm;
@@ -836,23 +842,34 @@ document.getElementById("btnCoachWeek").onclick=()=>{
 </style>
 
 <script>
+/* =========================
+   START + UTSKRIFT
+========================= */
 document.addEventListener("DOMContentLoaded", () => {
-  showView("nowView");
-  renderNow();
+  // Sätt startvy
+  if (typeof showView === "function") {
+    showView("nowView");
+  }
+  if (typeof renderNow === "function") {
+    renderNow();
+  }
 
-  // Koppla knappar efter att sidan laddats
+  // Koppla utskriftsknappar (bara om de finns)
   const buttons = {
     btnPrintParticipant: "👤 Deltagarschema",
     btnPrintCoach: "🧑‍🏫 Coachschema",
     btnPrintNow: "🔔 Pågår nu",
     btnPrintCompare: "🤖 Jämförelse"
   };
-  for (const [id, title] of Object.entries(buttons)) {
+  Object.entries(buttons).forEach(([id, title]) => {
     const el = document.getElementById(id);
-    if (el) el.onclick = () => printSchema(title);
-  }
+    if (el) el.addEventListener("click", () => printSchema(title));
+  });
 });
 
+/* =========================
+   Skapa rubrik för utskrift
+========================= */
 function preparePrintHeader(titleText) {
   let hdr = document.querySelector(".print-header");
   if (!hdr) {
@@ -860,30 +877,43 @@ function preparePrintHeader(titleText) {
     hdr.className = "print-header";
     hdr.innerHTML = `
       <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-           alt="Grunden DV logotyp" style="height:28px;">
+           alt="Grunden DV logotyp">
       <h2>${titleText || "Schema"}</h2>
       <div class="date">${new Date().toLocaleDateString("sv-SE", {
-        weekday:"long", year:"numeric", month:"long", day:"numeric"
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
       })}</div>`;
     document.body.prepend(hdr);
   } else {
     hdr.querySelector("h2").textContent = titleText || "Schema";
     hdr.querySelector(".date").textContent = new Date().toLocaleDateString("sv-SE", {
-      weekday:"long", year:"numeric", month:"long", day:"numeric"
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric"
     });
   }
 }
 
+/* =========================
+   Utskriftsfunktion
+========================= */
 function printSchema(title) {
   preparePrintHeader(title);
-  const allViews = document.querySelectorAll(".view");
-  allViews.forEach(v => v.classList.remove("active"));
+
+  // Visa endast aktiv vy
   const active = document.querySelector(".view.active");
   if (active) active.classList.add("print-visible");
+
+  // Starta utskrift
   setTimeout(() => window.print(), 200);
+
+  // Återställ efteråt
   setTimeout(() => {
-    document.querySelectorAll(".print-visible").forEach(e => e.classList.remove("print-visible"));
-  }, 2000);
+    document.querySelectorAll(".print-visible").forEach(el => el.classList.remove("print-visible"));
+  }, 1500);
 }
 </script>
 
