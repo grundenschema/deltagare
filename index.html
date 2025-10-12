@@ -732,20 +732,18 @@ document.getElementById("btnCoachWeek").onclick = () => {
 
 /* =========================
    UTSKRIFT – FRYSFRI, STABIL VERSION
-   (skriver ut via nytt fönster)
+   (nytt fönster med korrekt CSS och aktiv vy)
 ========================= */
-
 function doPrint(titleText = "") {
-  // Hitta det som ska skrivas ut (kan anpassas)
-  const view =
-    document.querySelector(".view:visible") ||
-    document.getElementById("participantView") ||
-    document.getElementById("coachView") ||
-    document.body;
+  // Hitta aktuell vy som är synlig
+  const views = ["participantView", "coachView", "nowView", "assistantView"];
+  const view = views.map(id => document.getElementById(id))
+    .find(el => el && el.style.display !== "none");
 
-  const content = view.innerHTML;
+  // Om inget hittas, skriv ut hela sidan som nödlösning
+  const content = view ? view.outerHTML : document.body.outerHTML;
 
-  // Skapa nytt, rent utskriftsfönster
+  // Skapa nytt utskriftsfönster
   const printWin = window.open("", "_blank", "width=1200,height=800");
   if (!printWin) {
     alert("Pop-up blockerad. Tillåt pop-ups för att kunna skriva ut.");
@@ -759,15 +757,23 @@ function doPrint(titleText = "") {
     day: "numeric",
   });
 
-  // Skriv innehåll i nya fönstret
+  // Hämta alla CSS-stilar från huvudfönstret
+  const styles = [...document.styleSheets]
+    .map(s => {
+      try { return [...s.cssRules].map(r => r.cssText).join("\n"); }
+      catch { return ""; }
+    })
+    .join("\n");
+
+  // Skriv innehåll till nya fönstret
   printWin.document.write(`
   <html lang="sv">
   <head>
     <meta charset="UTF-8">
     <title>Schema – ${titleText}</title>
     <style>
+      ${styles}
       body {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
         margin: 15mm;
         background: #fff;
         color: #000;
@@ -775,17 +781,17 @@ function doPrint(titleText = "") {
         print-color-adjust: exact;
       }
       .header {
-        display: flex;
-        align-items: flex-end;
-        gap: 12px;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 10px;
-        margin-bottom: 18px;
+        display:flex;
+        align-items:flex-end;
+        gap:12px;
+        border-bottom:1px solid #ccc;
+        padding-bottom:10px;
+        margin-bottom:18px;
       }
-      .header img { height: 20pt; margin-right: 10px; }
-      .header h2 { font-size: 20pt; font-weight: 800; margin: 0; }
-      .header .date { font-size: 11pt; color: #333; }
-      @page { size: A4 landscape; margin: 10mm; }
+      .header img { height:20pt; margin-right:10px; }
+      .header h2 { font-size:20pt; font-weight:800; margin:0; }
+      .header .date { font-size:11pt; color:#333; }
+      @page { size:A4 landscape; margin:10mm; }
     </style>
   </head>
   <body>
@@ -813,28 +819,3 @@ function doPrint(titleText = "") {
 
   printWin.document.close();
 }
-
-/* =========================
-   KOPPLA UTSKRIFTSKNAPPAR
-========================= */
-document.getElementById("btnPrintParticipant").onclick = () =>
-  doPrint(document.getElementById("nameSelect").value || "");
-
-document.getElementById("btnPrintCoach").onclick = () =>
-  doPrint(document.getElementById("coachSelect").value || "");
-
-document.getElementById("btnPrintNow").onclick = () => doPrint("Pågår nu");
-document.getElementById("btnPrintCompare").onclick = () => doPrint("Jämförelse");
-
-/* =========================
-   START: visa Pågår nu
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  if (typeof showView === "function" && typeof renderNow === "function") {
-    showView("nowView");
-    renderNow();
-  }
-});
-</script>
-</body>
-</html>
