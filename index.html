@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -715,121 +716,76 @@ function renderSick(){
   document.getElementById("sickResult").innerHTML = html;
 }
 
-document.getElementById("btnCoachWeek").onclick = () => {
-  const name = document.getElementById("coachSelect").value;
-  if (!name) { alert("Välj en coach."); return; }
-  document.getElementById("coachDay").style.display = "none";
-  document.getElementById("coachWeek").style.display = "block";
-  renderBlocksGeneric(
-    name,
-    true,
-    document.getElementById("cBlockHeader"),
-    document.getElementById("cBlockGrid")
-  );
+/* =========================
+   KNAPPKOPPLINGAR – DELTAGARE/COACH
+========================= */
+document.getElementById("btnParticipantToday").onclick=()=>{
+  const name=document.getElementById("nameSelect").value;
+  if(!name){ alert("Välj en deltagare."); return; }
+  // visa dag, dölj vecka
+  document.getElementById("participantWeek").style.display="none";
+  document.getElementById("participantDay").style.display="block";
+  renderCardsGeneric(name,false,document.getElementById("participantDay"));
 };
 
-<!-- =========================
-     UTSKRIFT – FÖRENKLAD OCH STABIL VERSION
-     (samma sida, behåller layout och färger)
-========================= -->
-<script>
-function doPrint(titleText = "") {
-  try {
-    // Hitta aktiv vy (deltagare, coach, pågår nu, assistent)
-    const visibleView = document.querySelector(".view.active");
-    if (!visibleView) {
-      alert("Ingen aktiv vy att skriva ut.");
-      return;
-    }
+document.getElementById("btnParticipantWeek").onclick=()=>{
+  const name=document.getElementById("nameSelect").value;
+  if(!name){ alert("Välj en deltagare."); return; }
+  // visa vecka, dölj dag
+  document.getElementById("participantDay").style.display="none";
+  document.getElementById("participantWeek").style.display="block";
+  renderBlocksGeneric(name,false,document.getElementById("pBlockHeader"),document.getElementById("pBlockGrid"));
+};
 
-    // Hitta själva schemat (kort eller block)
-    const printTarget =
-      visibleView.querySelector(".print-scope") ||
-      visibleView.querySelector(".cards") ||
-      visibleView.querySelector(".block-grid");
+document.getElementById("btnCoachToday").onclick=()=>{
+  const name=document.getElementById("coachSelect").value;
+  if(!name){ alert("Välj en coach."); return; }
+  document.getElementById("coachWeek").style.display="none";
+  document.getElementById("coachDay").style.display="block";
+  renderCardsGeneric(name,true,document.getElementById("coachDay"));
+};
 
-    if (!printTarget) {
-      alert("Inget schema att skriva ut.");
-      return;
-    }
-
-    // Skapa rubrik med logga och datum
-    const headerHTML = `
-      <div class="print-header" style="
-        display:flex;justify-content:space-between;align-items:center;
-        border-bottom:1px solid #ccc;padding:8px 12px;margin-bottom:14px;">
-        <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" 
-             alt="Grunden DV logotyp" style="height:28px;">
-        <div style="text-align:right">
-          <h2 style="font-size:18pt;font-weight:800;margin:0;">
-            Schema – ${titleText || "Grunden DV"}
-          </h2>
-          <div style="font-size:10pt;color:#333;">
-            Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Markera vilket område som ska skrivas ut
-    document.querySelectorAll(".view").forEach(v => v.classList.remove("print-visible"));
-    printTarget.classList.add("print-visible");
-
-    // Lägg till rubrik överst
-    const tempHeader = document.createElement("div");
-    tempHeader.innerHTML = headerHTML;
-    printTarget.prepend(tempHeader);
-
-    // Vänta lite så layouten hinner laddas
-    setTimeout(() => {
-      window.print();
-      // Återställ sidan efter utskrift
-      printTarget.classList.remove("print-visible");
-      tempHeader.remove();
-      document.body.style.pointerEvents = "auto";
-    }, 500);
-  } catch (err) {
-    console.error("Fel vid utskrift:", err);
-    alert("Ett fel uppstod vid utskrift.");
-  }
-}
+document.getElementById("btnCoachWeek").onclick=()=>{
+  const name=document.getElementById("coachSelect").value;
+  if(!name){ alert("Välj en coach."); return; }
+  document.getElementById("coachDay").style.display="none";
+  document.getElementById("coachWeek").style.display="block";
+  renderBlocksGeneric(name,true,document.getElementById("cBlockHeader"),document.getElementById("cBlockGrid"));
+};
 
 /* =========================
-   KOPPLA UTSKRIFTSKNAPPAR
+   UTSKRIFT – endast aktivt schema
 ========================= */
-document.getElementById("btnPrintParticipant").onclick = () =>
-  doPrint(document.getElementById("nameSelect").value || "");
+function printScopeWithin(viewId){
+  // ta bort tidigare markörer
+  document.querySelectorAll('.print-scope').forEach(e=>e.classList.remove('print-visible'));
+  const view = document.getElementById(viewId);
+  if(!view){ window.print(); return; }
 
-document.getElementById("btnPrintCoach").onclick = () =>
-  doPrint(document.getElementById("coachSelect").value || "");
+  // hitta första synliga print-scope i view
+  const scopes = [...view.querySelectorAll('.print-scope')];
+  const visible = scopes.find(n=>{
+    const s = getComputedStyle(n);
+    return s.display!=="none" && s.visibility!=="hidden";
+  });
+  if(visible) visible.classList.add('print-visible');
+  setTimeout(()=>window.print(), 200);
+}
 
-document.getElementById("btnPrintNow").onclick = () => doPrint("Pågår nu");
-document.getElementById("btnPrintCompare").onclick = () => doPrint("Jämförelse");
+document.getElementById("btnPrintParticipant").onclick=()=>printScopeWithin("participantView");
+document.getElementById("btnPrintCoach").onclick=()=>printScopeWithin("coachView");
+document.getElementById("btnPrintNow").onclick=()=>printScopeWithin("nowView");
+document.getElementById("btnPrintCompare").onclick=()=>printScopeWithin("assistantView");
 
 /* =========================
    START: visa Pågår nu
 ========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  if (typeof showView === "function" && typeof renderNow === "function") {
-    showView("nowView");
-    renderNow();
-  }
+document.addEventListener("DOMContentLoaded",()=>{
+  showView("nowView");
+  renderNow();
 });
-
-/* =========================
-   ÅTERSTÄLLNING EFTER UTSKRIFT
-========================= */
-window.onafterprint = () => {
-  // När utskriften stängs, visa alla vyer igen och slå på klick
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("print-visible"));
-  document.body.style.pointerEvents = "auto";
-};
 </script>
 </body>
 </html>
+
 
