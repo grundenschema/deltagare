@@ -753,10 +753,22 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – enkel och 100% Chrome-kompatibel
+   UTSKRIFTSKNAPPAR (läggs till i HTML)
+========================= */
+const printButtonsHTML = `
+<div class="print-buttons" style="margin:16px 0;">
+  <button onclick="doPrint(document.getElementById('nameSelect').value)">🧍 Deltagarschema</button>
+  <button onclick="doPrint(document.getElementById('coachSelect').value)">🧑‍🏫 Coachschema</button>
+  <button onclick="doPrint('Pågår nu')">🕒 Pågår nu</button>
+  <button onclick="doPrint('Jämförelse')">⚖️ Jämförelse</button>
+</div>`;
+document.body.insertAdjacentHTML("beforeend", printButtonsHTML);
+
+/* =========================
+   UTSKRIFT – Chrome-kompatibel med rubrik, logga, datum + luft
 ========================= */
 
-/* Rubrik (logga + titel + datum) */
+/* Skapa rubrik om den inte finns */
 if (!document.getElementById("printHeader")) {
   const headerHTML = `
     <div class="print-header" id="printHeader" style="display:none;">
@@ -773,7 +785,7 @@ if (!document.getElementById("printHeader")) {
   document.body.insertAdjacentHTML("afterbegin", headerHTML);
 }
 
-/* Utskrifts-CSS */
+/* CSS för rubriken och luft mellan rubrik/schemat */
 const printStyle = document.createElement("style");
 printStyle.textContent = `
 @media print {
@@ -786,11 +798,34 @@ printStyle.textContent = `
     margin-bottom:20px;
   }
 
-  .print-header img { height:20pt; margin-right:10px; }
-  .print-header h2 { font-size:20pt; font-weight:800; margin:0; }
-  .print-header .date { font-size:11pt; color:#333; }
+  /* Luft mellan rubrik och schema */
+  .print-header::after {
+    content:"";
+    display:block;
+    height:16px;
+    width:100%;
+  }
 
-  header, .tab-bar, .controls, .panel, .btn, #clock { display:none !important; }
+  .print-header img {
+    height:20pt;
+    margin-right:10px;
+  }
+
+  .print-header h2 {
+    font-size:20pt;
+    font-weight:800;
+    margin:0;
+  }
+
+  .print-header .date {
+    font-size:11pt;
+    color:#333;
+  }
+
+  /* Dölj UI-element vid utskrift */
+  header, .tab-bar, .controls, .panel, .btn, #clock, .print-buttons {
+    display:none !important;
+  }
 
   body {
     background:#fff;
@@ -803,9 +838,11 @@ printStyle.textContent = `
 }`;
 document.head.appendChild(printStyle);
 
-/* Uppdatera rubrik innan utskrift */
-function updatePrintHeader(titleText = "") {
-  const h = document.getElementById("printHeader");
+/* === Enkel och stabil utskriftsfunktion === */
+function doPrint(titleText = "") {
+  const header = document.getElementById("printHeader");
+  header.style.display = "flex";
+
   document.getElementById("printTitle").textContent = "Schema – " + (titleText || "");
   document.getElementById("printDate").textContent =
     "Utskriftsdatum: " +
@@ -813,35 +850,12 @@ function updatePrintHeader(titleText = "") {
       weekday: "long",
       year: "numeric",
       month: "long",
-      day: "numeric"
+      day: "numeric",
     });
-  h.style.display = "flex";
+
+  // Starta utskriftsdialogen direkt (Chrome-säkert)
+  window.print();
 }
-
-/* === DIREKTKOPPLADE KNAPPAR === */
-document.getElementById("btnPrintParticipant").onclick = () => {
-  updatePrintHeader(document.getElementById("nameSelect").value || "");
-  window.print();
-};
-document.getElementById("btnPrintCoach").onclick = () => {
-  updatePrintHeader(document.getElementById("coachSelect").value || "");
-  window.print();
-};
-document.getElementById("btnPrintNow").onclick = () => {
-  updatePrintHeader("Pågår nu");
-  window.print();
-};
-document.getElementById("btnPrintCompare").onclick = () => {
-  updatePrintHeader("Jämförelse");
-  window.print();
-};
-
-/* Testknapp – för att se att print funkar i Chrome */
-const testBtn = document.createElement("button");
-testBtn.textContent = "🖨️ Direkt testutskrift";
-testBtn.style.margin = "10px";
-testBtn.onclick = () => window.print();
-document.body.appendChild(testBtn);
 
 /* =========================
    START: visa Pågår nu
