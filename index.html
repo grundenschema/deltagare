@@ -730,86 +730,87 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 
-* =========================
-   UTSKRIFT – NY VERSION: öppnar separat print-fönster (låser aldrig)
+/* =========================
+   UTSKRIFT – FRYSFRI, STABIL VERSION
+   (skriver ut via nytt fönster)
 ========================= */
+
 function doPrint(titleText = "") {
-  const now = new Date().toLocaleDateString("sv-SE", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
+  // Hitta det som ska skrivas ut (kan anpassas)
+  const view =
+    document.querySelector(".view:visible") ||
+    document.getElementById("participantView") ||
+    document.getElementById("coachView") ||
+    document.body;
 
-  // Hämta det som syns i nuvarande vy
-  const view = document.querySelector(".view:visible") || document.body;
-  const htmlToPrint = view.innerHTML;
+  const content = view.innerHTML;
 
-  // Skapa nytt fönster
+  // Skapa nytt, rent utskriftsfönster
   const printWin = window.open("", "_blank", "width=1200,height=800");
   if (!printWin) {
     alert("Pop-up blockerad. Tillåt pop-ups för att kunna skriva ut.");
     return;
   }
 
-  // Bygg upp innehållet i printfönstret
+  const dateText = new Date().toLocaleDateString("sv-SE", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  // Skriv innehåll i nya fönstret
   printWin.document.write(`
-    <html lang="sv">
-    <head>
-      <meta charset="UTF-8">
-      <title>Schema – ${titleText}</title>
-      <style>
-        body {
-          font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-          color: #000;
-          background: #fff;
-          margin: 15mm;
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-        .print-header {
-          display: flex;
-          align-items: flex-end;
-          gap: 12px;
-          border-bottom: 1px solid #ccc;
-          padding-bottom: 10px;
-          margin-bottom: 18px;
-        }
-        .print-header img {
-          height: 20pt;
-          margin-right: 10px;
-        }
-        .print-header h2 {
-          font-size: 20pt;
-          font-weight: 800;
-          margin: 0;
-        }
-        .print-header .date {
-          font-size: 11pt;
-          color: #333;
-        }
-        @page { size: A4 landscape; margin: 10mm; }
-      </style>
-    </head>
-    <body>
-      <div class="print-header">
-        <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="Grunden DV logotyp">
-        <div>
-          <h2>Schema – ${titleText}</h2>
-          <div class="date">Utskriftsdatum: ${now}</div>
-        </div>
+  <html lang="sv">
+  <head>
+    <meta charset="UTF-8">
+    <title>Schema – ${titleText}</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        margin: 15mm;
+        background: #fff;
+        color: #000;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .header {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+        margin-bottom: 18px;
+      }
+      .header img { height: 20pt; margin-right: 10px; }
+      .header h2 { font-size: 20pt; font-weight: 800; margin: 0; }
+      .header .date { font-size: 11pt; color: #333; }
+      @page { size: A4 landscape; margin: 10mm; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+           alt="Grunden DV logotyp">
+      <div>
+        <h2>Schema – ${titleText}</h2>
+        <div class="date">Utskriftsdatum: ${dateText}</div>
       </div>
-      ${htmlToPrint}
-      <script>
-        window.onload = function() {
-          window.focus();
-          window.print();
-          window.close();
-        };
-      <\/script>
-    </body>
-    </html>
+    </div>
+    ${content}
+    <script>
+      window.onload = function(){
+        window.focus();
+        setTimeout(() => { 
+          window.print(); 
+          window.close(); 
+        }, 250);
+      };
+    <\/script>
+  </body>
+  </html>
   `);
+
   printWin.document.close();
 }
 
