@@ -140,26 +140,28 @@ select, .btn {
 .block-cell { position:relative; min-height:28px; background:transparent; border:none; }
 
 /* =========================
-   Block & Assistent-stilar
-========================= */
+   Block – visar hela texten utan att kapa
+========================== */
 .block {
-  position:absolute;
-  left:2px;
-  right:2px;
-  top:2px;
-  border-radius:10px;
-  padding:6px 8px;
-  line-height:1.25;
-  font-size:.82rem;
-  color:#111;
-  box-shadow:var(--shadow);
-  border:1px solid rgba(0,0,0,.15);
-  word-break:break-word;
-  overflow:hidden;
-  -webkit-print-color-adjust:exact;
-  print-color-adjust:exact;
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 2px;
+  border-radius: 10px;
+  padding: 6px 8px;
+  line-height: 1.25;
+  font-size: .82rem;
+  color: #111;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0,0,0,.15);
+  word-break: break-word;
+  overflow: visible;              
+  height: auto !important;        
+  min-height: 30px;               
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
-.block .title { font-weight:700; }
+
 
 /* =========================
    Jämförelse (i assistenten)
