@@ -753,56 +753,27 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – stabil, färdig version
+   UTSKRIFT – stabil och webbläsaroberoende
 ========================= */
 
-// skapa rubrik (endast en gång)
+/* --- Skapa rubrik (logga + titel + datum) --- */
 if (!document.getElementById("printHeader")) {
   const headerHTML = `
-  <div class="print-header" id="printHeader" style="display:none;">
-    <img
-      src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-      alt="Grunden DV logotyp"
-      style="height:20pt; margin-right:10px;"
-    />
-    <div>
-      <h2 id="printTitle" style="font-size:20pt; font-weight:800; margin:0;"></h2>
-      <div id="printDate" style="font-size:11pt; color:#333;"></div>
-    </div>
-  </div>`;
+    <div class="print-header" id="printHeader" style="display:none;">
+      <img
+        src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+        alt="Grunden DV logotyp"
+        style="height:20pt; margin-right:10px;"
+      />
+      <div>
+        <h2 id="printTitle" style="font-size:20pt; font-weight:800; margin:0;"></h2>
+        <div id="printDate" style="font-size:11pt; color:#333;"></div>
+      </div>
+    </div>`;
   document.body.insertAdjacentHTML("afterbegin", headerHTML);
 }
 
-// CSS för rubriken vid utskrift
-const printStyle = document.createElement("style");
-printStyle.textContent = `
-@media print {
-  .print-header {
-    display: flex !important;
-    align-items: flex-end;
-    gap: 12px;
-    border-bottom: 1px solid #ccc;
-    padding: 8px 12px 12px;
-    margin-bottom: 20px;
-  }
-
-  body {
-    background: #fff !important;
-    color: #000 !important;
-  }
-
-  .view, .cards, .block-grid, .block-header {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-}
-`;
-document.head.appendChild(printStyle);
-/* =========================
-   UTSKRIFT – enkel, stabil och webbläsaroberoende
-========================= */
-
-/* --- CSS för utskriftsrubriken --- */
+/* --- CSS för utskrift (färger, rubrik, layout) --- */
 const printStyle = document.createElement("style");
 printStyle.textContent = `
 @media print {
@@ -814,25 +785,34 @@ printStyle.textContent = `
     padding:8px 12px 12px;
     margin-bottom:20px;
   }
+
   .print-header img {
     height:20pt;
     margin-right:10px;
   }
+
   .print-header h2 {
     font-size:20pt;
     font-weight:800;
     margin:0;
   }
+
   .print-header .date {
     font-size:11pt;
     color:#333;
   }
 
   body {
-    background:#fff;
-    color:#000;
-    -webkit-print-color-adjust:exact;
-    print-color-adjust:exact;
+    background:#fff !important;
+    color:#000 !important;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+  }
+
+  /* Behåll färger i block och grid */
+  .view, .cards, .block-grid, .block-header {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* Dölj allt onödigt UI vid utskrift */
@@ -847,28 +827,12 @@ printStyle.textContent = `
 }`;
 document.head.appendChild(printStyle);
 
-/* --- Skapa rubriken (logga + titel + datum) --- */
-function ensurePrintHeader() {
-  if (!document.getElementById("printHeader")) {
-    const headerHTML = `
-      <div class="print-header" id="printHeader">
-        <img
-          src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-          alt="Grunden DV logotyp"
-        />
-        <div>
-          <h2 id="printTitle"></h2>
-          <div id="printDate" class="date"></div>
-        </div>
-      </div>`;
-    document.body.insertAdjacentHTML("afterbegin", headerHTML);
-  }
-}
-
-/* --- Själva utskriftsfunktionen (Emma-principen) --- */
+/* --- Utskriftsfunktion --- */
 function doPrint(titleText = "") {
-  ensurePrintHeader();
-  document.getElementById("printTitle").textContent = "Schema – " + titleText;
+  const header = document.getElementById("printHeader");
+  if (header) header.style.display = "flex";
+
+  document.getElementById("printTitle").textContent = "Schema – " + (titleText || "");
   document.getElementById("printDate").textContent =
     "Utskriftsdatum: " +
     new Date().toLocaleDateString("sv-SE", {
@@ -877,38 +841,43 @@ function doPrint(titleText = "") {
       month: "long",
       day: "numeric",
     });
+
   window.print();
+
+  // göm rubriken efter utskrift
+  setTimeout(() => { if (header) header.style.display = "none"; }, 300);
 }
 
 /* =========================
    KOPPLA UTSKRIFTSKNAPPAR
 ========================= */
-document.getElementById("btnPrintParticipant").onclick = function () {
+document.getElementById("btnPrintParticipant").onclick = () => {
   const name = document.getElementById("nameSelect").value || "";
   doPrint(name);
 };
 
-document.getElementById("btnPrintCoach").onclick = function () {
+document.getElementById("btnPrintCoach").onclick = () => {
   const name = document.getElementById("coachSelect").value || "";
   doPrint(name);
 };
 
-document.getElementById("btnPrintNow").onclick = function () {
+document.getElementById("btnPrintNow").onclick = () => {
   doPrint("Pågår nu");
 };
 
-document.getElementById("btnPrintCompare").onclick = function () {
+document.getElementById("btnPrintCompare").onclick = () => {
   doPrint("Jämförelse");
 };
 
 /* =========================
    START: visa Pågår nu
 ========================= */
-document.addEventListener("DOMContentLoaded", function () {
-  showView("nowView");
-  renderNow();
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof showView === "function" && typeof renderNow === "function") {
+    showView("nowView");
+    renderNow();
+  }
 });
 </script>
 </body>
 </html>
-
