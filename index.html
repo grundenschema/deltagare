@@ -818,6 +818,14 @@ document.addEventListener("DOMContentLoaded", () => {
     renderNow();
   }
 });
+
+/* =========================
+   ÅTERSTÄLLNING EFTER UTSKRIFT
+========================= */
+window.onafterprint = () => {
+  // När utskriften stängs, visa alla vyer igen
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("print-visible"));
+};
 </script>
 </body>
 </html>
