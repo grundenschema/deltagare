@@ -798,39 +798,73 @@ function preparePrintHeader(titleText) {
 }
 
 /* =========================
-   UTSKRIFT – endast aktiv vy
+   UTSKRIFT – stående layout
 ========================= */
-function printSchema(title) {
-  preparePrintHeader(title);
+@media print {
+  /* Dölj navigation och knappar */
+  header, .tab-bar, .controls, button {
+    display: none !important;
+  }
 
-  // Dölj alla vyer utom den aktiva
-  const allViews = document.querySelectorAll('.view');
-  allViews.forEach(v => v.classList.remove("active"));
-  const active = document.querySelector('.view.active');
-  if (active) active.classList.add("print-visible");
+  /* Grundstil för utskrift */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 10pt;
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
-  // Skriv ut
-  setTimeout(() => window.print(), 200);
+  /* Visa aktiv vy */
+  .view.print-visible {
+    display: block !important;
+    visibility: visible !important;
+  }
 
-  // Ta bort print-klassen efter utskrift
-  setTimeout(() => {
-    document.querySelectorAll('.print-visible').forEach(e => e.classList.remove('print-visible'));
-  }, 2000);
+  /* Utskriftsrubrik */
+  .print-header {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    padding: 8px 12px 6px;
+    margin-bottom: 14px;
+  }
+  .print-header img {
+    height: 28px;
+  }
+  .print-header h2 {
+    font-size: 16pt;
+    font-weight: 800;
+    margin: 0;
+  }
+  .print-header .date {
+    font-size: 10pt;
+    color: #333;
+  }
+
+  /* Schemaceller */
+  .block-time {
+    font-size: 9pt !important;
+    padding: 3px 6px !important;
+  }
+  .block {
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 9pt !important;
+    line-height: 1.2 !important;
+    overflow: visible !important;
+    white-space: normal !important;
+  }
+
+  /* Sidformat */
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
 }
 
-// Koppla knappar
-document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤 Deltagarschema");
-document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
-document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
-document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelse");
-
-/* =========================
-   START: visa Pågår nu
-========================= */
-document.addEventListener("DOMContentLoaded",()=>{
-  showView("nowView");
-  renderNow();
-});
 </script>
 </body>
 </html>
