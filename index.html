@@ -913,54 +913,60 @@ document.getElementById("btnCoachWeek").onclick=()=>{
 };
 
 /* =====================================================
-   Aktivera utskriftsknappar
+   AKTIVERA UTSKRIFTSKNAPPAR
    ===================================================== */
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("load", () => {
   const buttons = {
     btnPrintParticipant: "Deltagarschema",
     btnPrintCoach: "Coachschema",
     btnPrintNow: "Pågår nu",
     btnPrintCompare: "Jämförelse"
   };
+
   Object.entries(buttons).forEach(([id, title]) => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener("click", () => printSchema(title));
+    if (el) {
+      el.addEventListener("click", () => {
+        // Försök hämta namn beroende på vy
+        let personName = "";
+        const activeView = document.querySelector(".view.active");
+        if (activeView?.id === "participantView")
+          personName = document.getElementById("nameSelect")?.value || "";
+        else if (activeView?.id === "coachView")
+          personName = document.getElementById("coachSelect")?.value || "";
+
+        printSchema(title, personName);
+      });
+    }
   });
 });
 
+
 /* =====================================================
-   Förbered utskriftsrubrik
+   FÖRBERED UTSKRIFTSRUBRIK
    ===================================================== */
 function preparePrintHeader(titleText, personName) {
-  let hdr = document.querySelector(".print-header");
-  if (!hdr) {
-    hdr = document.createElement("div");
-    hdr.className = "print-header";
-    hdr.innerHTML = `
-      <h2>Schema – ${personName || titleText || "Okänd"}</h2>
-      <div class="date">
-        Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
-          year: "numeric",
-          month: "long",
-          day: "numeric"
-        })}
-      </div>`;
-    document.body.prepend(hdr);
-  } else {
-    hdr.querySelector("h2").textContent =
-      `Schema – ${personName || titleText || "Okänd"}`;
-    hdr.querySelector(".date").textContent =
-      "Utskriftsdatum: " +
-      new Date().toLocaleDateString("sv-SE", {
+  // Ta bort eventuell gammal rubrik
+  document.querySelector(".print-header")?.remove();
+
+  // Skapa ny rubrik
+  const hdr = document.createElement("div");
+  hdr.className = "print-header";
+  hdr.innerHTML = `
+    <h2>Schema – ${personName || titleText || "Okänd"}</h2>
+    <div class="date">
+      Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
         year: "numeric",
         month: "long",
         day: "numeric"
-      });
-  }
+      })}
+    </div>`;
+  document.body.prepend(hdr);
 }
 
+
 /* =====================================================
-   Utskriftsfunktion
+   UTFÖR UTSKRIFT
    ===================================================== */
 function printSchema(title, personName) {
   preparePrintHeader(title, personName);
@@ -968,15 +974,16 @@ function printSchema(title, personName) {
   const activeView = document.querySelector(".view.active");
   if (activeView) activeView.classList.add("print-visible");
 
-  // Ge webbläsaren tid att uppdatera innan utskrift
-  setTimeout(() => window.print(), 200);
+  // Vänta kort så layouten hinner uppdateras innan utskrift
+  setTimeout(() => window.print(), 300);
 
-  // Rensa markering efteråt
+  // Rensa efteråt
   setTimeout(() => {
-    document.querySelectorAll(".print-visible")
-      .forEach(el => el.classList.remove("print-visible"));
+    document.querySelectorAll(".print-visible").forEach(el => el.classList.remove("print-visible"));
+    document.querySelector(".print-header")?.remove();
   }, 1500);
 }
+
 
 </script>
 </body>
