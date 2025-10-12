@@ -134,38 +134,18 @@ select, .btn{
 .view.active{ display:block; }
 #viewTitle{ text-align:center; margin:10px 0 8px; font-weight:800; }
 
-/* =========================
-   UTSKRIFT – ny version
-========================= */
-@media print {
-  header, .tab-bar, .controls, button { display:none !important; }
-  body {
-    background:#fff;
-    color:#000;
-    font-size:10pt;
-    margin:0;
-    -webkit-print-color-adjust:exact;
-    print-color-adjust:exact;
-  }
-  .view { display:block !important; visibility:visible !important; }
-  .print-header {
-    display:flex !important;
-    justify-content:space-between;
-    align-items:center;
-    border-bottom:1px solid #ccc;
-    padding:8px 12px 6px;
-    margin-bottom:14px;
-  }
-  .print-header img { height:28px; }
-  .print-header h2 {
-    font-size:18pt;
-    font-weight:800;
-    margin:0;
-  }
-  .print-header .date { font-size:10pt; color:#333; }
-  @page { size:A4 landscape; margin:10mm; }
+/* Print – proffsig utskrift av just schemat */
+@media print{
+  body{ background:#fff; color:#000; font-size:9pt; margin:0; }
+  header, .tab-bar, .controls, .panel, .dropdown-content { display:none !important; }
+  /* Dölj alla vyer som standard */
+  .view{ display:none !important; visibility:hidden !important; }
+  /* Visa exakt den vy vi valt att skriva ut */
+  .print-visible{ display:block !important; visibility:visible !important; position:relative !important; }
+  .card, .compare-item{ break-inside:avoid; page-break-inside:avoid; }
+  .block{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  @page{ size:A4 landscape; margin:8mm; }
 }
-
 
 /* Små skärmar – lite större klickytor */
 @media (max-width:700px){
@@ -773,86 +753,11 @@ document.getElementById("btnCoachWeek").onclick=()=>{
   renderBlocksGeneric(name,true,document.getElementById("cBlockHeader"),document.getElementById("cBlockGrid"));
 };
 
-   /* =====================================================
-   UTSKRIFT – liggande layout
-   ===================================================== */
-<style>
-@media print {
-  /* Dölj navigation och knappar */
-  header, .tab-bar, .controls, button {
-    display: none !important;
-  }
-
-  /* Grundstil */
-  body {
-    background: #fff !important;
-    color: #000 !important;
-    font-size: 10pt;
-    margin: 0;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* Endast aktiv vy skrivs ut */
-  .view.print-visible {
-    display: block !important;
-    visibility: visible !important;
-  }
-
-  /* Utskriftsrubrik */
-  .print-header {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #ccc;
-    padding: 8px 12px 6px;
-    margin-bottom: 14px;
-  }
-  .print-header img {
-    height: 28px;
-  }
-  .print-header h2 {
-    font-size: 16pt;
-    font-weight: 800;
-    margin: 0;
-  }
-  .print-header .date {
-    font-size: 10pt;
-    color: #333;
-  }
-
-  /* Schemaceller */
-  .block-time {
-    font-size: 9pt !important;
-    padding: 3px 6px !important;
-  }
-  .block {
-    border-radius: 6px;
-    padding: 6px 8px;
-    font-size: 9pt !important;
-    line-height: 1.2 !important;
-    overflow: visible !important;
-    white-space: normal !important;
-  }
-
-  /* Liggande A4 */
-  @page {
-    size: A4 landscape;
-    margin: 10mm;
-  }
-}
-</style>
-
-<script>
 /* =====================================================
-   START + UTSKRIFT
+   UTSKRIFT – förbättrad version (fungerar i alla webbläsare)
    ===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-  // Sätt startvy om funktioner finns
-  if (typeof showView === "function") showView("nowView");
-  if (typeof renderNow === "function") renderNow();
-
-  // Koppla utskriftsknappar
+  // Koppla om utskriftsknapparna till nya funktionen
   const buttons = {
     btnPrintParticipant: "👤 Deltagarschema",
     btnPrintCoach: "🧑‍🏫 Coachschema",
@@ -866,7 +771,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =====================================================
-   Skapa rubrik för utskrift
+   Skapa rubrik överst vid utskrift
    ===================================================== */
 function preparePrintHeader(titleText) {
   let hdr = document.querySelector(".print-header");
@@ -901,22 +806,16 @@ function preparePrintHeader(titleText) {
 function printSchema(title) {
   preparePrintHeader(title);
 
-  const active = document.querySelector(".view.active");
-  if (active) active.classList.add("print-visible");
+  // Markera aktiv vy för utskrift
+  const activeView = document.querySelector(".view.active");
+  if (activeView) activeView.classList.add("print-visible");
 
+  // Vänta lite så DOM hinner uppdateras
   setTimeout(() => window.print(), 200);
 
+  // Ta bort markering efter utskrift
   setTimeout(() => {
-    document
-      .querySelectorAll(".print-visible")
+    document.querySelectorAll(".print-visible")
       .forEach(el => el.classList.remove("print-visible"));
   }, 1500);
 }
-
-/* =====================================================
-   SLUT PÅ SCRIPT
-   ===================================================== */
-</script>
-
-</body>
-</html>
