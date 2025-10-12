@@ -693,44 +693,107 @@ function renderCardsGeneric(name,isCoach,targetEl){
 /* =========================
    VECKA (BLOCK, LIGGANDE)
 ========================= */
-function makeSlots(){const a=[];for(let h=8;h<=16;h++){a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);}a.push("16:30");return a;}
-function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
-  const slots=makeSlots();
-  const days=["måndag","tisdag","onsdag","torsdag","fredag"];
-  const field=isCoach?"Coach":"Deltagare";
-  const rows=DATA.filter(r=>{
-    const list=splitNames(r[field]||"");
-    return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) || (r[field]||"").trim().toLowerCase()==="alla";
+function makeSlots() {
+  const a = [];
+  for (let h = 8; h <= 16; h++) {
+    a.push(`${String(h).padStart(2,"0")}:00`, `${String(h).padStart(2,"0")}:30`);
+  }
+  a.push("16:30");
+  return a;
+}
+
+function renderBlocksGeneric(name, isCoach, headerEl, gridEl) {
+  const slots = makeSlots();
+  const days = ["måndag", "tisdag", "onsdag", "torsdag", "fredag"];
+  const field = isCoach ? "Coach" : "Deltagare";
+  const rows = DATA.filter(r => {
+    const list = splitNames(r[field] || "");
+    return (
+      list.map(x => x.toLowerCase()).includes(name.toLowerCase()) ||
+      (r[field] || "").trim().toLowerCase() === "alla"
+    );
   });
 
-  headerEl.innerHTML="<div>Tid</div>"+days.map(d=>`<div>${d}</div>`).join("");
-  gridEl.innerHTML="";gridEl.style.gridTemplateColumns=`80px repeat(${days.length},1fr)`;
-  slots.forEach(t=>{gridEl.innerHTML+=`<div class='block-time'>${t}</div>`+days.map(()=>`<div class='block-cell'></div>`).join("");});
-  const cells=[...gridEl.children];
+  headerEl.innerHTML = "<div>Tid</div>" + days.map(d => `<div>${d}</div>`).join("");
+  gridEl.innerHTML = "";
+  gridEl.style.gridTemplateColumns = `80px repeat(${days.length},1fr)`;
+  slots.forEach(t => {
+    gridEl.innerHTML +=
+      `<div class='block-time'>${t}</div>` +
+      days.map(() => `<div class='block-cell'></div>`).join("");
+  });
+  const cells = [...gridEl.children];
 
-  rows.forEach(r=>{
-    const d=new Date(r.Datum);
-    let wd=d.getDay(); if(wd===0||wd===6) return;
-    const col=(wd-1)+1;
-    const sIdx=slots.indexOf(r.Start), eIdx=slots.indexOf(r.Slut);
-    if(sIdx<0||eIdx<=sIdx) return;
-    const firstCellIndex=sIdx*(1+days.length)+col, firstCell=cells[firstCellIndex];
-    const block=document.createElement("div");
-    block.className="block"; block.style.background=colorFor(r);
+  rows.forEach(r => {
+    const d = new Date(r.Datum);
+    let wd = d.getDay();
+    if (wd === 0 || wd === 6) return;
 
-    const [sh,sm]=(r.Start||"00:00").split(":").map(Number);
-    const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
-    const duration=(eh*60+em)-(sh*60+sm);
+    const col = (wd - 1) + 1;
+    const sIdx = slots.indexOf(r.Start),
+          eIdx = slots.indexOf(r.Slut);
+    if (sIdx < 0 || eIdx <= sIdx) return;
 
-    if(duration>30){
-      block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
-        ${emojiFor(r)} ${r.Aktivitet||""}<br>
-        ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
-    }else{
-      block.innerHTML=`${emojiFor(r)} ${r.Aktivitet||""} – ${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}`;
+    const firstCellIndex = sIdx * (1 + days.length) + col;
+    const firstCell = cells[firstCellIndex];
+    const block = document.createElement("div");
+    block.className = "block";
+    block.style.background = colorFor(r);
+
+    const [sh, sm] = (r.Start || "00:00").split(":").map(Number);
+    const [eh, em] = (r.Slut || "00:00").split(":").map(Number);
+    const duration = (eh * 60 + em) - (sh * 60 + sm);
+
+    const coacher = (r.Coach || "-").split(",").map(x => x.trim()).filter(Boolean);
+    const deltagare = (r.Deltagare || "-").split(",").map(x => x.trim()).filter(Boolean);
+
+    function kortTid(tid) {
+      if (!tid) return "";
+      const [h, m] = tid.split(":");
+      return `${parseInt(h)}.${m}`;
     }
 
-    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;block.style.height=(eIdx-sIdx)*cellH+"px";});
+    const startTid = kortTid(r.Start);
+    const slutTid = kortTid(r.Slut);
+
+    // === Coachvy ===
+    if (isCoach) {
+      let text = "";
+      if (duration <= 30) {
+        // 30 min: ingen emoji, 1 deltagare
+        text = `${startTid}–${slutTid} ${r.Aktivitet || ""} – 👥 ${deltagare[0] || "-"}`;
+      } else if (duration <= 60) {
+        // 1 timme: emoji + 2 deltagare + +x
+        const visade = deltagare.slice(0, 2);
+        const fler = deltagare.length - visade.length;
+        text = `${startTid}–${slutTid} ${emojiFor(r)} ${r.Aktivitet || ""} – 👥 ${visade.join(", ")}${fler > 0 ? " +" + fler : ""}`;
+      } else {
+        // >1 timme: emoji + 4 deltagare + +x
+        const visade = deltagare.slice(0, 4);
+        const fler = deltagare.length - visade.length;
+        text = `${startTid}–${slutTid} ${emojiFor(r)} ${r.Aktivitet || ""} – 👥 ${visade.join(", ")}${fler > 0 ? " +" + fler : ""}`;
+      }
+      block.innerHTML = text;
+    }
+
+    // === Deltagarvy ===
+    else {
+      let text = "";
+      if (duration <= 30) {
+        // 30 min: ingen emoji, 1 coach
+        text = `${startTid}–${slutTid} ${r.Aktivitet || ""} – 🧑‍🏫 ${coacher[0] || "-"}`;
+      } else {
+        // >= 1 timme: emoji + aktivitet + coach
+        text = `${startTid}–${slutTid} ${emojiFor(r)} ${r.Aktivitet || ""} – 🧑‍🏫 ${coacher[0] || "-"}`;
+      }
+      block.innerHTML = text;
+    }
+
+    // Anpassa höjden
+    requestAnimationFrame(() => {
+      const cellH = firstCell.clientHeight || 28;
+      block.style.height = (eIdx - sIdx) * cellH + "px";
+    });
     firstCell.appendChild(block);
   });
 }
@@ -777,53 +840,119 @@ document.getElementById("btnShowCompare").onclick = () => {
   out.style.display="block";
   document.getElementById("comparePanel").style.display="none";
 };
-
-function renderSingleWeek(name,isCoach,compact=false){
-  const slots=makeSlots(), days=["måndag","tisdag","onsdag","torsdag","fredag"];
-  const field=isCoach?"Coach":"Deltagare";
-  const rows=DATA.filter(r=>{
-    const list=splitNames(r[field]||"");
-    return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) || (r[field]||"").trim().toLowerCase()==="alla";
+/* =========================
+   ASSISTENT – Enskild vecka (för jämförelse)
+========================= */
+function renderSingleWeek(name, isCoach, compact = false) {
+  const slots = makeSlots();
+  const days = ["måndag", "tisdag", "onsdag", "torsdag", "fredag"];
+  const field = isCoach ? "Coach" : "Deltagare";
+  const rows = DATA.filter(r => {
+    const list = splitNames(r[field] || "");
+    return (
+      list.map(x => x.toLowerCase()).includes(name.toLowerCase()) ||
+      (r[field] || "").trim().toLowerCase() === "alla"
+    );
   });
 
-  const container=document.createElement("div");
-  container.innerHTML=`<div class="block-header"><div>Tid</div>${days.map(d=>`<div>${d}</div>`).join("")}</div>
-  <div class="block-grid" style="grid-template-columns:80px repeat(${days.length},1fr)"></div>`;
+  const container = document.createElement("div");
+  container.innerHTML = `
+    <div class="block-header">
+      <div>Tid</div>
+      ${days.map(d => `<div>${d}</div>`).join("")}
+    </div>
+    <div class="block-grid" style="grid-template-columns:80px repeat(${days.length},1fr)"></div>
+  `;
 
-  const grid=container.querySelector(".block-grid");
+  const grid = container.querySelector(".block-grid");
   const timeFont = compact ? ".78rem" : ".86rem";
-  grid.previousElementSibling.querySelectorAll('div').forEach(d => d.style.fontSize = compact ? ".86rem" : ".92rem");
-  slots.forEach(t=>{
-    grid.innerHTML+=`<div class='block-time' style="font-size:${timeFont}">${t}</div>`+days.map(()=>`<div class='block-cell'></div>`).join("");
+  grid.previousElementSibling.querySelectorAll("div").forEach(d => {
+    d.style.fontSize = compact ? ".86rem" : ".92rem";
   });
-  const cells=[...grid.children];
 
-  rows.forEach(r=>{
-    const wd=new Date(r.Datum).getDay(); if(wd===0||wd===6) return;
-    const col=(wd-1)+1; const sIdx=slots.indexOf(r.Start), eIdx=slots.indexOf(r.Slut); if(sIdx<0||eIdx<=sIdx) return;
-    const firstCellIndex=sIdx*(1+days.length)+col, firstCell=cells[firstCellIndex];
-    const block=document.createElement("div");
-    block.className="block"; block.style.background=colorFor(r);
+  slots.forEach(t => {
+    grid.innerHTML +=
+      `<div class='block-time' style="font-size:${timeFont}">${t}</div>` +
+      days.map(() => `<div class='block-cell'></div>`).join("");
+  });
+  const cells = [...grid.children];
+
+  rows.forEach(r => {
+    const wd = new Date(r.Datum).getDay();
+    if (wd === 0 || wd === 6) return;
+    const col = (wd - 1) + 1;
+    const sIdx = slots.indexOf(r.Start),
+          eIdx = slots.indexOf(r.Slut);
+    if (sIdx < 0 || eIdx <= sIdx) return;
+
+    const firstCellIndex = sIdx * (1 + days.length) + col;
+    const firstCell = cells[firstCellIndex];
+    const block = document.createElement("div");
+    block.className = "block";
+    block.style.background = colorFor(r);
     block.style.fontSize = compact ? ".78rem" : ".82rem";
     block.style.padding = compact ? "5px 6px" : "6px 8px";
 
-    const [sh,sm]=(r.Start||"00:00").split(":").map(Number);
-    const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
-    const duration=(eh*60+em)-(sh*60+sm);
+    const [sh, sm] = (r.Start || "00:00").split(":").map(Number);
+    const [eh, em] = (r.Slut || "00:00").split(":").map(Number);
+    const duration = (eh * 60 + em) - (sh * 60 + sm);
 
-    if(duration>30){
-      block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
-        ${emojiFor(r)} ${r.Aktivitet||""}<br>
-        ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
-    }else{
-      block.innerHTML=`${emojiFor(r)} ${r.Aktivitet||""} – ${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}`;
+    const coacher = (r.Coach || "-").split(",").map(x => x.trim()).filter(Boolean);
+    const deltagare = (r.Deltagare || "-").split(",").map(x => x.trim()).filter(Boolean);
+
+    function kortTid(tid) {
+      if (!tid) return "";
+      const [h, m] = tid.split(":");
+      return `${parseInt(h)}.${m}`;
     }
 
-    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||26;block.style.height=(eIdx-sIdx)*cellH+"px";});
+    const startTid = kortTid(r.Start);
+    const slutTid = kortTid(r.Slut);
+
+    // === Coachvy ===
+    if (isCoach) {
+      let text = "";
+      if (duration <= 30) {
+        // 30 min: ingen emoji, 1 deltagare
+        text = `${startTid}–${slutTid} ${r.Aktivitet || ""} – 👥 ${deltagare[0] || "-"}`;
+      } else if (duration <= 60) {
+        // 1 timme: emoji + 2 deltagare + +x
+        const visade = deltagare.slice(0, 2);
+        const fler = deltagare.length - visade.length;
+        text = `${startTid}–${slutTid} ${emojiFor(r)} ${r.Aktivitet || ""} – 👥 ${visade.join(", ")}${fler > 0 ? " +" + fler : ""}`;
+      } else {
+        // >1 timme: emoji + 4 deltagare + +x
+        const visade = deltagare.slice(0, 4);
+        const fler = deltagare.length - visade.length;
+        text = `${startTid}–${slutTid} ${emojiFor(r)} ${r.Aktivitet || ""} – 👥 ${visade.join(", ")}${fler > 0 ? " +" + fler : ""}`;
+      }
+      block.innerHTML = text;
+    }
+
+    // === Deltagarvy ===
+    else {
+      let text = "";
+      if (duration <= 30) {
+        // 30 min: ingen emoji, 1 coach
+        text = `${startTid}–${slutTid} ${r.Aktivitet || ""} – 🧑‍🏫 ${coacher[0] || "-"}`;
+      } else {
+        // >= 1 timme: emoji + aktivitet + coach
+        text = `${startTid}–${slutTid} ${emojiFor(r)} ${r.Aktivitet || ""} – 🧑‍🏫 ${coacher[0] || "-"}`;
+      }
+      block.innerHTML = text;
+    }
+
+    // Anpassa höjden dynamiskt
+    requestAnimationFrame(() => {
+      const cellH = firstCell.clientHeight || 26;
+      block.style.height = (eIdx - sIdx) * cellH + "px";
+    });
     firstCell.appendChild(block);
   });
+
   return container;
 }
+
 
 /* =========================
    ERSÄTTARE
