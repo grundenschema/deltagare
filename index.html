@@ -242,7 +242,7 @@ select, .btn {
   select, .btn { width:100%; }
 }
 
-//* =========================
+/* =========================
    Utskrift – skriv bara ut aktivt schema
 ========================= */
 @media print {
@@ -274,6 +274,13 @@ select, .btn {
     print-color-adjust: exact;
   }
 
+  /* 🔧 Lägg till detta: tillåt blockceller att växa */
+  .block-cell {
+    height: auto !important;
+    min-height: 40px !important;
+    overflow: visible !important;
+  }
+
   /* Behåll färger och layout */
   body {
     background: #fff !important;
@@ -290,6 +297,7 @@ select, .btn {
     margin: 10mm;
   }
 }
+
 
 </style>
 </head>
