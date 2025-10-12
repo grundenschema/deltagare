@@ -716,6 +716,7 @@ function renderSick(){
 }
 
 document.getElementById("btnCoachWeek").onclick = () => {
+document.getElementById("btnCoachWeek").onclick = () => {
   const name = document.getElementById("coachSelect").value;
   if (!name) { alert("Välj en coach."); return; }
   document.getElementById("coachDay").style.display = "none";
@@ -729,7 +730,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – ren, stabil version
+   UTSKRIFT – ren och stabil version
 ========================= */
 
 /* Skapa rubrik (logga + titel + datum) om den saknas */
@@ -775,7 +776,7 @@ printStyle.textContent = `
   .print-header .date { font-size:11pt; color:#333; }
 
   /* Dölj allt onödigt vid utskrift */
-  header, .tab-bar, .controls, .panel, .btn, #clock, .print-buttons {
+  header, .tab-bar, .controls, .panel, .btn, #clock {
     display:none !important;
   }
 
@@ -790,7 +791,7 @@ printStyle.textContent = `
 }`;
 document.head.appendChild(printStyle);
 
-/* Enkel utskriftsfunktion */
+/* Enkel utskriftsfunktion – fungerar i Chrome */
 function doPrint(titleText = "") {
   const header = document.getElementById("printHeader");
   header.style.display = "flex";
@@ -805,9 +806,21 @@ function doPrint(titleText = "") {
       day: "numeric",
     });
 
-  // Utskriftsdialog – körs direkt på knapptryck
+  // Kör utskriften direkt (kräver popup-tillstånd)
   window.print();
 }
+
+/* =========================
+   KOPPLA UTSKRIFTSKNAPPAR
+========================= */
+document.getElementById("btnPrintParticipant").onclick = () =>
+  doPrint(document.getElementById("nameSelect").value || "");
+
+document.getElementById("btnPrintCoach").onclick = () =>
+  doPrint(document.getElementById("coachSelect").value || "");
+
+document.getElementById("btnPrintNow").onclick = () => doPrint("Pågår nu");
+document.getElementById("btnPrintCompare").onclick = () => doPrint("Jämförelse");
 
 /* =========================
    START: visa Pågår nu
@@ -821,3 +834,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
