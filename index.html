@@ -764,108 +764,33 @@ const printButtonsHTML = `
 </div>`;
 document.body.insertAdjacentHTML("beforeend", printButtonsHTML);
 
-/* =========================
-   UTSKRIFT – Chrome-kompatibel med rubrik, logga, datum + luft
-========================= */
+/* UTSKRIFT */
+document.getElementById("btnPrint").onclick=()=>{
+  document.querySelectorAll('.print-scope').forEach(e=>e.classList.remove('print-visible'));
+  const sc=document.getElementById("schemaContainer");
+  const blocks=document.getElementById("blockContainer");
 
-/* Skapa rubrik om den inte finns */
-if (!document.getElementById("printHeader")) {
-  const headerHTML = `
-    <div class="print-header" id="printHeader" style="display:none;">
-      <img
-        src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-        alt="Grunden DV logotyp"
-        style="height:20pt;margin-right:10px;"
-      />
-      <div>
-        <h2 id="printTitle" style="font-size:20pt;font-weight:800;margin:0;"></h2>
-        <div id="printDate" style="font-size:11pt;color:#333;"></div>
-      </div>
-    </div>`;
-  document.body.insertAdjacentHTML("afterbegin", headerHTML);
-}
-
-/* CSS för rubriken och luft mellan rubrik/schemat */
-const printStyle = document.createElement("style");
-printStyle.textContent = `
-@media print {
-  .print-header {
-    display:flex !important;
-    align-items:flex-end;
-    gap:12px;
-    border-bottom:1px solid #ccc;
-    padding:8px 12px 12px;
-    margin-bottom:20px;
+  if(blocks.style.display==="block"){
+    blocks.classList.add("print-visible");
+  } else if(sc.style.display==="block" && sc.dataset.view==="compare"){
+    sc.classList.add("print-visible");
+  } else if(sc.style.display==="block"){
+    sc.classList.add("print-visible");
+  } else{
+    alert("Öppna ett schema först (Vecka, Dagens eller Jämförelse).");
+    return;
   }
 
-  /* Luft mellan rubrik och schema */
-  .print-header::after {
-    content:"";
-    display:block;
-    height:16px;
-    width:100%;
-  }
+  setTimeout(()=>{window.print();},150);
+};
 
-  .print-header img {
-    height:20pt;
-    margin-right:10px;
-  }
+/* LOGGA = START */
+document.querySelector("header img").addEventListener("click",()=>showNowAndNext());
 
-  .print-header h2 {
-    font-size:20pt;
-    font-weight:800;
-    margin:0;
-  }
-
-  .print-header .date {
-    font-size:11pt;
-    color:#333;
-  }
-
-  /* Dölj UI-element vid utskrift */
-  header, .tab-bar, .controls, .panel, .btn, #clock, .print-buttons {
-    display:none !important;
-  }
-
-  body {
-    background:#fff;
-    color:#000;
-    -webkit-print-color-adjust:exact;
-    print-color-adjust:exact;
-  }
-
-  @page { size:A4 landscape; margin:10mm; }
-}`;
-document.head.appendChild(printStyle);
-
-/* === Enkel och stabil utskriftsfunktion === */
-function doPrint(titleText = "") {
-  const header = document.getElementById("printHeader");
-  header.style.display = "flex";
-
-  document.getElementById("printTitle").textContent = "Schema – " + (titleText || "");
-  document.getElementById("printDate").textContent =
-    "Utskriftsdatum: " +
-    new Date().toLocaleDateString("sv-SE", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-  // Starta utskriftsdialogen direkt (Chrome-säkert)
-  window.print();
-}
-
-/* =========================
-   START: visa Pågår nu
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  if (typeof showView === "function" && typeof renderNow === "function") {
-    showView("nowView");
-    renderNow();
-  }
-});
+/* Auto-uppdatering av Pågår nu */
+setInterval(()=>{ 
+  if(document.getElementById("nowContainer").style.display==="block") showNowAndNext();
+},60000);
 </script>
 </body>
 </html>
