@@ -735,7 +735,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 <script>
 function doPrint(titleText = "") {
   try {
-    // Hitta vilken vy som är aktiv (deltagare, coach, pågår nu, assistent)
+    // Hitta aktiv vy (deltagare, coach, pågår nu, assistent)
     const visibleView = document.querySelector(".view.active");
     if (!visibleView) {
       alert("Ingen aktiv vy att skriva ut.");
@@ -776,20 +776,22 @@ function doPrint(titleText = "") {
       </div>
     `;
 
-    // Markera vilken del som ska skrivas ut
+    // Markera vilket område som ska skrivas ut
     document.querySelectorAll(".view").forEach(v => v.classList.remove("print-visible"));
     printTarget.classList.add("print-visible");
 
-    // Lägg till rubrik (tas bort efter utskrift)
+    // Lägg till rubrik överst
     const tempHeader = document.createElement("div");
     tempHeader.innerHTML = headerHTML;
     printTarget.prepend(tempHeader);
 
-    // Vänta lite så layouten hinner ritas upp
+    // Vänta lite så layouten hinner laddas
     setTimeout(() => {
       window.print();
+      // Återställ sidan efter utskrift
       printTarget.classList.remove("print-visible");
       tempHeader.remove();
+      document.body.style.pointerEvents = "auto";
     }, 500);
   } catch (err) {
     console.error("Fel vid utskrift:", err);
@@ -823,9 +825,11 @@ document.addEventListener("DOMContentLoaded", () => {
    ÅTERSTÄLLNING EFTER UTSKRIFT
 ========================= */
 window.onafterprint = () => {
-  // När utskriften stängs, visa alla vyer igen
+  // När utskriften stängs, visa alla vyer igen och slå på klick
   document.querySelectorAll(".view").forEach(v => v.classList.remove("print-visible"));
+  document.body.style.pointerEvents = "auto";
 };
 </script>
 </body>
 </html>
+
