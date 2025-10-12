@@ -753,102 +753,122 @@ document.getElementById("btnCoachWeek").onclick=()=>{
 };
 
 /* =========================
-   UTSKRIFT – endast aktivt schema + rubrik för blockschema
+   UTSKRIFT – aktivt schema + rubrik för blockschema (alla webbläsare)
 ========================= */
 
 // skapa rubrik (endast en gång)
 if (!document.getElementById("printHeader")) {
-  const headerHTML = `
-  <div class="print-header" id="printHeader" style="display:none;">
-    <img
-      src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-      alt="Grunden DV logotyp"
-      style="height:20pt; margin-right:10px;"
-    />
-    <div>
-      <h2 id="printTitle" style="font-size:20pt; font-weight:800; margin:0;"></h2>
-      <div id="printDate" style="font-size:11pt; color:#333;"></div>
-    </div>
-  </div>`;
+  var headerHTML =
+    '<div class="print-header" id="printHeader" style="display:none;">' +
+    '<img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" ' +
+    'alt="Grunden DV logotyp" style="height:20pt; margin-right:10px;">' +
+    '<div>' +
+    '<h2 id="printTitle" style="font-size:20pt; font-weight:800; margin:0;"></h2>' +
+    '<div id="printDate" style="font-size:11pt; color:#333;"></div>' +
+    '</div></div>';
   document.body.insertAdjacentHTML("afterbegin", headerHTML);
 }
 
 // CSS för utskriftsrubriken
-const style = document.createElement("style");
-style.textContent = `
-@media print {
-  .print-header {
-    display: flex !important;
-    align-items: flex-end;
-    gap: 12px;
-    border-bottom: 1px solid #ccc;
-    padding: 8px 12px 12px;
-    margin-bottom: 20px;
-  }
-}
-`;
+var style = document.createElement("style");
+style.textContent =
+  "@media print {" +
+  ".print-header {display:flex !important; align-items:flex-end; gap:12px; border-bottom:1px solid #ccc;" +
+  "padding:8px 12px 12px; margin-bottom:20px;}" +
+  "}";
 document.head.appendChild(style);
 
 // huvudfunktion
 function printScopeWithin(viewId) {
-  // ta bort tidigare markörer
-  document.querySelectorAll(".print-scope").forEach(e => e.classList.remove("print-visible"));
-  const view = document.getElementById(viewId);
-  if (!view) { window.print(); return; }
+  try {
+    // ta bort tidigare markörer
+    var scopesAll = document.querySelectorAll(".print-scope");
+    for (var i = 0; i < scopesAll.length; i++) {
+      scopesAll[i].classList.remove("print-visible");
+    }
 
-  // hitta första synliga print-scope i view (eller fallback)
-  const scopes = [...view.querySelectorAll(".print-scope")];
-  let visible = scopes.find(n => {
-    const s = getComputedStyle(n);
-    return s.display !== "none" && s.visibility !== "hidden";
-  }) || scopes[0]; // fallback om ingen synlig hittas
+    var view = document.getElementById(viewId);
+    if (!view) {
+      window.print();
+      return;
+    }
 
-  // visa rubrik endast för blockschema (coach + deltagare)
-  const showHeader = (viewId === "participantView" || viewId === "coachView");
-  const name =
-    viewId === "participantView"
-      ? document.getElementById("nameSelect").value
-      : viewId === "coachView"
-      ? document.getElementById("coachSelect").value
-      : "";
+    // hitta första synliga print-scope i view
+    var scopes = view.querySelectorAll(".print-scope");
+    var visible = null;
+    for (var j = 0; j < scopes.length; j++) {
+      var s = window.getComputedStyle(scopes[j]);
+      if (s.display !== "none" && s.visibility !== "hidden") {
+        visible = scopes[j];
+        break;
+      }
+    }
 
-  if (showHeader) {
-    document.getElementById("printTitle").textContent = "Schema – " + (name || "");
-    document.getElementById("printDate").textContent =
-      "Utskriftsdatum: " +
-      new Date().toLocaleDateString("sv-SE", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      });
-    document.getElementById("printHeader").style.display = "flex";
-  } else {
-    document.getElementById("printHeader").style.display = "none";
+    // fallback om ingen synlig hittas
+    if (!visible && scopes.length > 0) {
+      visible = scopes[0];
+    }
+
+    // visa rubrik endast för blockschema (coach + deltagare)
+    var showHeader = viewId === "participantView" || viewId === "coachView";
+    var name = "";
+    if (viewId === "participantView") {
+      name = document.getElementById("nameSelect").value;
+    } else if (viewId === "coachView") {
+      name = document.getElementById("coachSelect").value;
+    }
+
+    var header = document.getElementById("printHeader");
+    if (showHeader) {
+      document.getElementById("printTitle").textContent = "Schema – " + (name || "");
+      document.getElementById("printDate").textContent =
+        "Utskriftsdatum: " +
+        new Date().toLocaleDateString("sv-SE", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        });
+      header.style.display = "flex";
+    } else {
+      header.style.display = "none";
+    }
+
+    // markera rätt område
+    if (visible) visible.classList.add("print-visible");
+
+    // ge webbläsaren tid att rendera innan utskrift
+    setTimeout(function () {
+      window.print();
+      // vänta lite extra innan vi gömmer rubriken (Firefox kräver detta)
+      setTimeout(function () {
+        header.style.display = "none";
+      }, 800);
+    }, 500);
+  } catch (err) {
+    console.error("Fel vid utskrift:", err);
+    window.print();
   }
-
-  // markera rätt område
-  if (visible) visible.classList.add("print-visible");
-
-  // skriv ut
-  setTimeout(() => window.print(), 250);
-
-  // göm rubrik efteråt
-  setTimeout(() => {
-    document.getElementById("printHeader").style.display = "none";
-  }, 1000);
 }
 
 // knappar
-document.getElementById("btnPrintParticipant").onclick = () => printScopeWithin("participantView");
-document.getElementById("btnPrintCoach").onclick = () => printScopeWithin("coachView");
-document.getElementById("btnPrintNow").onclick = () => printScopeWithin("nowView");
-document.getElementById("btnPrintCompare").onclick = () => printScopeWithin("assistantView");
+document.getElementById("btnPrintParticipant").onclick = function () {
+  printScopeWithin("participantView");
+};
+document.getElementById("btnPrintCoach").onclick = function () {
+  printScopeWithin("coachView");
+};
+document.getElementById("btnPrintNow").onclick = function () {
+  printScopeWithin("nowView");
+};
+document.getElementById("btnPrintCompare").onclick = function () {
+  printScopeWithin("assistantView");
+};
 
 /* =========================
    START: visa Pågår nu
 ========================= */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
   showView("nowView");
   renderNow();
 });
