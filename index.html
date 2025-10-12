@@ -716,7 +716,6 @@ function renderSick(){
 }
 
 document.getElementById("btnCoachWeek").onclick = () => {
-document.getElementById("btnCoachWeek").onclick = () => {
   const name = document.getElementById("coachSelect").value;
   if (!name) { alert("Välj en coach."); return; }
   document.getElementById("coachDay").style.display = "none";
@@ -729,59 +728,24 @@ document.getElementById("btnCoachWeek").onclick = () => {
   );
 };
 
-
 /* =========================
-   UTSKRIFT – FRYSFRI, STABIL VERSION
-   (nytt fönster med korrekt CSS och aktiv vy)
+   UTSKRIFT – stabil och frysfri version
+   (nytt fönster som i Emma-testet)
 ========================= */
 function doPrint(titleText = "") {
-  // Hitta aktuell vy som är synlig
-  const views = ["participantView", "coachView", "nowView", "assistantView"];
-  const view = views.map(id => document.getElementById(id))
-    .find(el => el && el.style.display !== "none");
-
-  // Om inget hittas, skriv ut hela sidan som nödlösning
-  const content = view ? view.outerHTML : document.body.outerHTML;
-
-  // Skapa nytt utskriftsfönster
-  const printWin = window.open("", "_blank", "width=1200,height=800");
-  if (!printWin) {
-    alert("Pop-up blockerad. Tillåt pop-ups för att kunna skriva ut.");
-    return;
-  }
-
-  const dateText = new Date().toLocaleDateString("sv-SE", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
-  // Hämta alla CSS-stilar från huvudfönstret
-  const styles = [...document.styleSheets]
-    .map(s => {
-      try { return [...s.cssRules].map(r => r.cssText).join("\n"); }
-      catch { return ""; }
-    })
-    .join("\n");
-
- /* =========================
-   UTSKRIFT – stabil version (baserad på Emma-testet)
-========================= */
-function doPrint(titleText = "") {
-  // Välj den vy som syns
+  // Hitta den vy som visas just nu
   const views = ["participantView", "coachView", "nowView", "assistantView"];
   const visibleView = views
     .map(id => document.getElementById(id))
     .find(v => v && v.style.display !== "none");
 
-  // Om inget aktivt hittas, skriv ut hela sidan
+  // Om inget hittas – skriv ut hela sidan
   const content = visibleView ? visibleView.innerHTML : document.body.innerHTML;
 
-  // Skapa nytt, rent fönster
+  // Skapa ett nytt utskriftsfönster
   const printWin = window.open("", "_blank", "width=1200,height=800");
   if (!printWin) {
-    alert("Tillåt popups för att kunna skriva ut.");
+    alert("Tillåt popup-fönster för att kunna skriva ut.");
     return;
   }
 
@@ -792,7 +756,7 @@ function doPrint(titleText = "") {
     day: "numeric",
   });
 
-  // Minimal, säker mall
+  // Skriv HTML-innehåll till det nya fönstret
   printWin.document.write(`
   <html lang="sv">
   <head>
@@ -800,30 +764,31 @@ function doPrint(titleText = "") {
     <title>Schema – ${titleText}</title>
     <style>
       body {
-        font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-        background:#fff;
-        color:#000;
-        margin:15mm;
-        -webkit-print-color-adjust:exact;
-        print-color-adjust:exact;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        margin: 15mm;
+        background: #fff;
+        color: #000;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       .header {
-        display:flex;
-        align-items:flex-end;
-        gap:12px;
-        border-bottom:1px solid #ccc;
-        padding-bottom:8px;
-        margin-bottom:16px;
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+        margin-bottom: 18px;
       }
-      .header img { height:20pt; margin-right:10px; }
-      .header h2 { font-size:20pt; font-weight:800; margin:0; }
-      .header .date { font-size:11pt; color:#333; }
-      @page { size:A4 landscape; margin:10mm; }
+      .header img { height: 20pt; margin-right: 10px; }
+      .header h2 { font-size: 20pt; font-weight: 800; margin: 0; }
+      .header .date { font-size: 11pt; color: #333; }
+      @page { size: A4 landscape; margin: 10mm; }
     </style>
   </head>
   <body>
     <div class="header">
-      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="Grunden DV logotyp">
+      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+           alt="Grunden DV logotyp">
       <div>
         <h2>Schema – ${titleText}</h2>
         <div class="date">Utskriftsdatum: ${dateText}</div>
@@ -831,12 +796,42 @@ function doPrint(titleText = "") {
     </div>
     ${content}
     <script>
-      window.onload = () => {
-        window.print();
-        window.close();
+      window.onload = function() {
+        window.focus();
+        setTimeout(() => { 
+          window.print(); 
+          window.close(); 
+        }, 250);
       };
     <\/script>
   </body>
-  </html>`);
+  </html>
+  `);
+
   printWin.document.close();
 }
+
+/* =========================
+   KOPPLA UTSKRIFTSKNAPPAR
+========================= */
+document.getElementById("btnPrintParticipant").onclick = () =>
+  doPrint(document.getElementById("nameSelect").value || "");
+
+document.getElementById("btnPrintCoach").onclick = () =>
+  doPrint(document.getElementById("coachSelect").value || "");
+
+document.getElementById("btnPrintNow").onclick = () => doPrint("Pågår nu");
+document.getElementById("btnPrintCompare").onclick = () => doPrint("Jämförelse");
+
+/* =========================
+   START: visa Pågår nu
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof showView === "function" && typeof renderNow === "function") {
+    showView("nowView");
+    renderNow();
+  }
+});
+</script>
+</body>
+</html>
