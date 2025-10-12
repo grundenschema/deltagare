@@ -774,58 +774,55 @@ document.getElementById("btnCoachWeek").onclick=()=>{
 };
 
 /* =========================
-   UTSKRIFT – säker version
+   UTSKRIFT – proffsig version
 ========================= */
-function printSchema(title){
-  // skapa rubrik för utskrift
+function preparePrintHeader(titleText) {
   let hdr = document.querySelector(".print-header");
-  if(!hdr){
+  if (!hdr) {
     hdr = document.createElement("div");
     hdr.className = "print-header";
     hdr.innerHTML = `
-      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" 
-           alt="logga" style="height:28px;">
-      <h2>${title || "Schema"}</h2>
-      <div class="date">${new Date().toLocaleDateString("sv-SE",
-        {weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>`;
+      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+           alt="Grunden DV logotyp" style="height:28px;">
+      <h2>${titleText || "Schema"}</h2>
+      <div class="date">${new Date().toLocaleDateString("sv-SE", {
+        weekday:"long", year:"numeric", month:"long", day:"numeric"
+      })}</div>`;
     document.body.prepend(hdr);
+  } else {
+    hdr.querySelector("h2").textContent = titleText || "Schema";
+    hdr.querySelector(".date").textContent = new Date().toLocaleDateString("sv-SE", {
+      weekday:"long", year:"numeric", month:"long", day:"numeric"
+    });
   }
-  window.print();
 }
 
-// Koppla knappar till utskrift
+/* =========================
+   UTSKRIFT – endast aktiv vy
+========================= */
+function printSchema(title) {
+  preparePrintHeader(title);
+
+  // Dölj alla vyer utom den aktiva
+  const allViews = document.querySelectorAll('.view');
+  allViews.forEach(v => v.classList.remove("active"));
+  const active = document.querySelector('.view.active');
+  if (active) active.classList.add("print-visible");
+
+  // Skriv ut
+  setTimeout(() => window.print(), 200);
+
+  // Ta bort print-klassen efter utskrift
+  setTimeout(() => {
+    document.querySelectorAll('.print-visible').forEach(e => e.classList.remove('print-visible'));
+  }, 2000);
+}
+
+// Koppla knappar
 document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤 Deltagarschema");
 document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
-document.getElementById("btnPrintNow").onclick   = () => printSchema("🔔 Pågår nu");
+document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
 document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelse");
-
-/* =========================
-   UTSKRIFTS-CSS – från testfilen (fungerande)
-========================= */
-const style = document.createElement("style");
-style.textContent = `
-@media print {
-  header, .tab-bar, button { display:none !important; }
-  body {
-    background:#fff !important;
-    color:#000 !important;
-    -webkit-print-color-adjust:exact !important;
-    print-color-adjust:exact !important;
-    margin:0 !important;
-  }
-  .print-header,
-  .view,
-  .cards,
-  .block-grid,
-  .block-header,
-  .print-scope {
-    display:block !important;
-    visibility:visible !important;
-    opacity:1 !important;
-  }
-  @page { size:A4 landscape; margin:10mm; }
-}`;
-document.head.appendChild(style);
 
 /* =========================
    START: visa Pågår nu
