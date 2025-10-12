@@ -97,58 +97,115 @@ select, .btn{
   position:absolute; left:2px; right:2px; top:2px;
   border-radius:10px; padding:6px 8px; line-height:1.25;
   font-size:.82rem; color:#111; box-shadow:var(--shadow);
-  border:1px solid rgba(0,0,0,.15);
-  word-break:break-word; overflow:hidden;
-  -webkit-print-color-adjust:exact; print-color-adjust:exact;
+ /* =========================
+   Block & Assistent-stilar
+========================= */
+.block {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 2px;
+  border-radius: 10px;
+  padding: 6px 8px;
+  line-height: 1.25;
+  font-size: .82rem;
+  color: #111;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0,0,0,.15);
+  word-break: break-word;
+  overflow: hidden;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
-.block .title{font-weight:700}
+.block .title { font-weight: 700; }
 
-/* Jämförelse (i assistenten) */
-.compare-wrap{
-  display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+/* =========================
+   Jämförelse (i assistenten)
+========================= */
+.compare-wrap {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
 }
-.compare-item{
-  background:#fff;border:1px solid var(--border);border-radius:14px;padding:8px;box-shadow:var(--shadow);
+.compare-item {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: var(--shadow);
 }
-.compare-item h3{margin:6px 0 10px;text-align:center;font-size:1.0rem}
-
-/* Paneler + chips (assistent) */
-.panel{
-  display:none;background:#fff;border:1px solid #cfd8e3;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.12);
-  padding:16px;margin:14px auto; max-width:1200px;
-}
-.panel h2{margin:4px 0 10px;font-size:1.2rem}
-.chip-group{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-.chip-title{ font-weight:700; margin:10px 0 6px; }
-.chip{ display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  background:#fff; border:1px solid var(--chip-border); color:var(--chip-text);
-  border-radius:999px; padding:8px 14px; cursor:pointer; user-select:none;
-  transition: background .15s, border-color .15s, color .15s; font-size:.95rem; font-weight:500;
-}
-.chip input{display:none;}
-.chip.active{ background:var(--chip-active); border-color:var(--chip-active); color:#fff; }
-
-/* Visningsytor (en per flik) */
-.view{ display:none; }
-.view.active{ display:block; }
-#viewTitle{ text-align:center; margin:10px 0 8px; font-weight:800; }
-
-/* Små skärmar – lite större klickytor */
-@media (max-width:700px){
-  body{ padding:10px; }
-  select, .btn{ width:100%; }
+.compare-item h3 {
+  margin: 6px 0 10px;
+  text-align: center;
+  font-size: 1.0rem;
 }
 
 /* =========================
-   Utskrift – skriv ut exakt det som syns
+   Paneler + chips (assistent)
+========================= */
+.panel {
+  display: none;
+  background: #fff;
+  border: 1px solid #cfd8e3;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+  padding: 16px;
+  margin: 14px auto;
+  max-width: 1200px;
+}
+.panel h2 { margin: 4px 0 10px; font-size: 1.2rem; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.chip-title { font-weight: 700; margin: 10px 0 6px; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--chip-border);
+  color: var(--chip-text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s, border-color .15s, color .15s;
+  font-size: .95rem;
+  font-weight: 500;
+}
+.chip input { display: none; }
+.chip.active {
+  background: var(--chip-active);
+  border-color: var(--chip-active);
+  color: #fff;
+}
+
+/* =========================
+   Visningsytor (en per flik)
+========================= */
+.view { display: none; }
+.view.active { display: block; }
+#viewTitle {
+  text-align: center;
+  margin: 10px 0 8px;
+  font-weight: 800;
+}
+
+/* =========================
+   Små skärmar – större klickytor
+========================= */
+@media (max-width:700px) {
+  body { padding: 10px; }
+  select, .btn { width: 100%; }
+}
+
+/* =========================
+   Utskrift – skriv ut sidan som den ser ut
 ========================= */
 @media print {
-  /* Dölj bara navigation och knappar */
-  header, .tab-bar, .controls, button {
+  .tab-bar, button.btn {
     display: none !important;
   }
 
-  /* Grundinställning för utskrift */
   body {
     background: #fff !important;
     color: #000 !important;
@@ -158,32 +215,26 @@ select, .btn{
     print-color-adjust: exact;
   }
 
-  /* Visa allt innehåll som syns på sidan */
   .view {
     display: block !important;
     visibility: visible !important;
   }
 
-  /* Rubrik överst på utskriften */
-  .print-header {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #ccc;
-    padding: 8px 12px 6px;
-    margin-bottom: 14px;
+  header img {
+    height: 40px !important;
+    width: auto !important;
   }
-  .print-header img { height: 28px; }
-  .print-header h2 { font-size: 16pt; font-weight: 800; margin: 0; }
-  .print-header .date { font-size: 10pt; color: #333; }
 
-  /* Bevara färger i block och kort */
-  .block, .card {
+  .block, .card, .compare-item {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  /* Liggande A4 */
+  .card, .compare-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   @page {
     size: A4 landscape;
     margin: 10mm;
@@ -194,7 +245,8 @@ select, .btn{
 
 <body>
 <header title="Klicka för start (Pågår nu)">
-  <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="Grunden DV logotyp" id="homeLogo">
+  <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+       alt="Grunden DV logotyp" id="homeLogo">
   <div id="clock"></div>
 </header>
 
@@ -205,8 +257,6 @@ select, .btn{
   <button id="tabNow" class="tab active">🔔 Pågår nu</button>
   <button id="tabAssistant" class="tab">🤖 Assistent</button>
 </div>
-
-
 
 <!-- DELTAGARE-VY -->
 <div id="participantView" class="view">
