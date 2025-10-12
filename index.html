@@ -729,20 +729,33 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – stabil och frysfri version
-   (nytt fönster som i Emma-testet)
+   UTSKRIFT – STABIL, FÄRDIG VERSION
+   Skriver bara ut själva schemat (inte knappar)
 ========================= */
 function doPrint(titleText = "") {
-  // Hitta den vy som visas just nu
+  // Hitta aktiv vy
   const views = ["participantView", "coachView", "nowView", "assistantView"];
   const visibleView = views
     .map(id => document.getElementById(id))
     .find(v => v && v.style.display !== "none");
 
-  // Om inget hittas – skriv ut hela sidan
-  const content = visibleView ? visibleView.innerHTML : document.body.innerHTML;
+  // Försök hitta själva schemadelen inom aktiv vy
+  let content = "";
+  if (visibleView) {
+    const subSections = [
+      visibleView.querySelector("#pBlockGrid"),
+      visibleView.querySelector("#cBlockGrid"),
+      visibleView.querySelector("#nowView"),
+      visibleView.querySelector(".block-grid"),
+      visibleView.querySelector(".cards")
+    ];
+    const activeSection = subSections.find(s => s && s.offsetParent !== null);
+    content = activeSection ? activeSection.outerHTML : visibleView.innerHTML;
+  } else {
+    content = document.body.innerHTML;
+  }
 
-  // Skapa ett nytt utskriftsfönster
+  // Skapa nytt utskriftsfönster
   const printWin = window.open("", "_blank", "width=1200,height=800");
   if (!printWin) {
     alert("Tillåt popup-fönster för att kunna skriva ut.");
@@ -810,28 +823,3 @@ function doPrint(titleText = "") {
 
   printWin.document.close();
 }
-
-/* =========================
-   KOPPLA UTSKRIFTSKNAPPAR
-========================= */
-document.getElementById("btnPrintParticipant").onclick = () =>
-  doPrint(document.getElementById("nameSelect").value || "");
-
-document.getElementById("btnPrintCoach").onclick = () =>
-  doPrint(document.getElementById("coachSelect").value || "");
-
-document.getElementById("btnPrintNow").onclick = () => doPrint("Pågår nu");
-document.getElementById("btnPrintCompare").onclick = () => doPrint("Jämförelse");
-
-/* =========================
-   START: visa Pågår nu
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  if (typeof showView === "function" && typeof renderNow === "function") {
-    showView("nowView");
-    renderNow();
-  }
-});
-</script>
-</body>
-</html>
