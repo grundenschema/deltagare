@@ -773,7 +773,6 @@ document.getElementById("btnCoachWeek").onclick=()=>{
   renderBlocksGeneric(name,true,document.getElementById("cBlockHeader"),document.getElementById("cBlockGrid"));
 };
 
-<!-- =========================
      UTSKRIFT – liggande layout
 ========================= -->
 <style>
@@ -808,7 +807,9 @@ document.getElementById("btnCoachWeek").onclick=()=>{
     padding: 8px 12px 6px;
     margin-bottom: 14px;
   }
-  .print-header img { height: 28px; }
+  .print-header img {
+    height: 28px;
+  }
   .print-header h2 {
     font-size: 16pt;
     font-weight: 800;
@@ -846,15 +847,11 @@ document.getElementById("btnCoachWeek").onclick=()=>{
    START + UTSKRIFT
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // Sätt startvy
-  if (typeof showView === "function") {
-    showView("nowView");
-  }
-  if (typeof renderNow === "function") {
-    renderNow();
-  }
+  // Sätt startvy om funktioner finns
+  if (typeof showView === "function") showView("nowView");
+  if (typeof renderNow === "function") renderNow();
 
-  // Koppla utskriftsknappar (bara om de finns)
+  // Koppla utskriftsknappar
   const buttons = {
     btnPrintParticipant: "👤 Deltagarschema",
     btnPrintCoach: "🧑‍🏫 Coachschema",
@@ -903,16 +900,15 @@ function preparePrintHeader(titleText) {
 function printSchema(title) {
   preparePrintHeader(title);
 
-  // Visa endast aktiv vy
   const active = document.querySelector(".view.active");
   if (active) active.classList.add("print-visible");
 
-  // Starta utskrift
   setTimeout(() => window.print(), 200);
 
-  // Återställ efteråt
   setTimeout(() => {
-    document.querySelectorAll(".print-visible").forEach(el => el.classList.remove("print-visible"));
+    document
+      .querySelectorAll(".print-visible")
+      .forEach(el => el.classList.remove("print-visible"));
   }, 1500);
 }
 </script>
