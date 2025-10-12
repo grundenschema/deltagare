@@ -292,12 +292,19 @@ select, .btn {
     page-break-inside: avoid;
   }
 
+  /* Begränsa loggan i utskriftsrubriken */
+  .print-header img {
+    height: 35px !important;
+    width: auto !important;
+  }
+
   /* Skriv ut i A4 liggande */
   @page {
     size: A4 landscape;
     margin: 10mm;
   }
 }
+
 </style>
 </head>
 
