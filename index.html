@@ -786,20 +786,21 @@ function printSchema(title){
       <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" 
            alt="logga" style="height:28px;">
       <h2>${title || "Schema"}</h2>
-      <div class="date">${new Date().toLocaleDateString("sv-SE",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>`;
+      <div class="date">${new Date().toLocaleDateString("sv-SE",
+        {weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>`;
     document.body.prepend(hdr);
   }
   window.print();
 }
 
-// Koppla knappar
+// Koppla knappar till utskrift
 document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤 Deltagarschema");
 document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
-document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
+document.getElementById("btnPrintNow").onclick   = () => printSchema("🔔 Pågår nu");
 document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelse");
 
 /* =========================
-   UTSKRIFTS-CSS – tvingar visning av allt
+   UTSKRIFTS-CSS – från testfilen (fungerande)
 ========================= */
 const style = document.createElement("style");
 style.textContent = `
@@ -808,12 +809,16 @@ style.textContent = `
   body {
     background:#fff !important;
     color:#000 !important;
-    font-size:10pt !important;
-    margin:0 !important;
     -webkit-print-color-adjust:exact !important;
     print-color-adjust:exact !important;
+    margin:0 !important;
   }
-  .view, .cards, .block-grid, .block-header, .print-scope {
+  .print-header,
+  .view,
+  .cards,
+  .block-grid,
+  .block-header,
+  .print-scope {
     display:block !important;
     visibility:visible !important;
     opacity:1 !important;
