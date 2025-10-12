@@ -800,47 +800,65 @@ function preparePrintHeader(titleText) {
 }
 
 /* =========================
-   UTSKRIFT – endast aktivt schema
+   UTSKRIFT – bara skriv ut aktiv vy
 ========================= */
-
-function preparePrintHeader(titleText) {
-  let hdr = document.querySelector(".print-header");
-  if (!hdr) {
-    hdr = document.createElement("div");
-    hdr.className = "print-header";
-    hdr.innerHTML = `
-      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-           alt="Grunden DV logotyp" style="height:28px;">
-      <h2>${titleText || "Schema"}</h2>
-      <div class="date"></div>`;
-    document.body.prepend(hdr);
-  }
-  hdr.querySelector("h2").textContent = titleText || "Schema";
-  hdr.querySelector(".date").textContent = new Date().toLocaleDateString("sv-SE", {
-    weekday:"long", year:"numeric", month:"long", day:"numeric"
-  });
+function printSchema(title){
+  const hdr = document.querySelector(".print-header") || document.createElement("div");
+  hdr.className = "print-header";
+  hdr.innerHTML = `
+    <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="logga">
+    <h2>${title || "Schema"}</h2>
+    <div class="date">${new Date().toLocaleDateString("sv-SE",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>`;
+  document.body.prepend(hdr);
+  window.print();
 }
 
-function printSchema(title) {
-  preparePrintHeader(title);
-  // Visa endast aktuell vy
-  const allViews = document.querySelectorAll('.view');
-  allViews.forEach(v => v.style.display = "none");
-  const active = document.querySelector('.view.active');
-  if (active) active.style.display = "block";
-
-  // Starta utskrift
-  setTimeout(() => window.print(), 300);
-
-  // Återställ vyer efteråt
-  setTimeout(() => allViews.forEach(v => v.style.display = ""), 2000);
-}
-
-// Knappar
+// Knappar kopplade till utskrift
 document.getElementById("btnPrintParticipant").onclick = () => printSchema("👤 Deltagarschema");
 document.getElementById("btnPrintCoach").onclick = () => printSchema("🧑‍🏫 Coachschema");
 document.getElementById("btnPrintNow").onclick = () => printSchema("🔔 Pågår nu");
-document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelsescheman");
+document.getElementById("btnPrintCompare").onclick = () => printSchema("🤖 Jämförelse");
+
+/* =========================
+   UTSKRIFTS-CSS (lägg till om det saknas)
+========================= */
+const printStyle = document.createElement("style");
+printStyle.textContent = `
+@media print {
+  header, .tab-bar, .controls, button {
+    display:none !important;
+    visibility:hidden !important;
+  }
+  body {
+    background:#fff !important;
+    color:#000 !important;
+    font-size:10pt !important;
+    margin:0 !important;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+  }
+  .view {
+    display:block !important;
+    visibility:visible !important;
+  }
+  .print-header {
+    display:flex !important;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #ccc;
+    padding:8px 12px;
+    margin-bottom:14px;
+  }
+  .print-header img { height:28px !important; }
+  .print-header h2 {
+    font-size:18pt !important;
+    font-weight:800 !important;
+    margin:0 !important;
+  }
+  .print-header .date { font-size:10pt !important; color:#333 !important; }
+  @page { size:A4 landscape; margin:10mm; }
+}`;
+document.head.appendChild(printStyle);
 
 /* =========================
    START: visa Pågår nu
