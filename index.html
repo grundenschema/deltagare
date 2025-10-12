@@ -241,7 +241,6 @@ select, .btn {
   body { padding:10px; }
   select, .btn { width:100%; }
 }
-
 /* =========================
    Utskrift – skriv bara ut aktivt schema
 ========================= */
@@ -274,11 +273,27 @@ select, .btn {
     print-color-adjust: exact;
   }
 
-  /* 🔧 Lägg till detta: tillåt blockceller att växa */
+  /* 🔧 Tillåt blockceller att växa */
   .block-cell {
     height: auto !important;
     min-height: 40px !important;
     overflow: visible !important;
+  }
+
+  /* 💡 Lägg till detta: komprimera layouten vid utskrift */
+  .block {
+    font-size: 0.75rem !important;
+    line-height: 1.1 !important;
+    padding: 4px 6px !important;
+  }
+
+  .block-cell {
+    min-height: 24px !important;
+  }
+
+  body {
+    transform: scale(0.9);
+    transform-origin: top left;
   }
 
   /* Behåll färger och layout */
@@ -297,7 +312,6 @@ select, .btn {
     margin: 10mm;
   }
 }
-
 
 </style>
 </head>
