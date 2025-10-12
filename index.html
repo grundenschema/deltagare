@@ -798,7 +798,6 @@ printStyle.textContent = `
 }
 `;
 document.head.appendChild(printStyle);
-
 /* =========================
    UTSKRIFT – enkel, stabil och webbläsaroberoende
 ========================= */
@@ -815,15 +814,36 @@ printStyle.textContent = `
     padding:8px 12px 12px;
     margin-bottom:20px;
   }
-  .print-header img { height:20pt; margin-right:10px; }
-  .print-header h2 { font-size:20pt; font-weight:800; margin:0; }
-  .print-header .date { font-size:11pt; color:#333; }
+  .print-header img {
+    height:20pt;
+    margin-right:10px;
+  }
+  .print-header h2 {
+    font-size:20pt;
+    font-weight:800;
+    margin:0;
+  }
+  .print-header .date {
+    font-size:11pt;
+    color:#333;
+  }
 
-  body { background:#fff; color:#000; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body {
+    background:#fff;
+    color:#000;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
 
-  /* dölj UI vid utskrift */
-  header, .tab-bar, .controls, .panel, #clock, #viewTitle, .btn { display:none !important; }
-  @page { size:A4 landscape; margin:10mm; }
+  /* Dölj allt onödigt UI vid utskrift */
+  header, .tab-bar, .controls, .panel, #clock, #viewTitle, .btn {
+    display:none !important;
+  }
+
+  @page {
+    size:A4 landscape;
+    margin:10mm;
+  }
 }`;
 document.head.appendChild(printStyle);
 
@@ -832,7 +852,10 @@ function ensurePrintHeader() {
   if (!document.getElementById("printHeader")) {
     const headerHTML = `
       <div class="print-header" id="printHeader">
-        <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" alt="Grunden DV logotyp" />
+        <img
+          src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+          alt="Grunden DV logotyp"
+        />
         <div>
           <h2 id="printTitle"></h2>
           <div id="printDate" class="date"></div>
@@ -846,9 +869,14 @@ function ensurePrintHeader() {
 function doPrint(titleText = "") {
   ensurePrintHeader();
   document.getElementById("printTitle").textContent = "Schema – " + titleText;
-  document.getElementById("printDate").textContent = "Utskriftsdatum: " + new Date().toLocaleDateString("sv-SE", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric"
-  });
+  document.getElementById("printDate").textContent =
+    "Utskriftsdatum: " +
+    new Date().toLocaleDateString("sv-SE", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   window.print();
 }
 
@@ -859,12 +887,19 @@ document.getElementById("btnPrintParticipant").onclick = function () {
   const name = document.getElementById("nameSelect").value || "";
   doPrint(name);
 };
+
 document.getElementById("btnPrintCoach").onclick = function () {
   const name = document.getElementById("coachSelect").value || "";
   doPrint(name);
 };
-document.getElementById("btnPrintNow").onclick = function () { doPrint("Pågår nu"); };
-document.getElementById("btnPrintCompare").onclick = function () { doPrint("Jämförelse"); };
+
+document.getElementById("btnPrintNow").onclick = function () {
+  doPrint("Pågår nu");
+};
+
+document.getElementById("btnPrintCompare").onclick = function () {
+  doPrint("Jämförelse");
+};
 
 /* =========================
    START: visa Pågår nu
@@ -876,3 +911,4 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 </body>
 </html>
+
