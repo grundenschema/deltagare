@@ -757,25 +757,32 @@ document.getElementById("btnCoachWeek").onclick=()=>{
    UTSKRIFT – endast aktivt schema
 ========================= */
 function printScopeWithin(viewId){
-  // ta bort tidigare markörer
   document.querySelectorAll('.print-scope').forEach(e=>e.classList.remove('print-visible'));
-  const view = document.getElementById(viewId);
-  if(!view){ window.print(); return; }
 
-  // hitta första synliga print-scope i view
-  const scopes = [...view.querySelectorAll('.print-scope')];
-  const visible = scopes.find(n=>{
-    const s = getComputedStyle(n);
-    return s.display!=="none" && s.visibility!=="hidden";
-  });
-  if(visible) visible.classList.add('print-visible');
-  setTimeout(()=>window.print(), 200);
+  const view = document.getElementById(viewId);
+  if (!view) {
+    window.print();
+    return;
+  }
+
+  const visibleScopes = [...view.querySelectorAll('.print-scope')].filter(el => el.offsetParent !== null);
+
+  if (visibleScopes.length === 0) {
+    alert("Inget schema att skriva ut – visa ett schema först!");
+    return;
+  }
+
+  visibleScopes.forEach(el => el.classList.add('print-visible'));
+  setTimeout(() => window.print(), 300);
+  setTimeout(() => {
+    document.querySelectorAll('.print-visible').forEach(e => e.classList.remove('print-visible'));
+  }, 2000);
 }
 
-document.getElementById("btnPrintParticipant").onclick=()=>printScopeWithin("participantView");
-document.getElementById("btnPrintCoach").onclick=()=>printScopeWithin("coachView");
-document.getElementById("btnPrintNow").onclick=()=>printScopeWithin("nowView");
-document.getElementById("btnPrintCompare").onclick=()=>printScopeWithin("assistantView");
+document.getElementById("btnPrintParticipant").onclick = () => printScopeWithin("participantView");
+document.getElementById("btnPrintCoach").onclick = () => printScopeWithin("coachView");
+document.getElementById("btnPrintNow").onclick = () => printScopeWithin("nowView");
+document.getElementById("btnPrintCompare").onclick = () => printScopeWithin("assistantView");
 
 /* =========================
    START: visa Pågår nu
@@ -787,5 +794,3 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
-
-
