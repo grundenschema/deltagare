@@ -759,7 +759,7 @@ document.getElementById("btnCoachWeek").onclick = () => {
 /* Rubrik (logga + titel + datum) */
 if (!document.getElementById("printHeader")) {
   const headerHTML = `
-    <div class="print-header" id="printHeader">
+    <div class="print-header" id="printHeader" style="display:none;">
       <img
         src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
         alt="Grunden DV logotyp"
@@ -773,7 +773,7 @@ if (!document.getElementById("printHeader")) {
   document.body.insertAdjacentHTML("afterbegin", headerHTML);
 }
 
-/* Skriv ut CSS */
+/* Utskrifts-CSS */
 const printStyle = document.createElement("style");
 printStyle.textContent = `
 @media print {
@@ -785,18 +785,25 @@ printStyle.textContent = `
     padding:8px 12px 12px;
     margin-bottom:20px;
   }
-  header, .tab-bar, .controls, .panel, .btn { display:none !important; }
+
+  .print-header img { height:20pt; margin-right:10px; }
+  .print-header h2 { font-size:20pt; font-weight:800; margin:0; }
+  .print-header .date { font-size:11pt; color:#333; }
+
+  header, .tab-bar, .controls, .panel, .btn, #clock { display:none !important; }
+
   body {
     background:#fff;
     color:#000;
     -webkit-print-color-adjust:exact;
     print-color-adjust:exact;
   }
+
   @page { size:A4 landscape; margin:10mm; }
 }`;
 document.head.appendChild(printStyle);
 
-/* Funktion för rubrikuppdatering */
+/* Uppdatera rubrik innan utskrift */
 function updatePrintHeader(titleText = "") {
   const h = document.getElementById("printHeader");
   document.getElementById("printTitle").textContent = "Schema – " + (titleText || "");
@@ -829,12 +836,21 @@ document.getElementById("btnPrintCompare").onclick = () => {
   window.print();
 };
 
+/* Testknapp – för att se att print funkar i Chrome */
+const testBtn = document.createElement("button");
+testBtn.textContent = "🖨️ Direkt testutskrift";
+testBtn.style.margin = "10px";
+testBtn.onclick = () => window.print();
+document.body.appendChild(testBtn);
+
 /* =========================
    START: visa Pågår nu
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
-  showView("nowView");
-  renderNow();
+  if (typeof showView === "function" && typeof renderNow === "function") {
+    showView("nowView");
+    renderNow();
+  }
 });
 </script>
 </body>
