@@ -753,27 +753,27 @@ document.getElementById("btnCoachWeek").onclick = () => {
 };
 
 /* =========================
-   UTSKRIFT – robust och beprövad version
+   UTSKRIFT – enkel och 100% Chrome-kompatibel
 ========================= */
 
-/* --- Skapa rubrik (logga + titel + datum) --- */
+/* Rubrik (logga + titel + datum) */
 if (!document.getElementById("printHeader")) {
   const headerHTML = `
-    <div class="print-header" id="printHeader" style="display:none;">
+    <div class="print-header" id="printHeader">
       <img
         src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
         alt="Grunden DV logotyp"
-        style="height:20pt; margin-right:10px;"
+        style="height:20pt;margin-right:10px;"
       />
       <div>
-        <h2 id="printTitle" style="font-size:20pt; font-weight:800; margin:0;"></h2>
-        <div id="printDate" style="font-size:11pt; color:#333;"></div>
+        <h2 id="printTitle" style="font-size:20pt;font-weight:800;margin:0;"></h2>
+        <div id="printDate" style="font-size:11pt;color:#333;"></div>
       </div>
     </div>`;
   document.body.insertAdjacentHTML("afterbegin", headerHTML);
 }
 
-/* --- CSS för utskrift --- */
+/* Skriv ut CSS */
 const printStyle = document.createElement("style");
 printStyle.textContent = `
 @media print {
@@ -785,53 +785,20 @@ printStyle.textContent = `
     padding:8px 12px 12px;
     margin-bottom:20px;
   }
-
-  .print-header img {
-    height:20pt;
-    margin-right:10px;
-  }
-
-  .print-header h2 {
-    font-size:20pt;
-    font-weight:800;
-    margin:0;
-  }
-
-  .print-header .date {
-    font-size:11pt;
-    color:#333;
-  }
-
+  header, .tab-bar, .controls, .panel, .btn { display:none !important; }
   body {
     background:#fff;
     color:#000;
-    -webkit-print-color-adjust:exact !important;
-    print-color-adjust:exact !important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
   }
-
-  /* Behåll färger i block och grid */
-  .view, .cards, .block-grid, .block-header {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Dölj knappar, menyer osv. */
-  button, .controls, .tab-bar, header {
-    display:none !important;
-  }
-
-  @page {
-    size:A4 landscape;
-    margin:10mm;
-  }
+  @page { size:A4 landscape; margin:10mm; }
 }`;
 document.head.appendChild(printStyle);
 
-/* --- Utskriftsfunktion --- */
-function doPrint(titleText = "") {
-  const header = document.getElementById("printHeader");
-  header.style.display = "flex";
-
+/* Funktion för rubrikuppdatering */
+function updatePrintHeader(titleText = "") {
+  const h = document.getElementById("printHeader");
   document.getElementById("printTitle").textContent = "Schema – " + (titleText || "");
   document.getElementById("printDate").textContent =
     "Utskriftsdatum: " +
@@ -839,40 +806,35 @@ function doPrint(titleText = "") {
       weekday: "long",
       year: "numeric",
       month: "long",
-      day: "numeric",
+      day: "numeric"
     });
-
-  // Kör utskrift – direkt och synligt
-  window.scrollTo(0, 0);
-  window.print();
+  h.style.display = "flex";
 }
 
-/* =========================
-   KOPPLA UTSKRIFTSKNAPPAR
-========================= */
-document.addEventListener("click", (ev) => {
-  if (ev.target.matches("#btnPrintParticipant")) {
-    const name = document.getElementById("nameSelect")?.value || "";
-    doPrint(name);
-  }
-  if (ev.target.matches("#btnPrintCoach")) {
-    const name = document.getElementById("coachSelect")?.value || "";
-    doPrint(name);
-  }
-  if (ev.target.matches("#btnPrintNow")) doPrint("Pågår nu");
-  if (ev.target.matches("#btnPrintCompare")) doPrint("Jämförelse");
-});
+/* === DIREKTKOPPLADE KNAPPAR === */
+document.getElementById("btnPrintParticipant").onclick = () => {
+  updatePrintHeader(document.getElementById("nameSelect").value || "");
+  window.print();
+};
+document.getElementById("btnPrintCoach").onclick = () => {
+  updatePrintHeader(document.getElementById("coachSelect").value || "");
+  window.print();
+};
+document.getElementById("btnPrintNow").onclick = () => {
+  updatePrintHeader("Pågår nu");
+  window.print();
+};
+document.getElementById("btnPrintCompare").onclick = () => {
+  updatePrintHeader("Jämförelse");
+  window.print();
+};
 
 /* =========================
    START: visa Pågår nu
 ========================= */
-document.addEventListener("DOMContentLoaded", function () {
-  if (typeof showView === "function" && typeof renderNow === "function") {
-    showView("nowView");
-    renderNow();
-  }
-  console.log("✅ Scriptet kördes hela vägen till slutet");
-  alert("Test: scriptet är aktivt och kan skriva ut");
+document.addEventListener("DOMContentLoaded", () => {
+  showView("nowView");
+  renderNow();
 });
 </script>
 </body>
