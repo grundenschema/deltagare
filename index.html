@@ -249,16 +249,9 @@ select, .btn {
     display: none !important;
   }
 
-  /* Behåll logga – men i rimlig storlek */
+  /* Dölj vanliga loggan och klockan vid utskrift */
   header {
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  header img {
-    height: 40px !important;
-    width: auto !important;
+    display: none !important;
   }
 
   /* Visa bara aktiv vy */
@@ -269,6 +262,31 @@ select, .btn {
   .view.active {
     display: block !important;
     visibility: visible !important;
+  }
+
+  /* Stil för utskriftsrubrik */
+  .print-header {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+  .print-header img {
+    height: 35px !important;
+    width: auto !important;
+    margin-bottom: 6px;
+  }
+  .print-header h2 {
+    font-size: 18pt !important;
+    font-weight: 800;
+    margin: 4px 0;
+  }
+  .print-header .date {
+    font-size: 10pt;
+    color: #333;
   }
 
   /* Behåll färger och layout */
@@ -292,18 +310,13 @@ select, .btn {
     page-break-inside: avoid;
   }
 
-  /* Begränsa loggan i utskriftsrubriken */
-  .print-header img {
-    height: 35px !important;
-    width: auto !important;
-  }
-
-  /* Skriv ut i A4 liggande */
+  /* A4 liggande */
   @page {
     size: A4 landscape;
     margin: 10mm;
   }
 }
+
 
 </style>
 </head>
