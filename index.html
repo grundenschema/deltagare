@@ -307,6 +307,29 @@ select, .btn {
     margin: 10mm;
   }
 }
+
+@media (max-width:700px) {
+  /* Mobil: visa Coach/Deltagare överst med fade */
+  #coachView, #participantView {
+    transition: all 0.6s ease-in-out;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+  }
+  #coachView.active, #participantView.active {
+    opacity: 1;
+    max-height: 1000px;
+  }
+  /* Döljer utskriftsknappar på mobil */
+  #btnPrintCoach, #btnPrintParticipant, #btnPrintNow {
+    display:none !important;
+  }
+  /* Lägg Pågår nu + Assistent längst ner */
+  #nowView, #assistantView {
+    order: 99;
+  }
+}
+
 </style>
 </head>
 
