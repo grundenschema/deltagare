@@ -321,8 +321,8 @@ select, .btn {
 
 <!-- Flikar -->
 <div class="tab-bar">
-  <button id="tabParticipant" class="tab">👤 Deltagare</button>
   <button id="tabCoach" class="tab">🧑‍🏫 Coach</button>
+  <button id="tabParticipant" class="tab">👤 Deltagare</button>
   <button id="tabNow" class="tab active">🔔 Pågår nu</button>
   <button id="tabAssistant" class="tab">🤖 Assistent</button>
 </div>
@@ -334,8 +334,7 @@ select, .btn {
   <div class="controls">
     <select id="nameSelect"><option value="">-- Välj deltagare --</option></select>
     <button id="btnParticipantToday" class="btn primary">☀️ Dagens schema</button>
-    <button id="btnParticipantWeek" class="btn primary">🖨️ Utskriftsschema</button>
-    <button id="btnPrintParticipant" class="btn">🖨️ Skriv ut</button>
+    <button id="btnParticipantWeek" class="btn primary">📆 Veckoschema</button>
   </div>
   <div id="participantDay" class="cards print-scope"></div>
   <div id="participantWeek" class="print-scope" style="display:none;">
@@ -350,8 +349,7 @@ select, .btn {
   <div class="controls">
     <select id="coachSelect"><option value="">-- Välj coach --</option></select>
     <button id="btnCoachToday" class="btn primary">☀️ Dagens schema</button>
-    <button id="btnCoachWeek" class="btn primary">🖨️ Utskriftsschema</button>
-    <button id="btnPrintCoach" class="btn">🖨️ Skriv ut</button>
+    <button id="btnCoachWeek" class="btn primary">📆 Veckoschema</button>
   </div>
   <div id="coachDay" class="cards print-scope"></div>
   <div id="coachWeek" class="print-scope" style="display:none;">
@@ -984,61 +982,6 @@ function printSchema(title, personName) {
   }, 1500);
 }
 
-
-
-function reorderDays() {
-  const base = ["måndag", "tisdag", "onsdag", "torsdag", "fredag"];
-  const today = new Date().getDay(); // 0=sön, 1=mån ... 6=lör
-  if (today >= 1 && today <= 5) {
-    const index = today - 1;
-    return [...base.slice(index), ...base.slice(0, index)];
-  } else {
-    return base;
-  }
-}
-
-// Visar veckans schema i kortform med dagens dag först
-document.getElementById("btnParticipantToday").onclick = () => {
-  const name = document.getElementById("nameSelect").value;
-  if (!name) { alert("Välj en deltagare."); return; }
-  const days = reorderDays();
-  const container = document.getElementById("participantDay");
-  container.innerHTML = "";
-  document.getElementById("participantWeek").style.display = "none";
-  container.style.display = "flex";
-
-  days.forEach(day => {
-    const sectionTitle = document.createElement("div");
-    sectionTitle.classList.add("section-title");
-    sectionTitle.textContent = day.charAt(0).toUpperCase() + day.slice(1);
-    container.appendChild(sectionTitle);
-
-    if (typeof renderParticipantDay === "function") {
-      renderParticipantDay(name, day);
-    }
-  });
-};
-
-document.getElementById("btnCoachToday").onclick = () => {
-  const name = document.getElementById("coachSelect").value;
-  if (!name) { alert("Välj en coach."); return; }
-  const days = reorderDays();
-  const container = document.getElementById("coachDay");
-  container.innerHTML = "";
-  document.getElementById("coachWeek").style.display = "none";
-  container.style.display = "flex";
-
-  days.forEach(day => {
-    const sectionTitle = document.createElement("div");
-    sectionTitle.classList.add("section-title");
-    sectionTitle.textContent = day.charAt(0).toUpperCase() + day.slice(1);
-    container.appendChild(sectionTitle);
-
-    if (typeof renderCoachDay === "function") {
-      renderCoachDay(name, day);
-    }
-  });
-};
 
 </script>
 </body>
