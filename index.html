@@ -240,66 +240,55 @@ select, .btn {
   select, .btn { width:100%; }
 }
 
-@media print {
-  header, .tab-bar, button.btn, .controls, #viewTitle {
-    display: none !important;
-    visibility: hidden !important;
-  }
-  .view { display: none !important; visibility: hidden !important; }
-  .view.active { display: block !important; visibility: visible !important; }
+async function printSchema(title, personName) {
+  const activeView = document.querySelector(".view.active");
+  if (!activeView) return;
 
-  .print-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: #fff;
-    border-bottom: 2px solid #ccc;
-    padding: 6px 0 8px;
-    z-index: 999;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-  }
-  .print-header img {
-    height: 55px;
-    width: auto;
-    margin-left: 10px;
-  }
-  .print-header h2 {
-    font-size: 18pt !important;
-    font-weight: 800;
-    margin: 0;
-    text-align: center;
-  }
-  .print-header .date {
-    font-size: 10pt;
-    color: #333;
-    text-align: center;
+  // Hitta själva schemadelen (för utskrift)
+  const scope = activeView.querySelector(".print-scope");
+  if (!scope) {
+    alert("Inget schema att skriva ut i den här vyn.");
+    return;
   }
 
-  body {
-    background: #fff !important;
-    color: #000 !important;
-    font-size: 10pt;
-    margin: 0;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+  // Lägg till rubrik med logga
+  preparePrintHeader(title, personName);
 
-  .block, .card {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
+  // Vänta lite så rubriken hinner renderas
+  await new Promise(r => setTimeout(r, 200));
 
-  @page {
-    size: A4 landscape;
-    margin: 12mm 15mm;
-  }
+  // Fota bara schemadelen
+  const canvas = await html2canvas(scope, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#fff"
+  });
+
+  // Ta bort rubriken från sidan igen
+  document.querySelector(".print-header")?.remove();
+
+  // Gör en ny sida med rubrik + bild
+  const imgData = canvas.toDataURL("image/png");
+  const w = window.open("", "_blank");
+  w.document.write(`
+    <html>
+      <head><title>Utskrift – Schema</title></head>
+      <body style="margin:20px;text-align:center;font-family:sans-serif;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px;">
+          <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png" style="height:55px;width:auto;">
+          <div>
+            <h2 style="margin:0;font-size:18pt;">Schema – ${personName || title}</h2>
+            <div style="font-size:10pt;color:#333;">Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {year:"numeric", month:"long", day:"numeric"})}</div>
+          </div>
+        </div>
+        <img src="${imgData}" style="width:100%;max-width:1000px;"/>
+        <script>window.onload=()=>window.print();<\/script>
+      </body>
+    </html>
+  `);
+  w.document.close();
 }
+
 
 </style>
 </head>
@@ -943,17 +932,24 @@ function preparePrintHeader(titleText, personName) {
   // Ta bort eventuell gammal rubrik
   document.querySelector(".print-header")?.remove();
 
-  // Skapa ny rubrik
+  // Skapa ny rubrik med logga och text
   const hdr = document.createElement("div");
   hdr.className = "print-header";
   hdr.innerHTML = `
-    <h2>Schema – ${personName || titleText || "Okänd"}</h2>
-    <div class="date">
-      Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      })}
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:12px;">
+      <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+           alt="Grunden DV logotyp"
+           style="height:55px;width:auto;display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+      <div style="text-align:center;">
+        <h2 style="margin:0;font-size:18pt;font-weight:800;">Schema – ${personName || titleText || "Okänd"}</h2>
+        <div style="font-size:10pt;color:#333;">
+          Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+          })}
+        </div>
+      </div>
     </div>`;
   document.body.prepend(hdr);
 }
