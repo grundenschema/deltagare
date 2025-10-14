@@ -240,47 +240,45 @@ select, .btn {
   select, .btn { width:100%; }
 }
 
-/* =========================
-   Utskrift – skriv bara ut aktivt schema
-========================= */
 @media print {
-  /* Dölj navigering, knappar, flikar och header */
-  header, .tab-bar, button.btn, .controls {
+  header, .tab-bar, button.btn, .controls, #viewTitle {
     display: none !important;
     visibility: hidden !important;
   }
+  .view { display: none !important; visibility: hidden !important; }
+  .view.active { display: block !important; visibility: visible !important; }
 
-  /* Visa bara aktiv vy */
-  .view {
-    display: none !important;
-    visibility: hidden !important;
-  }
-  .view.active {
-    display: block !important;
-    visibility: visible !important;
-  }
-
-  /* Stil för utskriftsrubrik */
   .print-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-bottom: 2px solid #ccc;
+    padding: 6px 0 8px;
+    z-index: 999;
     display: flex !important;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 8px;
-    margin-bottom: 16px;
+    justify-content: center;
+    gap: 12px;
+  }
+  .print-header img {
+    height: 55px;
+    width: auto;
+    margin-left: 10px;
   }
   .print-header h2 {
     font-size: 18pt !important;
     font-weight: 800;
-    margin: 4px 0;
+    margin: 0;
+    text-align: center;
   }
   .print-header .date {
     font-size: 10pt;
     color: #333;
+    text-align: center;
   }
 
-  /* Behåll färger och layout */
   body {
     background: #fff !important;
     color: #000 !important;
@@ -290,43 +288,16 @@ select, .btn {
     print-color-adjust: exact;
   }
 
-  .block, .card, .compare-item {
+  .block, .card {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-  }
-
-  /* Undvik att element delas mellan sidor */
-  .card, .compare-item {
-    break-inside: avoid;
     page-break-inside: avoid;
+    break-inside: avoid;
   }
 
-  /* A4 liggande */
   @page {
     size: A4 landscape;
-    margin: 10mm;
-  }
-}
-
-@media (max-width:700px) {
-  /* Mobil: visa Coach/Deltagare överst med fade */
-  #coachView, #participantView {
-    transition: all 0.6s ease-in-out;
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-  }
-  #coachView.active, #participantView.active {
-    opacity: 1;
-    max-height: 1000px;
-  }
-  /* Döljer utskriftsknappar på mobil */
-  #btnPrintCoach, #btnPrintParticipant, #btnPrintNow {
-    display:none !important;
-  }
-  /* Lägg Pågår nu + Assistent längst ner */
-  #nowView, #assistantView {
-    order: 99;
+    margin: 12mm 15mm;
   }
 }
 
@@ -344,8 +315,8 @@ select, .btn {
 
 <!-- Flikar -->
 <div class="tab-bar">
-  <button id="tabCoach" class="tab">🧑‍🏫 Coach</button>
   <button id="tabParticipant" class="tab">👤 Deltagare</button>
+  <button id="tabCoach" class="tab">🧑‍🏫 Coach</button>
   <button id="tabNow" class="tab active">🔔 Pågår nu</button>
   <button id="tabAssistant" class="tab">🤖 Assistent</button>
 </div>
@@ -358,6 +329,7 @@ select, .btn {
     <select id="nameSelect"><option value="">-- Välj deltagare --</option></select>
     <button id="btnParticipantToday" class="btn primary">☀️ Dagens schema</button>
     <button id="btnParticipantWeek" class="btn primary">📆 Veckoschema</button>
+    <button id="btnPrintParticipant" class="btn">🖨️ Skriv ut</button>
   </div>
   <div id="participantDay" class="cards print-scope"></div>
   <div id="participantWeek" class="print-scope" style="display:none;">
@@ -373,6 +345,7 @@ select, .btn {
     <select id="coachSelect"><option value="">-- Välj coach --</option></select>
     <button id="btnCoachToday" class="btn primary">☀️ Dagens schema</button>
     <button id="btnCoachWeek" class="btn primary">📆 Veckoschema</button>
+    <button id="btnPrintCoach" class="btn">🖨️ Skriv ut</button>
   </div>
   <div id="coachDay" class="cards print-scope"></div>
   <div id="coachWeek" class="print-scope" style="display:none;">
