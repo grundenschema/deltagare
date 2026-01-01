@@ -131,4 +131,37 @@ section, article, .card, .day, .schemaDag, .scheduleDay, .dag, .weekDay{
   display:none !important;
 }
 .compare-page{ font-family: system-ui, sans-serif !important; }
+/* === STOPPA ALL SKALNING OCH IHOPTRYCKNING === */
+
+/* 1. Döda zoom/scale globalt */
+* {
+  transform: none !important;
+  zoom: 1 !important;
+}
+
+/* 2. Låt inget innehåll krympa bort */
+* {
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+/* 3. Flex/grid: tvinga radbrytning istället för krympning */
+* {
+  flex-shrink: 0 !important;
+}
+
+/* 4. Text: visa allt, aldrig kapa */
+* {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* 5. Om tabeller finns: låt dem scrolla istället */
+table {
+  width: max-content !important;
+  min-width: 100% !important;
+}
 
