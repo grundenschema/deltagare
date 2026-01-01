@@ -165,3 +165,22 @@ table {
   min-width: 100% !important;
 }
 
+// ===== VERSION =====
+const SITE_VERSION = "1:1";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const el = document.getElementById("siteVersion");
+  if (!el) return;
+
+  el.textContent = `Version ${SITE_VERSION}`;
+  el.style.position = "fixed";
+  el.style.bottom = "8px";
+  el.style.right = "8px";
+  el.style.background = "#111";
+  el.style.color = "#fff";
+  el.style.fontSize = "12px";
+  el.style.padding = "6px 10px";
+  el.style.borderRadius = "999px";
+  el.style.opacity = "0.85";
+  el.style.zIndex = "9999";
+});
