@@ -1,59 +1,24 @@
 /* =========================================
-   JÄMFÖRELSE: 2 SCHEMAN SIDA VID SIDA
-   - INGET klipps bort
-   - “mini”-känsla via lite mindre text
+   JÄMFÖRELSE: visa deltagare även i 30-min block
+   (block med inline height: 28px)
    ========================================= */
 
-:root{
-  --gap: 16px;
-  --paper-pad: 12px;
-  --paper-max-width: 720px;   /* justera vid behov */
-  --mini-font-scale: 0.92;    /* 0.85–1.0 */
+/* Bara inne i jämförelse-korten */
+.compare-item .block[style*="height: 28px"]{
+  height: auto !important;      /* överstyr inline height */
+  min-height: 28px;             /* behåll basstorlek */
+  white-space: normal !important;
+  overflow: visible !important;
+  line-height: 1.15;
 }
 
-.compare-wrap{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--gap);
-  padding: 12px;
-  align-items: start;
-  overflow-x: hidden;
+/* Gör texten lite kompaktare i de korta blocken så mer får plats */
+.compare-item .block[style*="height: 28px"] .title{
+  font-size: 0.85em;
+  margin-bottom: 2px;
 }
 
-/* varje schema */
-.compare-item{
-  width: 100%;
-  max-width: var(--paper-max-width);
-  justify-self: center;
-
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.12);
-
-  padding: var(--paper-pad);
-  box-sizing: border-box;
-
-  /* VIKTIGT: lås inte höjd + klipp inte */
-  height: auto;
-  overflow: visible;
-
-  /* mini-variant: gör allt lite mindre men behåll allt innehåll */
-  font-size: calc(1rem * var(--mini-font-scale));
+/* Om deltagarraden är vanlig text i blocket: gör den något mindre */
+.compare-item .block[style*="height: 28px"]{
+  font-size: 0.92em;
 }
-
-/* se till att gridden får krympa i sin kolumn */
-.compare-item *{
-  min-width: 0;
-}
-
-/* Smal skärm: 1 kolumn */
-@media (max-width: 1100px){
-  .compare-wrap{
-    grid-template-columns: 1fr;
-  }
-
-  .compare-item{
-    max-width: min(94vw, 980px);
-  }
-}
-
