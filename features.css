@@ -1,1 +1,56 @@
-/* tomt än så länge */
+/* =====================================
+   JÄMFÖRELSE (SKÄRM): A4 LIGGANDE-KÄNSLA
+   Ingen utskriftshantering
+   ===================================== */
+
+/* A4 liggande: 297 × 210 mm */
+:root{
+  --a4w: 297mm;
+  --a4h: 210mm;
+  --a4pad: 10mm;
+}
+
+/* Försök fånga vanliga wrappers/containers som brukar hålla jämförelsen */
+.compare-wrapper,
+.compare-container,
+.comparison-wrapper,
+#compare,
+#comparison,
+[data-view="compare"],
+[data-mode="compare"]{
+  width: var(--a4w);
+  height: var(--a4h);
+  margin: 0 auto;
+  padding: var(--a4pad);
+  box-sizing: border-box;
+  background: #fff;
+
+  /* “papper på bord”-känsla */
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  border-radius: 10px;
+
+  /* Om innehåll blir mer än A4: scroll hellre än att spränga layouten */
+  overflow: auto;
+}
+
+/* Om jämförelsen visar flera scheman bredvid varandra */
+.compare-wrapper > *,
+.compare-container > *,
+.comparison-wrapper > *{
+  flex: 1 1 0;
+}
+
+/* Skärmanpassning: se till att A4 ryms på små skärmar */
+@media screen {
+  .compare-wrapper,
+  .compare-container,
+  .comparison-wrapper,
+  #compare,
+  #comparison,
+  [data-view="compare"],
+  [data-mode="compare"]{
+    max-width: 100vw;
+    max-height: 100vh;
+    aspect-ratio: 297 / 210;
+  }
+}
