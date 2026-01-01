@@ -1,46 +1,63 @@
 /* =========================================
-   JÄMFÖRELSE: VARJE SCHEMA SOM A4 LIGGANDE
-   (skärm, ingen utskrift)
+   JÄMFÖRELSE: VECKOUTSKRIFT-LOOK PÅ SKÄRM
+   - A4 liggande proportion
+   - Skalas upp så det blir läsbart
+   - Ingen "scroll i liten ruta"
    ========================================= */
 
-/* Behåll jämförelsen enkel: scheman bredvid varandra + scroll */
+:root{
+  /* Hur stor del av skärmen A4-kortet ska ta? */
+  --sheet-max-w: 96vw;
+  --sheet-max-h: 88vh;
+
+  /* Luft runt innehåll */
+  --sheet-pad: 16px;
+}
+
+/* Jämförelse: scheman sida vid sida, scrolla bara horisontellt om det är många */
 .compare-wrap{
   display: flex;
-  gap: 16px;
+  gap: 18px;
   align-items: flex-start;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;
   padding: 12px;
   -webkit-overflow-scrolling: touch;
 }
 
-/* VARJE schema-kort i jämförelsen = liggande A4-proportion */
+/* Varje schema = ett "papper" som fyller skärmen (inte mm-storlek) */
 .compare-item{
-  /* Fysisk A4 liggande proportion, men anpassa till skärm */
-  width: min(297mm, calc(100vw - 40px));
+  /* Behåll A4 liggande proportion */
   aspect-ratio: 297 / 210;
+
+  /* Fyll skärmen men håll proportionen */
+  width: min(var(--sheet-max-w), calc(var(--sheet-max-h) * (297/210)));
+  height: auto;
 
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,.15);
 
-  padding: 10mm;
+  padding: var(--sheet-pad);
   box-sizing: border-box;
 
-  /* Viktigt: inget “krympt läge” */
+  /* Viktigt: låt kortet vara stort och läsbart */
   transform: none !important;
 }
 
-/* Om innehållet blir längre än kortet: scroll i kortet */
+/* Innehållet: ska inte bli en liten scrollruta */
 .compare-item > div{
-  overflow: auto;
-  max-height: 100%;
+  overflow: visible;
+  max-height: none;
 }
 
-/* Gör rubriken lite tydligare (valfritt men brukar hjälpa läsbarhet) */
+/* Om ditt schema innehåller en grid som blir för bred: låt den krympa mjukt */
+.compare-item .block-grid{
+  max-width: 100%;
+}
+
+/* Rubrik lite tydligare */
 .compare-item h3{
-  margin: 0 0 8px 0;
-  font-size: 1.05rem;
+  margin: 0 0 10px 0;
+  font-size: 1.1rem;
 }
-
-
