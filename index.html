@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Schema v5 – Grunden DV</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schema v5 – Grunden DV</title>
 
-<style>
-:root {
-  --bg:#f0f4f8;
-  --card-bg:#fff;
-  --border:#ddd;
-  --shadow:0 3px 10px rgba(0,0,0,.06);
-  --radius:14px;
-  --blue:#3b82f6;
-  --muted:#555;
-  --header-bg:#f5f7fa;
-  --chip-bg:#f8fafc;
-  --chip-border:#cfd8e3;
-  --chip-active:#3b82f6;
-  --chip-text:#1f2937;
-}
+  <!-- Extra funktioner (läggs i separata filer så du slipper pilla i bamse-koden) -->
+  <link rel="stylesheet" href="features.css" />
+  <script defer src="features.js"></script>
+
+  <style>
+    :root {
+      --bg:#f0f4f8;
+      --card-bg:#fff;
+      --border:#ddd;
+      --shadow:0 3px 10px rgba(0,0,0,.06);
+      --radius:14px;
+      --blue:#3b82f6;
+      --muted:#555;
+      --header-bg:#f5f7fa;
+      --chip-bg:#f8fafc;
+      --chip-border:#cfd8e3;
+      --chip-active:#3b82f6;
+      --chip-text:#1f2937;
+    }
+
 
 /* Reset & bas */
 * { box-sizing:border-box; margin:0; padding:0; }
