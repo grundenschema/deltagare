@@ -2,6 +2,7 @@
    JÄMFÖRELSE: A4 LIGGANDE (SKÄRM)
    Gäller endast compare-wrap
    ===================================== */
+body { outline: 8px solid red !important; }
 
 .compare-wrap {
   /* A4 liggande proportioner */
