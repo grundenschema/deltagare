@@ -1,102 +1,73 @@
-/* =====================================================
-   STARTBANNER + TA BORT EMOJIS ENDAST I JÄMFÖRELSE
-   ===================================================== */
+/* =========================
+   Banner
+   ========================= */
+.schema-version-banner{
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 10px 12px;
+  text-align: center;
+  background: #fff7cc;
+  border-bottom: 1px solid rgba(0,0,0,.1);
+  font-size: 0.95rem;
+}
 
-(function () {
-  // ---- Banner (valfri) ----
-  const bannerText = "Ny schemaversion är igång.";
-  document.addEventListener("DOMContentLoaded", () => {
-    if (!document.querySelector(".schema-version-banner")) {
-      const banner = document.createElement("div");
-      banner.className = "schema-version-banner";
-      banner.textContent = bannerText;
-      banner.style.position = "sticky";
-      banner.style.top = "0";
-      banner.style.zIndex = "9999";
-      banner.style.padding = "10px 12px";
-      banner.style.textAlign = "center";
-      banner.style.background = "#fff7cc";
-      banner.style.borderBottom = "1px solid rgba(0,0,0,.1)";
-      banner.style.fontSize = "0.95rem";
-      document.body.prepend(banner);
-    }
-  });
+/* =========================
+   JÄMFÖRELSE: 2 scheman sida vid sida (1 på smal)
+   ========================= */
+:root{
+  --cmp-gap: 16px;
+  --cmp-pad: 12px;
+  --cmp-max-width: 720px;
+  --cmp-font-scale: 0.95;
+}
 
-  // ---- Emoji-strip (endast jämförelse) ----
-  // Tar bort de flesta emojis/symboler som används i schemat (🎙️ 🧑‍🏫 👥 🕒 osv)
-  // OBS: detta påverkar bara textnoder inne i .compare-item
-  const EMOJI_REGEX =
-    /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}]/gu;
+.compare-wrap{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cmp-gap);
+  padding: 12px;
+  align-items: start;
+  overflow-x: hidden;
+}
 
-  function stripEmojisInNode(root) {
-    if (!root) return;
+@media (max-width: 1100px){
+  .compare-wrap{ grid-template-columns: 1fr; }
+}
 
-    // Gå igenom textnoder och rensa emojis
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
-    const toClean = [];
-    while (walker.nextNode()) toClean.push(walker.currentNode);
+.compare-item{
+  width: 100%;
+  max-width: var(--cmp-max-width);
+  justify-self: center;
 
-    for (const textNode of toClean) {
-      const original = textNode.nodeValue;
-      if (!original) continue;
-      const cleaned = original.replace(EMOJI_REGEX, "");
-      if (cleaned !== original) textNode.nodeValue = cleaned;
-    }
-  }
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
 
-  function cleanAllCompareItems() {
-    document.querySelectorAll(".compare-item").forEach((item) => {
-      stripEmojisInNode(item);
-    });
-  }
+  padding: var(--cmp-pad);
+  box-sizing: border-box;
 
-  // Kör direkt när sidan laddar
-  document.addEventListener("DOMContentLoaded", cleanAllCompareItems);
+  height: auto;
+  overflow: visible;
 
-  // Kör igen när jämförelsen uppdateras dynamiskt
-  const observer = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      // Om något nytt hamnar i compare-wrap eller compare-item
-      if (
-        (m.target && m.target.closest && m.target.closest(".compare-wrap")) ||
-        (m.addedNodes && m.addedNodes.length)
-      ) {
-        cleanAllCompareItems();
-        break;
-      }
-    }
-  });
+  font-size: calc(1rem * var(--cmp-font-scale));
+}
 
-  document.addEventListener("DOMContentLoaded", () => {
-    observer.observe(document.body, { childList: true, subtree: true });
-  });
-})();
-// =========================================
-// MOBIL: Gör veckoschemat sid-scrollbart
-// Wrappar .block-header + .block-grid i en div.week-scroll
-// =========================================
-document.addEventListener("DOMContentLoaded", () => {
-  // hitta alla block-header
-  const headers = Array.from(document.querySelectorAll(".block-header"));
+/* Inget klipps bort */
+.compare-item *{
+  min-width: 0;
+  overflow: visible;
+}
 
-  headers.forEach((header) => {
-    // block-grid brukar ligga direkt efter headern
-    const grid = header.nextElementSibling;
-    if (!grid || !grid.classList.contains("block-grid")) return;
-
-    // undvik att wrappa flera gånger
-    const alreadyWrapped = header.parentElement?.classList?.contains("week-scroll");
-    if (alreadyWrapped) return;
-
-    // skapa wrapper
-    const wrap = document.createElement("div");
-    wrap.className = "week-scroll";
-
-    // lägg wrappern där headern låg
-    header.parentNode.insertBefore(wrap, header);
-
-    // flytta in header + grid i wrappern
-    wrap.appendChild(header);
-    wrap.appendChild(grid);
-  });
-});
+/* Block får växa (deltagare syns även i 30-min) */
+.compare-item .block{
+  height: auto !important;
+  min-height: unset !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  line-height: 1.15;
+}
+.compare-item .block[style*="height: 28px"],
+.compare-item .block[style*="28px"]{
+  height: auto !important;
+}
