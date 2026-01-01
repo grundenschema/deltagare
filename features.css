@@ -1,402 +1,90 @@
-/* =====================================================
-   SCHEMA – REN, KORTBASERAD LAYOUT (MOBIL + DESKTOP)
-   + PRINT
-   + JÄMFÖRELSE: TA BORT EMOJIS
-   ===================================================== */
+/* ========= BAS ========= */
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.35}
+img{max-width:100%;height:auto}
 
-/* ---------- Design tokens ---------- */
-:root{
-  --bg: #0b0d10;
-  --panel: #12161c;
-  --panel2: #0f1318;
-  --text: #e9eef5;
-  --muted: #a9b4c2;
-  --line: rgba(255,255,255,.10);
+/* ========= LAYOUT: ALLT SOM MOBIL (ÄVEN DESKTOP) ========= */
+.container{width:min(1100px,calc(100% - 16px));margin:0 auto;padding:12px 0}
 
-  --accent: #7cc4ff;
-  --ok: #33d17a;
-  --warn: #ffb86b;
-  --bad: #ff6b6b;
+.section{margin:12px 0}
 
-  --radius: 16px;
-  --shadow: 0 10px 30px rgba(0,0,0,.35);
-  --shadow2: 0 6px 18px rgba(0,0,0,.25);
-
-  --gap: 12px;
-  --pad: 14px;
-
-  --maxw: 1200px;
-
-  --font: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+/* Kort / panel */
+.card{
+  border:1px solid #d7d7d7;
+  border-radius:14px;
+  background:#fff;
+  padding:12px;
+  margin:12px 0;
 }
 
-/* ---------- Base ---------- */
-*{ box-sizing:border-box; }
-html, body{ height:100%; }
-body{
-  margin:0;
-  font-family: var(--font);
-  background: radial-gradient(1200px 600px at 30% 0%, #101722 0%, var(--bg) 55%) fixed;
-  color: var(--text);
-  line-height: 1.35;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
+/* Rubriker */
+h1,h2,h3{margin:0 0 10px}
+.small{font-size:12px;color:#555}
 
-a{ color:inherit; }
-img{ max-width:100%; height:auto; }
-button, input, select, textarea{ font: inherit; }
-code, pre{ font-family: var(--mono); }
-
-/* ---------- App wrapper ---------- */
-/* Lägg gärna en wrapper runt allt: <main class="app"> ... */
-.app{
-  width: min(var(--maxw), calc(100% - 24px));
-  margin: 0 auto;
-  padding: 14px 0 30px;
-}
-
-/* ---------- Header / toolbar ---------- */
-/* Exempel: <header class="topbar"> ... */
-.topbar{
-  display:flex;
-  flex-wrap: wrap;
-  gap: var(--gap);
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.brand h1{
-  font-size: 18px;
-  margin:0;
-  letter-spacing: .2px;
-}
-.brand .sub{
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* Controls area */
-.toolbar{
-  display:flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items:center;
-  justify-content:flex-end;
-}
-
-.control{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(255,255,255,.04);
-  box-shadow: var(--shadow2);
-}
-.control label{
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-}
-.control select,
-.control input[type="text"],
-.control input[type="number"]{
-  background: transparent;
-  color: var(--text);
-  border: none;
-  outline: none;
-  min-width: 140px;
-}
-.control select option{ color: #111; }
-
-/* Buttons */
-.btn{
-  appearance:none;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,.06);
-  color: var(--text);
-  padding: 10px 12px;
-  border-radius: 999px;
-  cursor:pointer;
-  box-shadow: var(--shadow2);
-}
-.btn:hover{ border-color: rgba(255,255,255,.18); }
-.btn:active{ transform: translateY(1px); }
-.btn.primary{
-  border-color: rgba(124,196,255,.35);
-  background: rgba(124,196,255,.12);
-}
-
-/* ---------- Status / messages ---------- */
-.notice{
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,.04);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  color: var(--muted);
-  margin: 10px 0 14px;
-}
-
-/* ---------- Core layout: same as mobile on desktop ---------- */
-/* Du vill att desktop ska se ut som mobil: = kort, staplat. */
-.layout{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-
-/* ---------- Schedule container ---------- */
-/* Exempel: <section class="schedule"> ... */
-.schedule{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-
-/* Day card */
+/* ========= SCHEMA: DAG SOM KORT ========= */
+/* Byt .day, .slot till dina klassnamn om de heter annat */
 .day{
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
+  border:1px solid #cfcfcf;
+  border-radius:16px;
+  padding:12px;
+  margin:14px 0;
+  background:#fff;
 }
-
 .dayHeader{
   display:flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 12px 14px;
-  background: rgba(0,0,0,.18);
-  border-bottom: 1px solid var(--line);
+  justify-content:space-between;
+  gap:10px;
+  align-items:baseline;
+  padding-bottom:8px;
+  border-bottom:1px solid #e6e6e6;
+  margin-bottom:10px;
 }
-.dayTitle{
-  margin:0;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: .2px;
-}
-.dayMeta{
-  margin:0;
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-}
+.dayTitle{font-weight:800}
+.dayMeta{font-size:12px;color:#555;white-space:nowrap}
 
-/* Slots inside day */
-.dayBody{
-  padding: 12px;
-  display:grid;
-  gap: 10px;
-}
-
-/* A single row/card inside a day */
 .slot{
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,.03);
-  border-radius: 14px;
-  padding: 10px 10px;
+  border:1px solid #e2e2e2;
+  border-radius:14px;
+  padding:10px;
+  margin:10px 0;
+  background:#fafafa;
 }
-
 .slotTop{
   display:flex;
-  flex-wrap: wrap;
-  align-items:center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.slotTime{
-  font-weight: 700;
-  font-size: 13px;
-}
-.slotTags{
-  display:flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
   align-items:center;
 }
-.tag{
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  color: var(--muted);
-  background: rgba(255,255,255,.03);
-}
-.tag.ok{ border-color: rgba(51,209,122,.35); color: rgba(51,209,122,.95); background: rgba(51,209,122,.10); }
-.tag.warn{ border-color: rgba(255,184,107,.35); color: rgba(255,184,107,.95); background: rgba(255,184,107,.10); }
-.tag.bad{ border-color: rgba(255,107,107,.35); color: rgba(255,107,107,.95); background: rgba(255,107,107,.10); }
-
-.slotMain{
-  margin-top: 8px;
-  display:grid;
-  gap: 8px;
-}
-
-/* Participant/coach lines */
+.time{font-weight:800}
 .line{
   display:flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:6px;
 }
-.lineLabel{
-  font-size: 12px;
-  color: var(--muted);
-  min-width: 78px;
-}
-.lineValue{
-  font-size: 13px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
+.label{font-size:12px;color:#555;min-width:70px}
+.value{font-weight:600;overflow-wrap:anywhere}
+
+/* ========= MOBIL: se till att allt alltid får plats ========= */
+@media (max-width:600px){
+  .container{width:calc(100% - 12px)}
+  .dayMeta{white-space:normal}
 }
 
-/* Notes/details */
-.details{
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
-  overflow-wrap: anywhere;
+/* ========= PRINT ========= */
+@media print{
+  .noPrint{display:none !important}
+  body{background:#fff}
+  .day,.slot{break-inside:avoid;page-break-inside:avoid}
 }
 
-/* ---------- Comparison page ---------- */
+/* ========= JÄMFÖRELSESIDAN: TA BORT EMOJIS ========= */
 /* Sätt <body class="compare-page"> på jämförelsesidan */
 .compare-page .emoji,
-.compare-page .icon,
-.compare-page [class*="emoji"]{
+.compare-page [class*="emoji"],
+.compare-page .icon{
   display:none !important;
 }
-
-/* Om emojis är riktiga unicode-emoji i text och du vill neutralisera dem visuellt: */
-.compare-page{
-  font-family: var(--font); /* medvetet utan emoji-font fallback */
-}
-
-/* Jämförelse-kort */
-.compare{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-.compareCard{
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,.04);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow2);
-  overflow:hidden;
-}
-.compareHeader{
-  padding: 12px 14px;
-  background: rgba(0,0,0,.18);
-  border-bottom: 1px solid var(--line);
-  display:flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-.compareTitle{
-  margin:0;
-  font-size: 14px;
-  font-weight: 800;
-}
-.compareBody{
-  padding: 12px;
-  display:grid;
-  gap: 10px;
-}
-
-/* ---------- Tables (om du har tabeller) ---------- */
-.tableWrap{ overflow-x:auto; }
-table{
-  width:100%;
-  border-collapse: collapse;
-  min-width: 520px;
-}
-th, td{
-  border-bottom: 1px solid var(--line);
-  padding: 10px 10px;
-  text-align:left;
-  vertical-align: top;
-}
-th{
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 700;
-  background: rgba(255,255,255,.03);
-}
-td{
-  font-size: 13px;
-}
-td.small{ font-size: 12px; color: var(--muted); }
-
-/* ---------- Text overflow: visa hela namn hellre än att kapa ---------- */
-.break-anywhere{ overflow-wrap:anywhere; word-break: break-word; }
-.nowrap{ white-space: nowrap; }
-
-/* ---------- Desktop tweaks ---------- */
-/* Desktop får INTE bli “table/grid-helvete”. Vi håller kortlayouten. */
-@media (min-width: 900px){
-  .topbar{ margin-bottom: 14px; }
-  .brand h1{ font-size: 20px; }
-  .schedule{ gap: 16px; }
-  .dayBody{ grid-template-columns: 1fr; } /* håll samma som mobil */
-}
-
-/* ---------- Print ---------- */
-@media print{
-  :root{
-    --bg: #fff;
-    --panel: #fff;
-    --text: #000;
-    --muted: #333;
-    --line: rgba(0,0,0,.25);
-    --shadow: none;
-    --shadow2: none;
-  }
-
-  body{
-    background: #fff !important;
-    color:#000 !important;
-  }
-
-  .topbar, .toolbar, .btn, .control, .notice{
-    display:none !important;
-  }
-
-  .app{
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .day, .slot, .compareCard{
-    box-shadow:none !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .dayHeader{
-    background: #f3f3f3 !important;
-  }
-
-  a{ text-decoration:none !important; }
-}
-
-/* ---------- Optional: light mode toggle if you want ---------- */
-/*
-body.light{
-  --bg:#f6f7fb; --panel:#fff; --panel2:#fff;
-  --text:#0c111a; --muted:#4d5b6c; --line: rgba(0,0,0,.12);
-  background:#f6f7fb;
-}
-*/
-
+/* och om det är riktiga emoji-tecken i text: */
+.compare-page{font-family:system-ui,sans-serif}
