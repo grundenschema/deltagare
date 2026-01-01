@@ -325,12 +325,7 @@ select, .btn {
   <button id="tabCoach" class="tab">🧑‍🏫 Coach</button>
   <button id="tabNow" class="tab active">🔔 Pågår nu</button>
   <button id="tabAssistant" class="tab">🤖 Assistent</button>
-<div style="text-align:center; margin:10px 0;">
-  <button id="btnRefreshData" class="btn">🔄 Uppdatera master</button>
-  <div id="lastUpdated" style="margin-top:6px; font-size:0.9rem; color:#555;">
-    Senast uppdaterad: –
-  </div>
-</div>  
+</div>
 
 
 <!-- DELTAGARE-VY -->
@@ -419,84 +414,115 @@ const url="https://script.google.com/macros/s/AKfycbyrif6NVB3DPkmSam6kOX_M3xcXcr
 const aktivitetFarger = {
   "Måndagsmöte": { color: "#AED6F1", emoji: "📅" },
   "Gruppmöte": { color: "#7FB3D5", emoji: "👥" },
+
   "Lunch": { color: "#F9E79F", emoji: "🍲" },
+  "Lunch Mio": { color: "#F9A825", emoji: "🍽️" },
+  "Lunch Anders B": { color: "#F9A825", emoji: "🍽️" },
+
   "Frukost": { color: "#FAD7A0", emoji: "🥐" },
   "Morgonrutiner": { color: "#FAD7A0", emoji: "☀️" },
-  "morgonrutiner": { color: "#FAD7A0", emoji: "☀️" },
+
   "Ateljé": { color: "#F5CBA7", emoji: "🎨" },
-  "ateljén": { color: "#F5CBA7", emoji: "🎨" },
   "Ateljén": { color: "#F5CBA7", emoji: "🎨" },
+
   "Musik": { color: "#D2B4DE", emoji: "🎶" },
   "Musik veckomöte": { color: "#D2B4DE", emoji: "🎶" },
   "Musikutbyte": { color: "#D2B4DE", emoji: "🎶" },
   "Musikproduktion": { color: "#D2B4DE", emoji: "🎶" },
   "Egen musikproduktion": { color: "#D2B4DE", emoji: "🎶" },
-  "Egen musikproduktio": { color: "#D2B4DE", emoji: "🎶" },
   "Rep och jam": { color: "#D2B4DE", emoji: "🎶" },
-  "Pod": { color: "#A9CCE3", emoji: "🎙️" },
-  "Padel": { color: "#82E0AA", emoji: "🏓" },
-  "Lite av varje": { color: "#FADBD8", emoji: "✨" },
-  "lite av varje": { color: "#FADBD8", emoji: "✨" },
-  "Yoga": { color: "#D5F5E3", emoji: "🧘" },
-  "Gym": { color: "#A3E4D7", emoji: "🏋️‍♂️" },
-  "Film": { color: "#E6B0AA", emoji: "🎬" },
-  "Föreningsgruppen": { color: "#D6DBDF", emoji: "🤝" },
-  "Trummor": { color: "#F1948A", emoji: "🥁" },
-  "Återkoppling": { color: "#85C1E9", emoji: "🔄" },
-  "Medicin": { color: "#E59866", emoji: "💊" },
-  "Biljard": { color: "#A9DFBF", emoji: "🎱" },
-  "Spelgruppen": { color: "#F8C471", emoji: "🎲" },
-  "Sömnad": { color: "#F5EEF8", emoji: "🧵" },
-  "Filmgruppen": { color: "#E6B0AA", emoji: "🎬" },
   "Musikquizz": { color: "#D2B4DE", emoji: "🎶" },
   "Musikdokumentär": { color: "#D2B4DE", emoji: "🎶" },
+  "Vocal": { color: "#D2B4DE", emoji: "🎤" },
+
+  "Pod": { color: "#A9CCE3", emoji: "🎙️" },
+  "Pod sidbenor": { color: "#A9CCE3", emoji: "🎙️" },
+
+  "Padel": { color: "#82E0AA", emoji: "🏓" },
+
+  "Lite av varje": { color: "#FADBD8", emoji: "✨" },
+
+  "Yoga": { color: "#D5F5E3", emoji: "🧘" },
+
+  "Gym": { color: "#A3E4D7", emoji: "🏋️‍♂️" },
+  "Gym Slottskogens Gym": { color: "#A3E4D7", emoji: "🏋️‍♂️" },
+
+  "Film": { color: "#E6B0AA", emoji: "🎬" },
+  "Filmgruppen": { color: "#E6B0AA", emoji: "🎬" },
+
+  "Föreningsgruppen": { color: "#D6DBDF", emoji: "🤝" },
+  "Autentiskt relaterande": { color: "#D6DBDF", emoji: "🤝" },
+
+  "Trummor": { color: "#F1948A", emoji: "🥁" },
+
+  "Återkoppling": { color: "#85C1E9", emoji: "🔄" },
+
+  "Medicin": { color: "#E59866", emoji: "💊" },
+
+  "Biljard": { color: "#A9DFBF", emoji: "🎱" },
+
+  "Spelgruppen": { color: "#F8C471", emoji: "🎲" },
+
+  "Sömnad": { color: "#F5EEF8", emoji: "🧵" },
+
   "Warhammer": { color: "#C39BD3", emoji: "🛡️" },
-  "Utflykt": { color: "#A9CCE3", emoji: "🚌" },
-  "Uppstart Taket": { color: "#AED6F1", emoji: "🌤️" },
-  "Uppstart": { color: "#AED6F1", emoji: "🌤️" },
-  "Gåträning": { color: "#ABEBC6", emoji: "🚶‍♂️" },
-  "Gåträning  / byte till rullstol": { color: "#ABEBC6", emoji: "🚶‍♂️" },
+
+  "Utflykt": { color: "#ABEBC6", emoji: "🚌" },
   "Promenad": { color: "#ABEBC6", emoji: "🚶‍♀️" },
-  "Toa,  promenad": { color: "#ABEBC6", emoji: "🚶‍♀️" },
-  "Baka": { color: "#FAD7A0", emoji: "🧁" },
-  "Bakning": { color: "#FAD7A0", emoji: "🧁" },
-  "Fika, Ladda stol": { color: "#FAD7A0", emoji: "☕🔋" },
-  "Fika": { color: "#FAD7A0", emoji: "☕" },
-  "Ladda stol": { color: "#FAD7A0", emoji: "☕🔋" },
+  "Gåträning": { color: "#ABEBC6", emoji: "🚶‍♂️" },
+  "Gåträning / byte till rullstol": { color: "#ABEBC6", emoji: "🚶‍♂️" },
+  "Toa, promenad": { color: "#ABEBC6", emoji: "🚶‍♀️" },
+  "Lunchpromenad": { color: "#ABEBC6", emoji: "🚶‍♀️🍲" },
+  "Kulturpromenad": { color: "#ABEBC6", emoji: "🏛️" },
+
   "Lokalvård": { color: "#E5E7E8", emoji: "🧹" },
   "Öppen verkstad": { color: "#E5E7E8", emoji: "🧰" },
-  "Vocal": { color: "#E8DAEF", emoji: "🎤" },
+  "Handla": { color: "#E5E7E8", emoji: "🛒" },
+  "Handling": { color: "#E5E7E8", emoji: "🛒" },
+
   "Behandling": { color: "#FDEDEC", emoji: "💆‍♀️" },
   "Behandlingar": { color: "#FDEDEC", emoji: "💆‍♀️" },
   "Relax Massagestol": { color: "#FDEDEC", emoji: "💺" },
-  "Transkibering": { color: "#E8DAEF", emoji: "⌨️" },
+
   "Transkribering": { color: "#E8DAEF", emoji: "⌨️" },
-  "Pod sidbenor": { color: "#A9CCE3", emoji: "🎙️" },
-  "Pod Sidbenor": { color: "#A9CCE3", emoji: "🎙️" },
-  "Lunchpromenad": { color: "#ABEBC6", emoji: "🚶‍♀️🍲" },
-  "Autentiskt relaterande": { color: "#D6DBDF", emoji: "🤝" },
-  "Handla": { color: "#E5E7E8", emoji: "🛒" },
-  "Handling": { color: "#E5E7E8", emoji: "🛒" },
-  "Foto": { color: "#E8DAEF", emoji: "📸" },
-  "Kommunikation": { color: "#D6EAF8", emoji: "💬" },
-  "Kulturpromenad": { color: "#ABEBC6", emoji: "🏛️" },
-  "Poesigrupp": { color: "#FDEBD0", emoji: "✍️" },
-  "Poesigruppen": { color: "#FDEBD0", emoji: "✍️" },
-  "Samtal": { color: "#FCF3CF", emoji: "💬" },
-  "Samtal onsdag eller torsdag": { color: "#FCF3CF", emoji: "💬" },
+  "Transkibering": { color: "#E8DAEF", emoji: "⌨️" },
   "Manusarbete": { color: "#E8DAEF", emoji: "📝" },
   "Mark- Manusarbete (John)": { color: "#E8DAEF", emoji: "📝" },
-  "Gym Slottskogens Gym": { color: "#A3E4D7", emoji: "🏋️‍♂️" },
-  "Filmkunskap": { color: "#E6B0AA", emoji: "🎬" },
-  "Avslappning": { color: "#D5F5E3", emoji: "🪷" }
+  "Foto": { color: "#E8DAEF", emoji: "📸" },
+
+  "Kommunikation": { color: "#D6EAF8", emoji: "💬" },
+
+  "Poesigrupp": { color: "#FDEBD0", emoji: "✍️" },
+  "Poesigruppen": { color: "#FDEBD0", emoji: "✍️" },
+
+  "Samtal": { color: "#FCF3CF", emoji: "💬" },
+  "Samtal onsdag eller torsdag": { color: "#FCF3CF", emoji: "💬" },
+
+  "Avslappning": { color: "#D5F5E3", emoji: "🪷" },
+
+  "Ladda stol": { color: "#FAD7A0", emoji: "🔋" }
 };
 
-function colorFor(r) { return (aktivitetFarger[r.Aktivitet] || { color: "#edf2f7" }).color; }
-function emojiFor(r) { return (aktivitetFarger[r.Aktivitet] || { emoji: "" }).emoji; }
-function dayKey(str) { return String(str).slice(0, 10); }
-function todayKey() { return new Date().toISOString().slice(0, 10); }
+/* ===== FUNKTIONER ===== */
+
+function colorFor(r) {
+  return (aktivitetFarger[r.Aktivitet] || { color: "#edf2f7" }).color;
+}
+
+function emojiFor(r) {
+  return (aktivitetFarger[r.Aktivitet] || { emoji: "" }).emoji;
+}
+
+function dayKey(str) {
+  return String(str).slice(0, 10);
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function weekdayName(d) {
-  return ["söndag", "måndag", "tisdag", "onsdag", "torsdag", "fredag", "lördag"][d];
+  return ["söndag","måndag","tisdag","onsdag","torsdag","fredag","lördag"][d];
 }
 
 
@@ -506,10 +532,7 @@ let DATA=[];
 /* Ladda data + init */
 async function loadData(){
   try{
-    const res = await fetch(url + "?nocache=" + performance.now(), {
-  cache: "no-store"
-});
-
+    const res=await fetch(url+"?t="+Date.now());
     const json=await res.json();
     DATA=json.data||[];
     fillLists(); fillCompareLists(); fillSickList();
@@ -1004,25 +1027,6 @@ function printSchema(title, personName) {
     document.querySelector(".print-header")?.remove();
   }, 1500);
 }
-
-
-/* =====================================================
-   MANUELL MASTER-UPPDATERING + TIDSSTÄMPEL
-   ===================================================== */
-
-document.getElementById("btnRefreshData").addEventListener("click", async () => {
-  await loadData();      // Hämtar senaste data från Google Sheet
-  renderNow();           // Uppdaterar vyn (du kan byta vy här om du vill)
-
-  const now = new Date().toLocaleTimeString("sv-SE", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  });
-
-  document.getElementById("lastUpdated").textContent =
-    "Senast uppdaterad: " + now;
-});
 
 
 </script>
