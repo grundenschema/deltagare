@@ -1,9 +1,62 @@
-/* =========================================
-   JÄMFÖRELSE = SAMMA BETEENDE SOM VECKOUTSKRIFT
-   ========================================= */
+/* =====================================================
+   JÄMFÖRELSE: MINI-VERSION AV VECKOUTSKRIFT (SKÄRM)
+   - 2 scheman sida vid sida
+   - 1 kolumn på smal skärm
+   - Inget innehåll kapas
+   - Emojis borttagna ENDAST i jämförelse
+   ===================================================== */
 
-/* Alla block i jämförelse ska bete sig som i veckovyn */
-.compare-item .block {
+:root{
+  --gap: 16px;
+  --paper-pad: 12px;
+  --paper-max-width: 720px;
+  --mini-font-scale: 0.95;
+}
+
+/* ===== JÄMFÖRELSELAYOUT ===== */
+.compare-wrap{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+  padding: 12px;
+  align-items: start;
+  overflow-x: hidden;
+}
+
+/* Smal skärm: 1 kolumn */
+@media (max-width: 1100px){
+  .compare-wrap{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== VARJE SCHEMA ===== */
+.compare-item{
+  width: 100%;
+  max-width: var(--paper-max-width);
+  justify-self: center;
+
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+
+  padding: var(--paper-pad);
+  box-sizing: border-box;
+
+  height: auto;
+  overflow: visible;
+
+  font-size: calc(1rem * var(--mini-font-scale));
+}
+
+/* Viktigt: inget klipps bort */
+.compare-item *{
+  min-width: 0;
+  overflow: visible;
+}
+
+/* ===== BLOCK = SAMMA BETEENDE SOM VECKOUTSKRIFT ===== */
+.compare-item .block{
   height: auto !important;
   min-height: unset !important;
   overflow: visible !important;
@@ -11,18 +64,18 @@
   line-height: 1.15;
 }
 
-/* Halvtimmespass: låt dem växa så deltagare syns */
+/* Halvtimmespass (28px i original) får växa */
 .compare-item .block[style*="28px"],
-.compare-item .block[style*="height: 28px"] {
+.compare-item .block[style*="height: 28px"]{
   height: auto !important;
 }
 
-/* Säkerställ att titel + deltagare alltid visas */
-.compare-item .block .title {
-  display: block;
-  margin-bottom: 2px;
+/* ===== TA BORT EMOJIS ENDAST I JÄMFÖRELSE ===== */
+.compare-item{
+  font-variant-emoji: text;
 }
 
-.compare-item .block br {
-  display: inline;
+.compare-item .emoji,
+.compare-item .icon{
+  display: none !important;
 }
