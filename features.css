@@ -1,93 +1,77 @@
 /* =====================================================
-   JÄMFÖRELSE: MINI-VERSION AV VECKOUTSKRIFT (SKÄRM)
-   - 2 scheman sida vid sida
-   - 1 kolumn på smal skärm
-   - Inget innehåll kapas
-   - Emojis borttagna ENDAST i jämförelse
+   features.css (REN)
+   - Banner
+   - Jämförelse: 2-up (1-up på smal)
+   - Mobil: veckovy sidscroll (funkar hos dig)
+   - Desktop: veckovy stabil grid (inte kaos)
    ===================================================== */
 
-:root{
-  --gap: 16px;
-  --paper-pad: 12px;
-  --paper-max-width: 720px;
-  --mini-font-scale: 0.95;
+/* =========================
+   Banner
+   ========================= */
+.schema-version-banner{
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 10px 12px;
+  text-align: center;
+  background: #fff7cc;
+  border-bottom: 1px solid rgba(0,0,0,.1);
+  font-size: 0.95rem;
 }
 
-/* ===== JÄMFÖRELSELAYOUT ===== */
+/* =========================
+   JÄMFÖRELSE (mini av veckovyn)
+   ========================= */
+:root{
+  --cmp-gap: 16px;
+  --cmp-pad: 12px;
+  --cmp-max-width: 720px;
+  --cmp-font-scale: 0.95;
+
+  --week-day-min: 180px; /* mobil kolumnbredd */
+}
+
+/* 2 scheman sida vid sida */
 .compare-wrap{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--gap);
+  gap: var(--cmp-gap);
   padding: 12px;
   align-items: start;
   overflow-x: hidden;
 }
-/* =========================================
-   MOBIL: VECKOSCHEMA = sidscroll så passen syns
-   ========================================= */
-.week-scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  max-width: 100%;
-  padding-bottom: 6px;
-}
 
-/* Låt header + grid bli "bredare än skärmen" så sidscroll aktiveras */
-.week-scroll .block-header,
-.week-scroll .block-grid {
-  width: max-content;
-}
-
-/* Gör varje dag bred nog på mobil */
-@media (max-width: 900px) {
-  .week-scroll .block-header {
-    grid-template-columns: 80px repeat(5, 180px) !important;
-  }
-  .week-scroll .block-grid {
-    grid-template-columns: 80px repeat(5, 180px) !important;
-  }
-
-  /* Lite bättre läsbarhet i passen */
-  .week-scroll .block {
-    font-size: 0.9rem !important;
-    line-height: 1.15 !important;
-  }
-}
-
-/* Smal skärm: 1 kolumn */
+/* 1 kolumn på smal skärm */
 @media (max-width: 1100px){
-  .compare-wrap{
-    grid-template-columns: 1fr;
-  }
+  .compare-wrap{ grid-template-columns: 1fr; }
 }
 
-/* ===== VARJE SCHEMA ===== */
 .compare-item{
   width: 100%;
-  max-width: var(--paper-max-width);
+  max-width: var(--cmp-max-width);
   justify-self: center;
 
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,.12);
 
-  padding: var(--paper-pad);
+  padding: var(--cmp-pad);
   box-sizing: border-box;
 
   height: auto;
   overflow: visible;
 
-  font-size: calc(1rem * var(--mini-font-scale));
+  font-size: calc(1rem * var(--cmp-font-scale));
 }
 
-/* Viktigt: inget klipps bort */
+/* Inget klipps bort */
 .compare-item *{
   min-width: 0;
   overflow: visible;
 }
 
-/* ===== BLOCK = SAMMA BETEENDE SOM VECKOUTSKRIFT ===== */
+/* Block får växa (deltagare syns även i 30-min) */
 .compare-item .block{
   height: auto !important;
   min-height: unset !important;
@@ -95,101 +79,59 @@
   white-space: normal !important;
   line-height: 1.15;
 }
-
-/* Halvtimmespass (28px i original) får växa */
-.compare-item .block[style*="28px"],
-.compare-item .block[style*="height: 28px"]{
+.compare-item .block[style*="height: 28px"],
+.compare-item .block[style*="28px"]{
   height: auto !important;
 }
 
-/* ===== TA BORT EMOJIS ENDAST I JÄMFÖRELSE ===== */
-.compare-item{
-  font-variant-emoji: text;
-}
-
-.compare-item .emoji,
-.compare-item .icon{
-  display: none !important;
-}
-/* =========================================
-   MOBIL: VECKOSCHEMA – gör passen läsbara
-   ========================================= */
-@media (max-width: 820px) {
-
-  /* Gör rubrikraden scrollbar */
-  .block-header{
-    display: grid !important;
-    grid-template-columns: 64px repeat(5, 160px) !important; /* Tid + 5 dagar */
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-  }
-
-  /* Gör själva veckogridden scrollbar + läsbar */
-  .block-grid{
-    display: grid !important;
-    grid-template-columns: 64px repeat(5, 160px) !important;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-  }
-
-  /* Lite tajtare text men inte pyttelitet */
-  .block-time{
-    font-size: 0.8rem !important;
-  }
-
-  .block{
-    font-size: 0.85rem !important;
-    line-height: 1.15 !important;
-    padding: 6px 7px !important;
-    white-space: normal !important;
-    overflow: visible !important;
-  }
-
-  /* Halvtimmespass: låt texten få plats */
-  .block[style*="height: 28px"],
-  .block[style*="28px"]{
-    height: auto !important;
-    min-height: 28px;
-  }
-}
-/* =========================================
-   MOBIL: VECKOSCHEMA = sidscroll så passen syns
-   ========================================= */
-.week-scroll {
+/* =========================
+   VECKOVY – MOBIL (sidscroll)
+   Kräver att JS har wrappat i .week-scroll
+   ========================= */
+.week-scroll{
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   max-width: 100%;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
 }
 
-/* Låt header + grid bli "bredare än skärmen" så sidscroll aktiveras */
+/* Låt veckogrid bli bredare än skärmen på mobil */
 .week-scroll .block-header,
-.week-scroll .block-grid {
+.week-scroll .block-grid{
   width: max-content;
 }
 
-/* Gör varje dag bred nog på mobil */
-@media (max-width: 900px) {
-  .week-scroll .block-header {
-    grid-template-columns: 80px repeat(5, 180px) !important;
+/* Mobilbredd: stabila kolumner + läsbar text */
+@media (max-width: 900px){
+  .week-scroll .block-header{
+    grid-template-columns: 80px repeat(5, var(--week-day-min)) !important;
   }
-  .week-scroll .block-grid {
-    grid-template-columns: 80px repeat(5, 180px) !important;
+  .week-scroll .block-grid{
+    grid-template-columns: 80px repeat(5, var(--week-day-min)) !important;
   }
 
-  /* Lite bättre läsbarhet i passen */
-  .week-scroll .block {
+  .week-scroll .block{
     font-size: 0.9rem !important;
     line-height: 1.15 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+  }
+
+  /* 30-min block på mobil: låt text få plats */
+  .week-scroll .block[style*="height: 28px"],
+  .week-scroll .block[style*="28px"]{
+    height: auto !important;
+    min-height: 28px;
   }
 }
-/* =========================================
-   DESKTOP: ÅTERSTÄLL VECKOSCHEMAT (om week-scroll förstör)
-   ========================================= */
-@media (min-width: 901px) {
+
+/* =========================
+   VECKOVY – DESKTOP (stabil, “som utskrift” fast skärm)
+   ========================= */
+@media screen and (min-width: 901px){
+
+  /* Desktop ska INTE använda max-content (det gör det fult/kaos) */
   .week-scroll{
     overflow: visible !important;
     padding-bottom: 0 !important;
@@ -199,6 +141,20 @@
   .week-scroll .block-grid{
     width: 100% !important;
     max-width: 100% !important;
-    grid-template-columns: initial !important; /* släpp mobilkolumnerna */
+  }
+
+  /* Stabil kolumnlayout: Tid + 5 dagar */
+  .block-header{
+    grid-template-columns: 90px repeat(5, minmax(180px, 1fr)) !important;
+  }
+  .block-grid{
+    grid-template-columns: 90px repeat(5, minmax(180px, 1fr)) !important;
+  }
+
+  /* Läsvänligt som utskrift */
+  .block{
+    white-space: normal !important;
+    overflow: visible !important;
+    line-height: 1.15 !important;
   }
 }
