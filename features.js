@@ -71,32 +71,3 @@
     observer.observe(document.body, { childList: true, subtree: true });
   });
 })();
-// =========================================
-// MOBIL: Gör veckoschemat sid-scrollbart
-// Wrappar .block-header + .block-grid i en div.week-scroll
-// =========================================
-document.addEventListener("DOMContentLoaded", () => {
-  // hitta alla block-header
-  const headers = Array.from(document.querySelectorAll(".block-header"));
-
-  headers.forEach((header) => {
-    // block-grid brukar ligga direkt efter headern
-    const grid = header.nextElementSibling;
-    if (!grid || !grid.classList.contains("block-grid")) return;
-
-    // undvik att wrappa flera gånger
-    const alreadyWrapped = header.parentElement?.classList?.contains("week-scroll");
-    if (alreadyWrapped) return;
-
-    // skapa wrapper
-    const wrap = document.createElement("div");
-    wrap.className = "week-scroll";
-
-    // lägg wrappern där headern låg
-    header.parentNode.insertBefore(wrap, header);
-
-    // flytta in header + grid i wrappern
-    wrap.appendChild(header);
-    wrap.appendChild(grid);
-  });
-});
