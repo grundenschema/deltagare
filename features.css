@@ -75,4 +75,60 @@ h1,h2,h3{margin:0 0 10px}
 .compare-page [class*="emoji"],
 .compare-page .icon{display:none !important}
 .compare-page{font-family:system-ui,sans-serif}
+/* ========= OVERRIDE: LÄGG SIST ========= */
+
+/* 1) Döda "mobil-gömmer saker" och kapning */
+@media (max-width: 99999px){
+  *{
+    max-width: 100% !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+  }
+}
+
+/* 2) Grund: stabil text och radbrytningar */
+body{
+  margin:0 !important;
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif !important;
+  line-height:1.35 !important;
+}
+
+/* 3) Tvinga allt att bete sig som "kort" (fungerar även om du inte har day/slot-klasser) */
+section, article, .card, .day, .schemaDag, .scheduleDay, .dag, .weekDay{
+  border: 1px solid #cfcfcf !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  padding: 12px !important;
+  margin: 14px 0 !important;
+}
+
+/* 4) Rader/element inuti – gör dem wrap:bara */
+.row, .line, .slot, .pass, .item, .rad{
+  border: 1px solid #e2e2e2 !important;
+  border-radius: 14px !important;
+  background: #fafafa !important;
+  padding: 10px !important;
+  margin: 10px 0 !important;
+}
+
+.row, .line{
+  display:flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.name, .value, .text, .participant, .coach{
+  overflow-wrap:anywhere !important;
+  word-break: break-word !important;
+}
+
+/* 5) Jämförelsesidan: bort med emojis */
+.compare-page .emoji,
+.compare-page [class*="emoji"],
+.compare-page .icon{
+  display:none !important;
+}
+.compare-page{ font-family: system-ui, sans-serif !important; }
 
