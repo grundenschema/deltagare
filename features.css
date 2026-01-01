@@ -186,3 +186,19 @@
     line-height: 1.15 !important;
   }
 }
+/* =========================================
+   DESKTOP: ÅTERSTÄLL VECKOSCHEMAT (om week-scroll förstör)
+   ========================================= */
+@media (min-width: 901px) {
+  .week-scroll{
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+
+  .week-scroll .block-header,
+  .week-scroll .block-grid{
+    width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: initial !important; /* släpp mobilkolumnerna */
+  }
+}
