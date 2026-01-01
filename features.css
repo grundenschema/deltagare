@@ -1,31 +1,36 @@
 /* =========================================
-   JÄMFÖRELSE: MINI-UTSKRIFT, UNDER VARANDRA
+   JÄMFÖRELSE: 2 SCHEMAN SIDA VID SIDA
+   - 2 kolumner på bred skärm
+   - 1 kolumn på smal skärm
+   - "mini-utskrift"-känsla (A4 liggande proportion)
    ========================================= */
 
 :root{
-  /* “Mini A4” på skärm: justera om du vill */
-  --mini-width: min(94vw, 980px);  /* hur bred varje “papper” ska vara */
-  --paper-pad: 14px;
+  --gap: 16px;
+  --paper-pad: 12px;
+
+  /* Viktig: så två får plats utan att bli löjligt små */
+  --paper-max-width: 720px;  /* sänk om de inte får plats, höj om du vill större */
 }
 
-/* Jämförelse: stapla, inte bredvid */
 .compare-wrap{
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-
-  /* vanlig sid-scroll nedåt, ingen sid-scroll */
-  overflow-x: hidden;
-  overflow-y: visible;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
 
   padding: 12px;
-  align-items: center;
+  align-items: start;
+
+  overflow-x: hidden;
 }
 
-/* Varje schema = ett “papper” i liggande A4-proportion */
+/* varje schema */
 .compare-item{
-  width: var(--mini-width);
-  aspect-ratio: 297 / 210;        /* liggande A4-känsla */
+  width: 100%;
+  max-width: var(--paper-max-width);
+  justify-self: center;
+
+  aspect-ratio: 297 / 210;  /* liggande A4 */
 
   background: #fff;
   border-radius: 12px;
@@ -34,37 +39,27 @@
   padding: var(--paper-pad);
   box-sizing: border-box;
 
-  /* viktigt: inte göra en liten intern scrollruta */
   overflow: hidden;
 }
 
-/* Innehållet ska få vara fullt synligt (normal sid-scroll istället) */
+/* undvik "scrollruta i kortet" */
 .compare-item > div{
   overflow: visible;
   max-height: none;
 }
 
-/* Lite tydligare rubrik, som på utskrift */
 .compare-item h3{
   margin: 0 0 10px 0;
   font-size: 1.05rem;
 }
 
-/* =========================================
-   STARTBANNER: "NY SCHEMAVERSION"
-   ========================================= */
+/* Smal skärm (Chromebook/mobil): 1 kolumn för läsbarhet */
+@media (max-width: 1100px){
+  .compare-wrap{
+    grid-template-columns: 1fr;
+  }
 
-.schema-version-banner{
-  position: sticky;
-  top: 0;
-  z-index: 9999;
-
-  margin: 0;
-  padding: 10px 12px;
-  text-align: center;
-
-  background: #fff7cc;
-  border-bottom: 1px solid rgba(0,0,0,.08);
-  font-size: 0.95rem;
+  .compare-item{
+    max-width: min(94vw, 980px);
+  }
 }
-
