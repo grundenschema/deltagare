@@ -1,73 +1,46 @@
-/* =========================
-   Banner
-   ========================= */
-.schema-version-banner{
-  position: sticky;
-  top: 0;
-  z-index: 9999;
-  padding: 10px 12px;
-  text-align: center;
-  background: #fff7cc;
-  border-bottom: 1px solid rgba(0,0,0,.1);
-  font-size: 0.95rem;
-}
+/* =====================================================
+   Banner + Ta bort emojis ENDAST i jämförelse
+   ===================================================== */
 
-/* =========================
-   JÄMFÖRELSE: 2 scheman sida vid sida (1 på smal)
-   ========================= */
-:root{
-  --cmp-gap: 16px;
-  --cmp-pad: 12px;
-  --cmp-max-width: 720px;
-  --cmp-font-scale: 0.95;
-}
+(function () {
+  const bannerText = "Ny schemaversion är igång.";
 
-.compare-wrap{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--cmp-gap);
-  padding: 12px;
-  align-items: start;
-  overflow-x: hidden;
-}
+  const EMOJI_REGEX =
+    /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}]/gu;
 
-@media (max-width: 1100px){
-  .compare-wrap{ grid-template-columns: 1fr; }
-}
+  function ensureBanner() {
+    if (document.querySelector(".schema-version-banner")) return;
+    const banner = document.createElement("div");
+    banner.className = "schema-version-banner";
+    banner.textContent = bannerText;
+    document.body.prepend(banner);
+  }
 
-.compare-item{
-  width: 100%;
-  max-width: var(--cmp-max-width);
-  justify-self: center;
+  function stripEmojisInNode(root) {
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    for (const n of nodes) {
+      const t = n.nodeValue;
+      if (!t) continue;
+      const cleaned = t.replace(EMOJI_REGEX, "");
+      if (cleaned !== t) n.nodeValue = cleaned;
+    }
+  }
 
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  function cleanCompare() {
+    document.querySelectorAll(".compare-item").forEach(stripEmojisInNode);
+  }
 
-  padding: var(--cmp-pad);
-  box-sizing: border-box;
+  document.addEventListener("DOMContentLoaded", () => {
+    ensureBanner();
+    cleanCompare();
+  });
 
-  height: auto;
-  overflow: visible;
+  const observer = new MutationObserver(() => cleanCompare());
+  document.addEventListener("DOMContentLoaded", () => {
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+})();
 
-  font-size: calc(1rem * var(--cmp-font-scale));
-}
-
-/* Inget klipps bort */
-.compare-item *{
-  min-width: 0;
-  overflow: visible;
-}
-
-/* Block får växa (deltagare syns även i 30-min) */
-.compare-item .block{
-  height: auto !important;
-  min-height: unset !important;
-  overflow: visible !important;
-  white-space: normal !important;
-  line-height: 1.15;
-}
-.compare-item .block[style*="height: 28px"],
-.compare-item .block[style*="28px"]{
-  height: auto !important;
-}
