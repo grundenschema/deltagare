@@ -1,54 +1,40 @@
 /* =====================================
-   JÄMFÖRELSE (SKÄRM): A4 LIGGANDE-KÄNSLA
-   Ingen utskriftshantering
+   JÄMFÖRELSE: A4 LIGGANDE (SKÄRM)
+   Gäller endast compare-wrap
    ===================================== */
 
-/* A4 liggande: 297 × 210 mm */
-:root{
-  --a4w: 297mm;
-  --a4h: 210mm;
-  --a4pad: 10mm;
-}
+.compare-wrap {
+  /* A4 liggande proportioner */
+  width: 297mm;
+  min-height: 210mm;
 
-/* Försök fånga vanliga wrappers/containers som brukar hålla jämförelsen */
-.compare-wrapper,
-.compare-container,
-.comparison-wrapper,
-#compare,
-#comparison,
-[data-view="compare"],
-[data-mode="compare"]{
-  width: var(--a4w);
-  height: var(--a4h);
-  margin: 0 auto;
-  padding: var(--a4pad);
+  margin: 20px auto;
+  padding: 12mm;
   box-sizing: border-box;
-  background: #fff;
 
-  /* “papper på bord”-känsla */
+  background: #ffffff;
+
+  /* papper-känsla */
   box-shadow: 0 10px 30px rgba(0,0,0,.15);
-  border-radius: 10px;
+  border-radius: 12px;
 
-  /* Om innehåll blir mer än A4: scroll hellre än att spränga layouten */
+  /* scheman bredvid varandra */
+  display: flex;
+  gap: 10mm;
+
+  /* om det blir för mycket innehåll */
   overflow: auto;
 }
 
-/* Om jämförelsen visar flera scheman bredvid varandra */
-.compare-wrapper > *,
-.compare-container > *,
-.comparison-wrapper > *{
+/* varje schema i jämförelsen */
+.compare-wrap > .compare-item {
   flex: 1 1 0;
+  min-width: 0; /* viktigt för flex */
 }
 
-/* Skärmanpassning: se till att A4 ryms på små skärmar */
+/* Anpassning för små skärmar (Chromebook m.m.) */
 @media screen {
-  .compare-wrapper,
-  .compare-container,
-  .comparison-wrapper,
-  #compare,
-  #comparison,
-  [data-view="compare"],
-  [data-mode="compare"]{
+  .compare-wrap {
     max-width: 100vw;
     max-height: 100vh;
     aspect-ratio: 297 / 210;
