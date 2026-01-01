@@ -154,3 +154,35 @@
     min-height: 28px;
   }
 }
+/* =========================================
+   MOBIL: VECKOSCHEMA = sidscroll så passen syns
+   ========================================= */
+.week-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  padding-bottom: 6px;
+}
+
+/* Låt header + grid bli "bredare än skärmen" så sidscroll aktiveras */
+.week-scroll .block-header,
+.week-scroll .block-grid {
+  width: max-content;
+}
+
+/* Gör varje dag bred nog på mobil */
+@media (max-width: 900px) {
+  .week-scroll .block-header {
+    grid-template-columns: 80px repeat(5, 180px) !important;
+  }
+  .week-scroll .block-grid {
+    grid-template-columns: 80px repeat(5, 180px) !important;
+  }
+
+  /* Lite bättre läsbarhet i passen */
+  .week-scroll .block {
+    font-size: 0.9rem !important;
+    line-height: 1.15 !important;
+  }
+}
