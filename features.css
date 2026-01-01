@@ -1,63 +1,70 @@
 /* =========================================
-   JÄMFÖRELSE: VECKOUTSKRIFT-LOOK PÅ SKÄRM
-   - A4 liggande proportion
-   - Skalas upp så det blir läsbart
-   - Ingen "scroll i liten ruta"
+   JÄMFÖRELSE: MINI-UTSKRIFT, UNDER VARANDRA
    ========================================= */
 
 :root{
-  /* Hur stor del av skärmen A4-kortet ska ta? */
-  --sheet-max-w: 96vw;
-  --sheet-max-h: 88vh;
-
-  /* Luft runt innehåll */
-  --sheet-pad: 16px;
+  /* “Mini A4” på skärm: justera om du vill */
+  --mini-width: min(94vw, 980px);  /* hur bred varje “papper” ska vara */
+  --paper-pad: 14px;
 }
 
-/* Jämförelse: scheman sida vid sida, scrolla bara horisontellt om det är många */
+/* Jämförelse: stapla, inte bredvid */
 .compare-wrap{
   display: flex;
+  flex-direction: column;
   gap: 18px;
-  align-items: flex-start;
-  overflow-x: auto;
+
+  /* vanlig sid-scroll nedåt, ingen sid-scroll */
+  overflow-x: hidden;
   overflow-y: visible;
+
   padding: 12px;
-  -webkit-overflow-scrolling: touch;
+  align-items: center;
 }
 
-/* Varje schema = ett "papper" som fyller skärmen (inte mm-storlek) */
+/* Varje schema = ett “papper” i liggande A4-proportion */
 .compare-item{
-  /* Behåll A4 liggande proportion */
-  aspect-ratio: 297 / 210;
-
-  /* Fyll skärmen men håll proportionen */
-  width: min(var(--sheet-max-w), calc(var(--sheet-max-h) * (297/210)));
-  height: auto;
+  width: var(--mini-width);
+  aspect-ratio: 297 / 210;        /* liggande A4-känsla */
 
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
 
-  padding: var(--sheet-pad);
+  padding: var(--paper-pad);
   box-sizing: border-box;
 
-  /* Viktigt: låt kortet vara stort och läsbart */
-  transform: none !important;
+  /* viktigt: inte göra en liten intern scrollruta */
+  overflow: hidden;
 }
 
-/* Innehållet: ska inte bli en liten scrollruta */
+/* Innehållet ska få vara fullt synligt (normal sid-scroll istället) */
 .compare-item > div{
   overflow: visible;
   max-height: none;
 }
 
-/* Om ditt schema innehåller en grid som blir för bred: låt den krympa mjukt */
-.compare-item .block-grid{
-  max-width: 100%;
-}
-
-/* Rubrik lite tydligare */
+/* Lite tydligare rubrik, som på utskrift */
 .compare-item h3{
   margin: 0 0 10px 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
+
+/* =========================================
+   STARTBANNER: "NY SCHEMAVERSION"
+   ========================================= */
+
+.schema-version-banner{
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+
+  margin: 0;
+  padding: 10px 12px;
+  text-align: center;
+
+  background: #fff7cc;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  font-size: 0.95rem;
+}
+
