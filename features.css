@@ -1,41 +1,46 @@
-/* =====================================
-   JÄMFÖRELSE: A4 LIGGANDE (SKÄRM)
-   Träffar exakt: .compare-wrap + .compare-item
-   ===================================== */
+/* =========================================
+   JÄMFÖRELSE: VARJE SCHEMA SOM A4 LIGGANDE
+   (skärm, ingen utskrift)
+   ========================================= */
 
+/* Behåll jämförelsen enkel: scheman bredvid varandra + scroll */
 .compare-wrap{
-  /* A4 liggande proportioner */
-  width: 297mm;
-  min-height: 210mm;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 12px;
+  -webkit-overflow-scrolling: touch;
+}
 
-  margin: 16px auto;
-  padding: 10mm;
-  box-sizing: border-box;
+/* VARJE schema-kort i jämförelsen = liggande A4-proportion */
+.compare-item{
+  /* Fysisk A4 liggande proportion, men anpassa till skärm */
+  width: min(297mm, calc(100vw - 40px));
+  aspect-ratio: 297 / 210;
 
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,.15);
 
-  /* flera scheman bredvid varandra */
-  display: flex;
-  gap: 10mm;
+  padding: 10mm;
+  box-sizing: border-box;
 
-  /* om det blir för brett: scroll istället för att spränga layout */
+  /* Viktigt: inget “krympt läge” */
+  transform: none !important;
+}
+
+/* Om innehållet blir längre än kortet: scroll i kortet */
+.compare-item > div{
   overflow: auto;
+  max-height: 100%;
 }
 
-/* varje schema (kolumn) i jämförelsen */
-.compare-wrap > .compare-item{
-  flex: 1 1 0;
-  min-width: 0; /* viktigt så innehåll inte tvingar bredd */
+/* Gör rubriken lite tydligare (valfritt men brukar hjälpa läsbarhet) */
+.compare-item h3{
+  margin: 0 0 8px 0;
+  font-size: 1.05rem;
 }
 
-/* Chromebook/små skärmar: håll A4-proportion men låt den krympa */
-@media screen{
-  .compare-wrap{
-    max-width: 100vw;
-    max-height: 100vh;
-    aspect-ratio: 297 / 210;
-  }
-}
 
