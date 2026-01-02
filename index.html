@@ -161,10 +161,49 @@ select, .btn {
   border:1px solid rgba(0,0,0,.15);
   word-break:break-word;
   overflow:hidden;
+
+.block .mini{
+  font-size:.80rem;
+  line-height:1.15;
+  margin-top:2px;
+}
+.block.small{
+  padding:4px 6px;
+  line-height:1.10;
+  font-size:.78rem;
+}
+.block.small .mini{
+  font-size:.78rem;
+}
   -webkit-print-color-adjust:exact;
   print-color-adjust:exact;
 }
 .block .title { font-weight:700; }
+
+/* Mindre pass (<=30 min): håll texten läsbar och visa alltid deltagare/coach */
+.block.small{
+  padding:4px 6px;
+  font-size:.74rem;
+  line-height:1.15;
+}
+.block.small .title{
+  font-size:.80rem;
+}
+@media print{
+  .block.small{
+    padding:3px 4px !important;
+    font-size:8.0pt !important;
+    line-height:1.08 !important;
+  }
+  .block.small .title{
+    font-size:8.4pt !important;
+  }
+  .block.small .mini{
+    font-size:7.8pt !important;
+    line-height:1.05 !important;
+  }
+}
+
 
 /* =========================
    Jämförelse (i assistenten)
@@ -172,7 +211,10 @@ select, .btn {
 .compare-wrap {
   display:grid;
   gap:16px;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width:800px){
+  .compare-wrap{ grid-template-columns:1fr; }
 }
 .compare-item {
   background:#fff;
@@ -304,6 +346,31 @@ select, .btn {
   .card, .compare-item {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+
+  /* Jämförelse: alltid två scheman per rad på A4 liggande */
+  .compare-wrap{
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .compare-item{
+    padding: 6px !important;
+    border-radius: 10px !important;
+  }
+  .compare-item h3{
+    font-size: 11pt !important;
+    margin: 4px 0 8px !important;
+  }
+  .block{ 
+    font-size: 8.6pt !important;
+    padding: 5px 6px !important;
+  }
+  .block .title{
+    font-size: 9pt !important;
+  }
+  .block-time{
+    font-size: 8.5pt !important;
   }
 
   /* A4 liggande */
@@ -722,6 +789,33 @@ function renderCardsGeneric(name,isCoach,targetEl){
    VECKA (BLOCK, LIGGANDE)
 ========================= */
 function makeSlots(){const a=[];for(let h=8;h<=16;h++){a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);}a.push("16:30");return a;}
+// ★ TIDSTOLKNING (för udda tider som 11:15) – blockvyn ska aldrig tappa aktiviteter
+function timeToMinutes(t){
+  const [h,m] = (t||"00:00").split(":").map(Number);
+  return h*60 + m;
+}
+
+// Snappar NEDÅT till närmaste slot (t.ex. 11:15 → 11:30? Nej, nedåt betyder <= tid.
+// Eftersom dina slots är :00 och :30 innebär 11:15 → 11:00 och 11:45 → 11:30.
+// (Exakt tid visas alltid i texten.)
+function snapUpToSlotIndex(time, slots){
+  const mins = timeToMinutes(time);
+  let bestIdx = slots.length - 1;
+  let bestVal = Infinity;
+
+  slots.forEach((s, i) => {
+    const v = timeToMinutes(s);
+    if (v >= mins && v < bestVal) {
+      bestVal = v;
+      bestIdx = i;
+    }
+  });
+
+  // om tiden är senare än sista slot: lägg på sista slot
+  return bestIdx;
+}
+
+
 function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
   const slots=makeSlots();
   const days=["måndag","tisdag","onsdag","torsdag","fredag"];
@@ -740,8 +834,15 @@ function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
     const d=new Date(r.Datum);
     let wd=d.getDay(); if(wd===0||wd===6) return;
     const col=(wd-1)+1;
-    const sIdx=slots.indexOf(r.Start), eIdx=slots.indexOf(r.Slut);
-    if(sIdx<0||eIdx<=sIdx) return;
+    let sIdx=slots.indexOf(r.Start);
+let eIdx=slots.indexOf(r.Slut);
+
+// Om tiden inte matchar exakt (t.ex. 11:15) – snap till närmaste slot UPPÅT
+if(sIdx<0) sIdx=snapUpToSlotIndex(r.Start, slots);
+if(eIdx<0) eIdx=snapUpToSlotIndex(r.Slut, slots);
+
+// Säkerställ minst ett block så inget försvinner
+if(eIdx<=sIdx) eIdx=sIdx+1;
     const firstCellIndex=sIdx*(1+days.length)+col, firstCell=cells[firstCellIndex];
     const block=document.createElement("div");
     block.className="block"; block.style.background=colorFor(r);
@@ -750,15 +851,28 @@ function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
     const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
     const duration=(eh*60+em)-(sh*60+sm);
 
-    if(duration>30){
-      block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
-        ${emojiFor(r)} ${r.Aktivitet||""}<br>
-        ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
-    }else{
-      block.innerHTML=`${emojiFor(r)} ${r.Aktivitet||""} – ${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}`;
-    }
+    if(duration<=30) block.classList.add("small");
 
-    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;block.style.height=(eIdx-sIdx)*cellH+"px";});
+    if(noEmoji){
+      if(duration<=30){
+        block.innerHTML=`<div class="title">${r.Start||""}–${r.Slut||""} ${r.Aktivitet||""}</div>
+          <div class="mini">${isCoach ? "Deltagare: "+(r.Deltagare||"-") : "Coach: "+(r.Coach||"-")}</div>`;
+      }else{
+        block.innerHTML=`<div class="title">${r.Start||""}–${r.Slut||""}</div>
+          ${r.Aktivitet||""}<br>
+          ${isCoach ? "Deltagare: "+(r.Deltagare||"-") : "Coach: "+(r.Coach||"-")}`;
+      }
+    }else{
+      if(duration>30){
+        block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
+          ${emojiFor(r)} ${r.Aktivitet||""}<br>
+          ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
+      }else{
+        block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""} ${emojiFor(r)} ${r.Aktivitet||""}</div>
+          <div class="mini">${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}</div>`;
+      }
+    }
+requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;block.style.height=(eIdx-sIdx)*cellH+"px";});
     firstCell.appendChild(block);
   });
 }
@@ -784,7 +898,7 @@ document.getElementById("btnShowCompare").onclick = () => {
   ].map(cb => ({ name: cb.value, isCoach: cb.classList.contains("chk-coach") }));
 
   if (!selected.length) { alert("Välj minst ett namn."); return; }
-  if (selected.length > 4) { alert("Välj högst 4 personer för jämförelse."); return; }
+  if (selected.length > 6) { alert("Välj högst 6 personer för jämförelse."); return; }
 
   const out=document.getElementById("compareOutput");
   out.innerHTML = ""; // rensa
@@ -795,9 +909,9 @@ document.getElementById("btnShowCompare").onclick = () => {
     const item = document.createElement("div");
     item.className = "compare-item";
     const header = document.createElement("h3");
-    header.textContent = (sel.isCoach ? "🧑‍🏫 " : "🧍 ") + sel.name;
+    header.textContent = sel.name;
     item.appendChild(header);
-    item.appendChild(renderSingleWeek(sel.name, sel.isCoach, true));
+    item.appendChild(renderSingleWeek(sel.name, sel.isCoach, true, true));
     wrap.appendChild(item);
   });
 
@@ -806,7 +920,7 @@ document.getElementById("btnShowCompare").onclick = () => {
   document.getElementById("comparePanel").style.display="none";
 };
 
-function renderSingleWeek(name,isCoach,compact=false){
+function renderSingleWeek(name,isCoach,compact=false,noEmoji=false){
   const slots=makeSlots(), days=["måndag","tisdag","onsdag","torsdag","fredag"];
   const field=isCoach?"Coach":"Deltagare";
   const rows=DATA.filter(r=>{
@@ -828,7 +942,16 @@ function renderSingleWeek(name,isCoach,compact=false){
 
   rows.forEach(r=>{
     const wd=new Date(r.Datum).getDay(); if(wd===0||wd===6) return;
-    const col=(wd-1)+1; const sIdx=slots.indexOf(r.Start), eIdx=slots.indexOf(r.Slut); if(sIdx<0||eIdx<=sIdx) return;
+    const col=(wd-1)+1;
+let sIdx=slots.indexOf(r.Start);
+let eIdx=slots.indexOf(r.Slut);
+
+// Om tiden inte matchar exakt (t.ex. 11:15) – snap till närmaste slot UPPÅT
+if(sIdx<0) sIdx=snapUpToSlotIndex(r.Start, slots);
+if(eIdx<0) eIdx=snapUpToSlotIndex(r.Slut, slots);
+
+// Säkerställ minst ett block så inget försvinner
+if(eIdx<=sIdx) eIdx=sIdx+1;
     const firstCellIndex=sIdx*(1+days.length)+col, firstCell=cells[firstCellIndex];
     const block=document.createElement("div");
     block.className="block"; block.style.background=colorFor(r);
@@ -839,12 +962,28 @@ function renderSingleWeek(name,isCoach,compact=false){
     const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
     const duration=(eh*60+em)-(sh*60+sm);
 
+    if(duration<=30) block.classList.add("small");
+
     if(duration>30){
-      block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
-        ${emojiFor(r)} ${r.Aktivitet||""}<br>
-        ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
+      if(noEmoji){
+        block.innerHTML=`<div class="title">${r.Start||""}–${r.Slut||""}</div>
+          ${r.Aktivitet||""}<br>
+          ${isCoach ? "Deltagare: "+(r.Deltagare||"-") : "Coach: "+(r.Coach||"-")}`;
+      }else{
+        block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
+          ${emojiFor(r)} ${r.Aktivitet||""}<br>
+          ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
+      }
     }else{
-      block.innerHTML=`${emojiFor(r)} ${r.Aktivitet||""} – ${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}`;
+      if(noEmoji){
+        block.innerHTML=`<div class="title">${r.Start||""}–${r.Slut||""}</div>
+          ${r.Aktivitet||""}<br>
+          ${isCoach ? "Deltagare: "+(r.Deltagare||"-") : "Coach: "+(r.Coach||"-")}`;
+      }else{
+        block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
+          ${emojiFor(r)} ${r.Aktivitet||""}<br>
+          ${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}`;
+      }
     }
 
     requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||26;block.style.height=(eIdx-sIdx)*cellH+"px";});
