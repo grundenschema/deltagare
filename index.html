@@ -1,30 +1,214 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Schema v5 – Grunden DV</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Schema v5 – Grunden DV</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-  <!-- Extra funktioner (läggs i separata filer så du slipper pilla i bamse-koden) -->
-  <link rel="stylesheet" href="features.css" />
-  <script defer src="features.js"></script>
+<style id="dynamicPageStyle">
+/* @page rules handled dynamically */
 
-  <style>
-    :root {
-      --bg:#f0f4f8;
-      --card-bg:#fff;
-      --border:#ddd;
-      --shadow:0 3px 10px rgba(0,0,0,.06);
-      --radius:14px;
-      --blue:#3b82f6;
-      --muted:#555;
-      --header-bg:#f5f7fa;
-      --chip-bg:#f8fafc;
-      --chip-border:#cfd8e3;
-      --chip-active:#3b82f6;
-      --chip-text:#1f2937;
-    }
+/* ===== QR overlay + print ===== */
+#qrOverlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.35);
+  display:none;
+  z-index:9999;
+}
+#qrOverlay .qr-sheet{
+  position:absolute;
+  inset:12px;
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  overflow:auto;
+  padding:14px;
+}
+#qrOverlay .qr-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+#qrOverlay .qr-actions .left{
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+}
+#qrOverlay h2{ font-size:18px; margin:0; }
+#qrPrintArea{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:12px;
+}
+.qr-card{
+  border:1px solid #ddd;
+  border-radius:12px;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:center;
+}
+.qr-card .qr-name{
+  font-weight:800;
+  text-align:center;
+}
+.qr-card .qr-url{
+  font-size:10px;
+  opacity:.65;
+  word-break:break-all;
+  text-align:center;
+}
+.qr-inline{
+  display:none;
+  margin:10px auto 0;
+  max-width:360px;
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:14px;
+  padding:10px;
+  box-shadow:var(--shadow);
+}
+.qr-inline .row{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.qr-inline .meta{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.qr-inline .meta .name{ font-weight:900; }
+.qr-inline .meta .url{ font-size:12px; opacity:.7; word-break:break-all; }
 
+/* ===== QR knappar: håll rent i UI ===== */
+.qr-tools{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+@media (max-width: 720px){
+  .qr-tools{ display:none !important; } /* QR-admin är för personal på större skärm */
+  #qrOverlay .qr-sheet{ inset:8px; }
+  #qrPrintArea{ grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); }
+}
+@media print{
+  body.qr-print *{ visibility:hidden !important; }
+  body.qr-print #qrOverlay,
+  body.qr-print #qrOverlay *{ visibility:visible !important; }
+  body.qr-print #qrOverlay{
+    position:absolute !important;
+    inset:0 !important;
+    background:#fff !important;
+  }
+  body.qr-print #qrOverlay .qr-sheet{
+    position:static !important;
+    inset:auto !important;
+    box-shadow:none !important;
+    border-radius:0 !important;
+    padding:0 !important;
+  }
+  body.qr-print #qrOverlay .qr-actions{ display:none !important; }
+}
+
+/* ===== v33: FIX för mobil dagschema ===== */
+@media (max-width: 720px){
+  /* Visa INTE dagsvyn (rubrik/hint + kortlista) innan val är gjort */
+  body:not(.mobile-day-mode) #mobileParticipantDayView,
+  body:not(.mobile-day-mode) #mobileCoachDayView{ display:none !important; }
+
+  body:not(.mobile-day-mode) .mobile-day-header,
+  body:not(.mobile-day-mode) .mobile-swipe-hint{ display:none !important; }
+
+  /* Dagläge: fast rubrik + scroll under */
+  body.mobile-day-mode{ overflow:hidden; }
+  body.mobile-day-mode #mobileParticipantDayView,
+  body.mobile-day-mode #mobileCoachDayView{
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0; right: 0;
+    bottom: env(safe-area-inset-bottom);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 14px 18px;
+    background: #eef3f8;
+  }
+  body.mobile-day-mode .mobile-day-header{
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #eef3f8;
+    margin: 0 0 2px;
+  }
+  body.mobile-day-mode .mobile-swipe-hint{
+    position: sticky;
+    top: 54px;
+    z-index: 29;
+    background: #eef3f8;
+  }
+}
+
+
+/* ===== v34: Mobil dagbanner layout ===== */
+.mobile-day-header{
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mobile-day-left{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:6px;
+}
+.mobile-inline-back{
+  font-size: 18px !important;
+  padding: 6px 10px !important;
+  min-height: 32px;
+  line-height: 1;
+}
+.mobile-day-title{
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.05;
+}
+.mobile-day-sub{
+  font-size: 14px;
+  font-weight: 600;
+  opacity: .75;
+  text-align: right;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+/* I dagläge: dölj stora tillbaka-raden + rubriker + select */
+body.mobile-day-mode .mobile-backbar,
+body.mobile-day-mode .mobile-selectbar,
+body.mobile-day-mode .mobile-titlebar{
+  display: none !important;
+}
+
+</style>
+
+<style>
+:root {
+  --bg:#f0f4f8;
+  --card-bg:#fff;
+  --border:#ddd;
+  --shadow:0 3px 10px rgba(0,0,0,.06);
+  --radius:14px;
+  --blue:#3b82f6;
+  --muted:#555;
+  --header-bg:#f5f7fa;
+  --chip-bg:#f8fafc;
+  --chip-border:#cfd8e3;
+  --chip-active:#3b82f6;
+  --chip-text:#1f2937;
+}
 
 /* Reset & bas */
 * { box-sizing:border-box; margin:0; padding:0; }
@@ -128,7 +312,7 @@ select, .btn {
 
 .section-title { text-align:center; margin:10px 0 8px; font-weight:800; font-size:1.15rem; }
 
-/* Veckoschema – blocklayout */
+/* Schema – blocklayout */
 #blockContainer { display:none; margin-top:8px; }
 .block-header {
   display:grid;
@@ -142,7 +326,7 @@ select, .btn {
 .block-header div { text-align:center; padding:8px 0; }
 .block-grid { display:grid; grid-template-columns:80px repeat(5,1fr); background:transparent; }
 .block-time { font-size:.86rem; padding:4px 6px; text-align:right; color:#2b2b2b; }
-.block-cell { position:relative; min-height:28px; background:transparent; border:none; }
+.block-cell { position:relative; min-height:34px; background:transparent; border:none; }
 
 /* =========================
    Block & Assistent-stilar
@@ -160,50 +344,11 @@ select, .btn {
   box-shadow:var(--shadow);
   border:1px solid rgba(0,0,0,.15);
   word-break:break-word;
-  overflow:hidden;
-
-.block .mini{
-  font-size:.80rem;
-  line-height:1.15;
-  margin-top:2px;
-}
-.block.small{
-  padding:4px 6px;
-  line-height:1.10;
-  font-size:.78rem;
-}
-.block.small .mini{
-  font-size:.78rem;
-}
+  overflow:visible;
   -webkit-print-color-adjust:exact;
   print-color-adjust:exact;
 }
 .block .title { font-weight:700; }
-
-/* Mindre pass (<=30 min): håll texten läsbar och visa alltid deltagare/coach */
-.block.small{
-  padding:4px 6px;
-  font-size:.74rem;
-  line-height:1.15;
-}
-.block.small .title{
-  font-size:.80rem;
-}
-@media print{
-  .block.small{
-    padding:3px 4px !important;
-    font-size:8.0pt !important;
-    line-height:1.08 !important;
-  }
-  .block.small .title{
-    font-size:8.4pt !important;
-  }
-  .block.small .mini{
-    font-size:7.8pt !important;
-    line-height:1.05 !important;
-  }
-}
-
 
 /* =========================
    Jämförelse (i assistenten)
@@ -211,10 +356,7 @@ select, .btn {
 .compare-wrap {
   display:grid;
   gap:16px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-@media (max-width:800px){
-  .compare-wrap{ grid-template-columns:1fr; }
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
 }
 .compare-item {
   background:#fff;
@@ -348,91 +490,1657 @@ select, .btn {
     page-break-inside: avoid;
   }
 
+  /* A4 liggande */
+  /* @page removed (handled dynamically) */}
 
-  /* Jämförelse: alltid två scheman per rad på A4 liggande */
+/* =========================
+   Jämförelse (i assistenten)
+========================= */
+.compare-wrap{
+  display:grid;
+  gap:16px;
+  /* Skärm: visa två i rad när det finns plats */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items:start;
+}
+@media (max-width: 820px){
+  .compare-wrap{ grid-template-columns: 1fr; }
+}
+
+.compare-item{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:8px;
+  box-shadow:var(--shadow);
+  /* Gör korten visuellt jämnstora på skärm */
+  min-height: 520px;
+}
+
+.compare-item h3{
+  margin:6px 0 10px;
+  text-align:center;
+  font-size:1.0rem;
+}
+
+/* ===== Utskrift: A4 liggande, max 2 scheman per rad ===== */
+@media print{
   .compare-wrap{
     grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
+    gap: 8mm !important;
   }
+  /* varje jämförelseschema = "halv A4" (två per rad på A4 liggande) */
   .compare-item{
-    padding: 6px !important;
-    border-radius: 10px !important;
-  }
-  .compare-item h3{
-    font-size: 11pt !important;
-    margin: 4px 0 8px !important;
-  }
-  .block{ 
-    font-size: 8.6pt !important;
-    padding: 5px 6px !important;
-  }
-  .block .title{
-    font-size: 9pt !important;
-  }
-  .block-time{
-    font-size: 8.5pt !important;
+    padding: 6mm !important;
+    min-height: auto !important;
+    height: 190mm; /* 210mm - (2*10mm sidmarginal) */
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
-  /* A4 liggande */
-  @page {
-    size: A4 landscape;
-    margin: 10mm;
+  /* tajta typografi lite för att få plats */
+  .compare-item h3{ font-size: 11pt !important; margin: 0 0 6mm !important; }
+  .block-header{ font-size: .86rem !important; }
+  .block-time{ font-size: .78rem !important; }
+  .block{ font-size: .78rem !important; padding: 5px 6px !important; }
+}
+
+
+/* ===== Coach 30-minuterspass: EN RAD, säkert ===== */
+.block.coach-half {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.block.coach-half .act { font-weight: 800; }
+.block.coach-half .time { opacity: .9; }
+
+
+/* ===== Fet stil för aktivitet (alla vyer) ===== */
+.act { font-weight: 800; }
+.card h3 { font-weight: 800; }
+
+
+/* ===== Deltagare 30-minuterspass: EN RAD, säkert ===== */
+.block.part-half {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ===== Utskriftsrubrik ===== */
+#print-header {
+  display: none;
+}
+
+@media print {
+  #print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0;
+    font-size: 12px;
+  }
+  .print-title {
+    font-weight: 800;
+    font-size: 17px;
+  }
+  .print-meta {
+    font-size: 11px;
+    color: #333;
+    display: flex;
+    gap: 12px;
   }
 }
+
+
+@media print {
+  h1, h2, .view-title, .schema-title, .coach-title {
+    display: none !important;
+  }
+}
+
+
+@media print {
+  body { margin-top: 10mm; }
+  #main, #content, .container { margin-top: 0 !important; padding-top: 0 !important; }
+}
+
+
+@media print {
+  .coach-schema-title,
+  .coach-header,
+  .view-header,
+  .schema-header,
+  .topbar,
+  .subtitle,
+  .print-subtitle {
+    display: none !important;
+  }
+}
+
+
+@media print {
+  .print-subtitle,
+  .print-date,
+  .subtitle,
+  .subheader,
+  .schema-subtitle,
+  .print-meta {
+    display: none !important;
+  }
+}
+
+
+@media print {
+  #print-header-single {
+    font-weight: 800;
+    font-size: 17px;
+    margin-bottom: 4px;
+  }
+}
+
+
+@media print {
+  #viewTitle,
+  .controls,
+  .toggleRow,
+  .top-controls,
+  .tabs,
+  .tabbar,
+  .nav,
+  .header,
+  .subheader {
+    display: none !important;
+  }
+}
+
+
+@media print {
+  #print-header-single {
+    font-weight: 800;
+    font-size: 26px;
+    text-align: center;
+    margin-bottom: 6mm; /* space between title and schema */
+  }
+}
+
+
+@media print {
+  hr, .divider, .top-line {
+    display: none !important;
+    border: none !important;
+  }
+}
+
+
+.start-text,
+.intro,
+.help-text,
+.info-text {
+  display: none !important;
+}
+
+
+@media print {
+  * {
+    box-shadow: none !important;
+  }
+  body {
+    border-top: none !important;
+  }
+  hr {
+    display: none !important;
+  }
+  header, .header, .topbar, .app-header {
+    border: none !important;
+    display: none !important;
+  }
+}
+
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    text-rendering: geometricPrecision;
+  }
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+
+#print-header-single{display:none;}
+
+/* Print-only elements must not show on screen */
+.print-only, #print-date, #print-person, #print-header, #print-meta { display:none !important; }
+@media print {
+  .print-only, #print-date, #print-person, #print-header, #print-meta { display:inline !important; }
+}
+
+
+/* ===== Print header visibility fix ===== */
+#print-header-single { display: none; }
+@media print {
+  #print-header-single { display: block !important; }
+}
+
+
+/* ===== Print logo (endast utskrift) ===== */
+#print-logo { display: none; }
+@media print {
+  #print-logo {
+    display: block !important;
+    position: fixed;
+    top: 10mm;
+    right: 10mm;
+    z-index: 9999;
+  }
+  #print-logo img {
+    height: 16mm;   /* justera vid behov */
+    width: auto;
+  }
+  /* Ge rubriken lite luft så den inte krockar med loggan */
+  #print-header-single { padding-right: 28mm; }
+}
+
+
+/* ===== Print logo (robust, endast utskrift) ===== */
+#print-logo { display: none; }
+@media print {
+  #print-logo {
+    display: block !important;
+    position: fixed;
+    top: 10mm;
+    right: 10mm;
+    z-index: 9999;
+  }
+  #print-logo img {
+    height: 16mm;   /* justera vid behov */
+    width: auto;
+  }
+  #print-header-single { padding-right: 28mm; }
+}
+
+
+@media print {
+  /* Flytta Chromes övre linje visuellt till under rubriken */
+  #print-header-single {
+    border-top: none !important;
+    border-bottom: 2px solid #000;
+    padding-bottom: 6mm;
+    margin-bottom: 8mm;
+  }
+}
+
+/* =========================
+   Bildstöd (Deltagare)
+========================= */
+.picto-wrap { max-width: 1100px; margin: 0 auto; }
+.picto-day {
+  background:#fff;
+  padding: 14mm 12mm;
+  margin: 0 auto 12mm;
+  border: 0;
+}
+.picto-day-title{
+  text-align:center;
+  font-weight: 900;
+  font-size: 22pt;
+  margin: 0 0 10mm 0;
+}
+.picto-item{
+  display:grid;
+  grid-template-columns: 120px 1fr 220px; /* Tid | Aktivitet | Coach */
+  align-items:center;
+  gap: 8mm;
+  border: 4px solid #000;
+  border-radius: 18px;
+  padding: 10mm;
+  margin: 0 0 8mm 0;
+}
+.picto-time{ text-align:center; font-weight: 900; }
+.picto-time .clock{ font-size: 44px; line-height:1; margin-bottom: 2mm; }
+.picto-time .t{ font-size: 28px; line-height:1.05; }
+
+.picto-act{ text-align:center; }
+.picto-act .e{ font-size: 64px; line-height:1; margin-bottom: 3mm; }
+.picto-act .a{ font-size: 28px; font-weight: 900; line-height:1.1; }
+
+.picto-coach{ text-align:center; }
+.picto-coach .lbl{ font-size: 18px; font-weight: 800; margin-bottom: 2mm; letter-spacing:.2px; }
+.picto-coach .names{ font-size: 26px; font-weight: 900; line-height:1.08; word-break: break-word; }
+
+/* Print: om bildstöd är aktivt, kör stående A4 */
+@media print{
+  /* pictos-print @page removed (handled dynamically) */
+/* Endast bildstöd ska påverka sidbrytningar */
+  body.pictos-print #participantPictos .picto-day{
+    break-after: page;
+    page-break-after: always;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Undvik att wrapper eller andra block skapar extra sidor */
+  body.pictos-print #participantPictos .picto-wrap{
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+}
+
+
+  body.pictos-print #participantPictos .picto-item{
+    grid-template-columns: 95px 1fr 170px !important;
+    gap: 6mm !important;
+    padding: 7mm !important;
+    margin: 0 0 6mm 0 !important;
+    border-width: 3px !important;
+  }
+  body.pictos-print #participantPictos .picto-time .clock{ font-size: 34px !important; }
+  body.pictos-print #participantPictos .picto-time .t{ font-size: 26px !important; }
+  body.pictos-print #participantPictos .picto-act .e{ font-size: 48px !important; }
+  body.pictos-print #participantPictos .picto-act .a{ font-size: 26px !important; }
+  body.pictos-print #participantPictos .picto-coach .lbl{ font-size: 15px !important; }
+  body.pictos-print #participantPictos .picto-coach .names{ font-size: 20px !important; }
+}
+
+
+@media print {
+  /* Bildstöd: hård komprimering för att få plats med upp till 8 aktiviteter */
+  body.pictos-print #participantPictos .picto-day-title{
+    font-size: 18pt !important;
+    margin: 0 0 6mm 0 !important;
+  }
+  body.pictos-print #participantPictos .picto-day{
+    padding: 7mm 6mm !important;
+    margin: 0 !important;
+  }
+  body.pictos-print #participantPictos .picto-item{
+    grid-template-columns: 85px 1fr 150px !important;
+    gap: 4.5mm !important;
+    padding: 5.5mm !important;
+    margin: 0 0 4.5mm 0 !important;
+    border-width: 2.5px !important;
+    border-radius: 14px !important;
+  }
+  body.pictos-print #participantPictos .picto-time .clock{ font-size: 28px !important; margin-bottom: 1.5mm !important; }
+  body.pictos-print #participantPictos .picto-time .t{ font-size: 18px !important; }
+  body.pictos-print #participantPictos .picto-act .e{ font-size: 40px !important; margin-bottom: 1.5mm !important; }
+  body.pictos-print #participantPictos .picto-act .a{ font-size: 18px !important; }
+  body.pictos-print #participantPictos .picto-coach .lbl{ font-size: 12px !important; margin-bottom: 1mm !important; }
+  body.pictos-print #participantPictos .picto-coach .names{ font-size: 17px !important; line-height: 1.05 !important; }
+}
+
+
+@media print {
+  /* Bildstöd: skala ner hela ytan så upp till 8 rutor får plats */
+  body.pictos-print #print-logo { display: none !important; }
+  body.pictos-print #print-header-single { margin-bottom: 3mm !important; font-size: 18px !important; }
+
+  
+
+  /* Sidbrytning: en dag per sida, men INGEN tom sista/extra sida */
+  body.pictos-print #participantPictos .picto-day{
+    break-after: page;
+    page-break-after: always;
+  }
+  body.pictos-print #participantPictos .picto-day:last-child{
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+
+  /* Extra säkerhet: inga oförklarliga blank-sidor före första */
+  body.pictos-print #participantPictos,
+  body.pictos-print #participantPictos .picto-wrap,
+  body.pictos-print #participantPictos .picto-day{
+    break-before: auto !important;
+    page-break-before: auto !important;
+  }
+}
+
+
+@media print {
+  body.pictos-print #print-header-single {
+    display: none !important;
+  }
+}
+
+
+@media print {
+  body.pictos-print #participantPictos .picto-day-title{
+    font-size: 16pt !important;
+    margin: 0 0 3.5mm 0 !important;
+  }
+  body.pictos-print #participantPictos .picto-day{
+    padding: 5.8mm 4.5mm !important;
+    margin: 0 !important;
+  }
+  body.pictos-print #participantPictos .picto-item{
+    grid-template-columns: 86px 1fr 145px !important;
+    gap: 4.6mm !important;
+    padding: 5.8mm !important;
+    margin: 0 0 3.8mm 0 !important;
+    border-width: 2px !important;
+    border-radius: 12px !important;
+  }
+  body.pictos-print #participantPictos .picto-time .clock{ font-size: 26px !important; margin-bottom: 1mm !important; }
+  body.pictos-print #participantPictos .picto-time .t{ font-size: 17px !important; }
+  body.pictos-print #participantPictos .picto-act .e{ font-size: 40px !important; margin-bottom: 1mm !important; }
+  body.pictos-print #participantPictos .picto-act .a{ font-size: 17px !important; }
+  body.pictos-print #participantPictos .picto-coach .lbl{ font-size: 10px !important; margin-bottom: .5mm !important; }
+  body.pictos-print #participantPictos .picto-coach .names{ font-size: 15px !important; }
+}
+
+
+body.pictos-print #participantPictos .picto-day{
+    height: 277mm; /* A4 297mm - ca 20mm marginaler */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    break-after: page;
+  }
+
+  body.pictos-print #participantPictos .picto-item{
+    flex: 0 0 auto;
+    height: 30mm;          /* 8 x 30mm = 240mm */
+    margin-bottom: 3mm;   /* 8 x 3mm = 24mm */
+    padding: 6mm !important;
+    box-sizing: border-box;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  body.pictos-print #participantPictos .picto-item:last-child{
+    margin-bottom: 0 !important;
+  }
+
+  /* Text får ALDRIG bryta rad */
+  body.pictos-print #participantPictos .picto-act .a,
+  body.pictos-print #participantPictos .picto-coach .names{
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+
+@media print {
+  /* === Bildstöd: exakt 8 rutor per sida, jämn luft === */
+  body.pictos-print{
+    --pageH: 277mm;      /* 297mm - ca 20mm marginaler */
+    --padTop: 5mm;
+    --padBot: 5mm;
+    --titleH: 12mm;      /* reserverad höjd för rubrik */
+    --gap: 3mm;          /* mellan rutor */
+    --itemH: calc((var(--pageH) - var(--padTop) - var(--padBot) - var(--titleH) - (7 * var(--gap))) / 8);
+  }
+
+  body.pictos-print #participantPictos{
+    transform: none !important;
+    width: 100% !important;
+  }
+
+  body.pictos-print #participantPictos .picto-day{
+    height: var(--pageH);
+    box-sizing: border-box;
+    padding: var(--padTop) 0 var(--padBot) 0 !important;
+    display: flex;
+    flex-direction: column;
+    break-after: page;
+    page-break-after: always;
+  }
+  body.pictos-print #participantPictos .picto-day:last-child{
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+
+  body.pictos-print #participantPictos .picto-day-title{
+    height: var(--titleH);
+    line-height: var(--titleH);
+    margin: 0 !important;
+    padding: 0 0 2mm 0 !important;
+    font-size: 16pt !important;
+    text-align: center;
+    flex: 0 0 auto;
+  }
+
+  body.pictos-print #participantPictos .picto-item{
+    flex: 0 0 auto;
+    height: var(--itemH);
+    margin: 0 0 var(--gap) 0 !important;
+    padding: 5.5mm !important;
+    box-sizing: border-box;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  body.pictos-print #participantPictos .picto-item:last-child{
+    margin-bottom: 0 !important;
+  }
+
+  /* Text får ALDRIG bryta rad */
+  body.pictos-print #participantPictos .picto-act .a,
+  body.pictos-print #participantPictos .picto-coach .names{
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Lås line-height så emoji/font inte ändrar totalhöjd */
+  body.pictos-print #participantPictos .picto-time,
+  body.pictos-print #participantPictos .picto-act,
+  body.pictos-print #participantPictos .picto-coach{
+    line-height: 1.05 !important;
+  }
+}
+
+
+@media print {
+  /* Bildstöd: ingen topp-rubrik som skjuter ner första sidan */
+  body.pictos-print #print-header-single { display: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }
+  body.pictos-print .print-header { display: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }
+  body.pictos-print #print-logo { display: none !important; }
+
+  /* Nollställ ev. toppmarginaler på containern */
+  body.pictos-print #participantPictos { margin-top: 0 !important; padding-top: 0 !important; }
+}
+
+
+}
+
+
+@media print {
+  /* ===== Första sidan: ingen extra toppmarginal ===== */
+  body.pictos-print {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  /* Om någon global regel sätter body margin-top, neutralisera */
+  html, body {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+  /* Nollställ ev. fixed-top som kan reservera höjd */
+  body.pictos-print #print-logo,
+  body.pictos-print #print-header,
+  body.pictos-print #print-meta,
+  body.pictos-print #print-date,
+  body.pictos-print #print-person {
+    display: none !important;
+    height: 0 !important;
+  }
+}
+
+
+/* =========================
+   Mobiloptimering
+========================= */
+@media (max-width: 720px){
+  body{ padding: 10px !important; }
+  .view{ padding: 10px !important; }
+
+  #viewTitle{
+    font-size: 20px !important;
+    margin: 8px 0 10px 0 !important;
+  }
+
+  .controls{
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .controls select,
+  .controls .btn{
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  /* Touchvänliga knappar */
+  .btn{
+    min-height: 44px !important;
+    font-size: 16px !important;
+    padding: 12px 12px !important;
+  }
+  select{
+    min-height: 44px !important;
+    font-size: 16px !important;
+    padding: 10px 12px !important;
+  }
+
+  /* Kort-vy: bättre läsbarhet */
+  .card{
+    border-radius: 14px !important;
+  }
+  .card .title{
+    font-size: 18px !important;
+  }
+  .card .meta{
+    font-size: 14px !important;
+  }
+
+  /* Bildstöd på skärm: stapla kolumner på mobil */
+  .picto-wrap{ max-width: 100% !important; }
+  .picto-day{ padding: 14px !important; }
+  .picto-item{
+    grid-template-columns: 1fr !important;
+    text-align: center !important;
+    gap: 10px !important;
+    padding: 14px !important;
+  }
+  .picto-time{ order: 1; }
+  .picto-act{ order: 2; }
+  .picto-coach{ order: 3; }
+  .picto-time .clock{ font-size: 36px !important; }
+  .picto-time .t{ font-size: 18px !important; }
+  .picto-act .e{ font-size: 52px !important; }
+  .picto-act .a{ font-size: 18px !important; }
+  .picto-coach .names{ font-size: 18px !important; }
+
+  }
+
+/* Super-små skärmar */
+@media (max-width: 380px){
+  #viewTitle{ font-size: 18px !important; }
+  .btn, select{ font-size: 15px !important; }
+  .picto-act .e{ font-size: 46px !important; }
+}
+
+
+/* =========================
+   Mobilfix (städad vy)
+========================= */
+@media (max-width: 720px){
+  /* Ta bort onödiga flikar i mobilen */
+  #tabAssistant { display:none !important; }
+  #assistantView { display:none !important; }
+
+  /* Bildstöd-knappen behövs inte i mobilen */
+  #btnParticipantPictos { display:none !important; }
+
+  /* Större väljare, särskilt coach */
+  #coachSelect, #nameSelect{
+    font-size: 18px !important;
+    padding: 14px 14px !important;
+    min-height: 52px !important;
+  }
+
+  /* Veckoschema: visa hela veckan genom horisontell scroll */
+  #participantWeek, #coachWeek{
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+  }
+  #participantWeek .block-header,
+  #participantWeek .block-grid,
+  #coachWeek .block-header,
+  #coachWeek .block-grid{
+    min-width: 820px; /* så alla dagar får plats */
+  }
+
+  /* Gör tidskolumnen lite större så man ser */
+  .block-header{ grid-template-columns: 90px repeat(5, 1fr) !important; }
+  .block-grid{ grid-template-columns: 90px repeat(5, 1fr) !important; }
+  .block-time{ font-size: 14px !important; }
+
+  /* Mindre rörigt: lite tajtare kort */
+  .card h3{ font-size: 18px !important; }
+  .card .row{ font-size: 15px !important; }
+}
+
+
+
+
+/* Diskret underrubrik */
+.subhint{
+  margin: 6px 0 10px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+
+
+
+
+
+@media print {
+  /* Centrera rubrik (namn + datum) vid utskrift av VECKOSCHEMAN (coach + deltagare) */
+  body:not(.pictos-print) #print-header-single{
+    text-align: center !important;
+  }
+  body:not(.pictos-print) #print-header-single *{
+    text-align: center !important;
+  }
+}
+
+
+@media print {
+  /* Dölj vy-rubriker vid utskrift (ska inte följa med i print) */
+  #participantView #viewTitle,
+  #coachView #viewTitle{
+    display: none !important;
+  }
+}
+
+
+@media print {
+  /* Centrera rubrik (namn + datum) på VECKOSCHEMA */
+  body:not(.pictos-print) #print-header-single{
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center !important;
+  }
+}
+
+
+
+/* =========================
+   MOBIL: Dag-för-dag med swipe (kortvy)
+   - Default: idag
+   - Swipe: höger=framåt, vänster=bakåt
+   - Stopp med "motstånd" i kanterna
+========================= */
+#mobileParticipantDayView, #mobileCoachDayView { display:none; max-width:1100px; margin:0 auto; }
+@media (max-width: 720px){
+  #mobileParticipantDayView, #mobileCoachDayView { display:block !important; }
+  /* Mobil = tittläge: dölj utskriftsknappar och veckovy-knappar */
+  #btnParticipantWeek, #btnParticipantPictos, #btnPrintParticipant,
+  #btnCoachWeek, #btnPrintCoach,
+  #tabAssistant { display:none !important; }
+
+  /* Dölj veckogrid på mobil */
+  #participantWeek, #coachWeek, #compareOutput { display:none !important; }
+}
+
+
+/* Mobil: dag-rubrik som i referensbild (Idag – tisdag + datum) */
+@media (max-width: 720px){
+  body.mobile-fullscreen #viewTitle,
+  body.mobile-fullscreen .controls,
+  body.mobile-fullscreen .mobile-backbar{ display:none !important; }
+
+  /* Gör dagsvyn till "riktig" helskärm och låt korten scrolla */
+  body.mobile-fullscreen #mobileParticipantDayView,
+  body.mobile-fullscreen #mobileCoachDayView{
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0; right: 0;
+    bottom: env(safe-area-inset-bottom);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 14px 18px;
+  }
+
+  body.mobile-fullscreen .mobile-day-header{
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #eef3f8;
+    padding: 6px 0 4px;
+    margin: 0 0 2px;
+  }
+
+  body.mobile-fullscreen .mobile-day-title{
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    line-height: 1.05;
+  }
+  body.mobile-fullscreen .mobile-day-sub{
+    font-size: 18px;
+    font-weight: 700;
+    opacity: 0.85;
+    margin-top: 6px;
+    white-space: nowrap;
+  }
+
+  body.mobile-fullscreen .mobile-swipe-hint{
+    position: sticky;
+    top: 54px;
+    z-index: 19;
+    text-align: center;
+    font-weight: 700;
+    font-size: 18px;
+    opacity: 0.65;
+    margin: 0 0 10px;
+    padding: 6px 0 8px;
+    background: #eef3f8;
+  }
+
+  /* Back-knapp inuti dagraden */
+  body.mobile-fullscreen .mobile-inline-back{
+    padding: 8px 10px !important;
+    min-height: 40px !important;
+    border-radius: 999px !important;
+    margin-right: 8px;
+  }
+
+  /* Swipe-yta ska inte låsa scroll */
+  body.mobile-fullscreen .mobile-swipe-surface{
+    touch-action: pan-y;
+  }
+}
+
+.mobile-day-header{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  margin: 8px 0 8px;
+}
+.mobile-day-title{
+  font-weight: 900;
+  font-size: 20px;
+}
+.mobile-day-sub{
+  font-size: 13px;
+  color: #444;
+  white-space: nowrap;
+}
+.mobile-edge-hint{
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin: 6px 0 0;
+  min-height: 16px;
+}
+
+/* swipe-yta: vi tillåter vertikal scroll men fångar horisontell */
+.mobile-swipe-surface{
+  touch-action: pan-y;
+  user-select:none;
+  will-change: transform;
+  transition: transform 120ms ease-out;
+}
+
+
+
+/* =========================
+   UI: Dölj "Skriv ut" (globalt)
+========================= */
+@media (max-width: 720px){
+  #btnPrintParticipant, #btnPrintCoach, #btnPrintNow, #btnPrintCompare { display:none !important; }
+}
+
+
+
+/* Mobil: ta bort "Dagens schema"-knappar (Idag är default + swipe) */
+@media (max-width: 720px){
+  #btnParticipantToday, #btnCoachToday { display:none !important; }
+}
+
+/* Mobil: Pågår nu över Coach/Deltagare */
+@media (max-width: 720px){
+  .tab-bar{ display:flex; flex-direction:column; gap:8px; align-items:stretch; }
+  #tabNow{ width:100%; order:1; }
+  #tabCoach, #tabParticipant{ width:49%; }
+  .tab-row-mobile{ display:flex; gap:8px; order:2; }
+  /* flytta in coach/deltagare i en rad via wrapper */
+  #tabAssistant{ display:none !important; }
+}
+
+
+
+@media (max-width: 720px){
+  #mPSwipe, #mCSwipe{ min-height: 55vh; }
+}
+
+
+
+/* =========================
+   MOBIL: Hel-skärm för dagschema + tillbaka
+========================= */
+.mobile-backbar{ display:none; }
+.mobile-back{ display:none; }
+
+@media (max-width: 720px){
+  /* Mer yta till schema */
+  body.mobile-fullscreen .tab-bar{ display:none !important; } /* dölj endast i helskärm-vy */
+  body.mobile-fullscreen .mobile-backbar{ display:block; max-width:1100px; margin: 6px auto 0; }
+  body.mobile-fullscreen .mobile-back{ display:inline-flex !important; align-items:center; gap:8px; }
+
+  /* Låt vyerna använda skärmen bättre */
+  .view{ min-height: calc(100vh - 120px); } /* header + luft */
+  #mobileParticipantDayView, #mobileCoachDayView{ padding-bottom: 18px; }
+}
+
+/* "Bläddra mellan blad" - animation */
+@media (max-width: 720px){
+  .page-enter{
+    opacity: 0.01;
+    transform: translateX(36px) rotateY(-10deg);
+    transform-origin: 50% 50%;
+  }
+  .page-enter-left{
+    opacity: 0.01;
+    transform: translateX(-36px) rotateY(10deg);
+    transform-origin: 50% 50%;
+  }
+  .page-enter-active{
+    opacity: 1;
+    transform: translateX(0px) rotateY(0deg);
+    transition: opacity 180ms ease-out, transform 180ms ease-out;
+  }
+  /* ge lite perspektiv känsla */
+  #mPDayCards, #mCDayCards{ perspective: 900px; }
+}
+
+
+
+@media (max-width: 720px){
+  .mobile-swipe-hint{
+    font-size: 12px;
+    color: #555;
+    text-align: center;
+    margin: 4px 0 8px;
+    opacity: 0.85;
+  }
+  .mobile-swipe-hint.hide{
+    opacity: 0.0;
+    transition: opacity 220ms ease-out;
+  }
+  /* mjukare "snap" när man släpper */
+  .mobile-swipe-surface{
+    transition: transform 180ms cubic-bezier(.2,.8,.2,1);
+  }
+}
+
+
+
+/* =========================
+   MOBIL: Riktig helskärm i schema + tillbaka till start
+========================= */
+@media (max-width: 720px){
+  body.mobile-fullscreen header{ display:none !important; }
+  body.mobile-fullscreen #dataStatus{ display:none !important; }
+  body.mobile-fullscreen #debugPanel{ display:none !important; }
+
+  body.mobile-fullscreen{
+    overflow:hidden; /* undvik att body scrollar bakom vyn */
+  }
+
+  /* Backbar ligger fast högst upp (respektera safe-area på iPhone) */
+  body.mobile-fullscreen .mobile-backbar{
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0; right: 0;
+    z-index: 9999;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 10px 12px;
+    border-bottom: 1px solid #e6e6e6;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  }
+
+  /* Själva innehållet under backbaren */
+  body.mobile-fullscreen #participantView,
+  body.mobile-fullscreen #coachView{
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: auto;
+    padding-top: calc(56px + env(safe-area-inset-top));
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    background: #f7f7fb;
+  }
+
+  /* Ta bort extra rubrik/controls som äter höjd i helskärm */
+  body.mobile-fullscreen #participantView #viewTitle,
+  body.mobile-fullscreen #coachView #viewTitle{
+    display:none !important;
+  }
+  body.mobile-fullscreen #participantView .controls,
+  body.mobile-fullscreen #coachView .controls{
+    position: sticky;
+    top: calc(56px + env(safe-area-inset-top));
+    z-index: 1000;
+    background: #f7f7fb;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  /* Ge swipe-yta mer plats */
+  body.mobile-fullscreen #mPSwipe,
+  body.mobile-fullscreen #mCSwipe{
+    min-height: 62vh;
+  }
+}
+
+
+
+@media (max-width: 720px){
+  body.mobile-fullscreen #mobileCoachDayView{ padding-top: 6px; }
+  body.mobile-fullscreen .mobile-day-header{ margin-top: 8px; }
+}
+
+
+
+@media (max-width: 720px){
+  .mobile-swipe-hint{ font-weight:600; }
+}
+
+
+
+/* Desktop: flik-ordning Deltagare → Pågår nu → Coach */
+@media (min-width: 721px){
+  .tab-bar{ display:flex; gap:8px; align-items:center; justify-content:flex-start; flex-wrap:wrap; }
+  #tabParticipant{ order:1; }
+  #tabNow{ order:2; }
+  #tabCoach{ order:3; }
+  #tabAssistant{ order:4; }
+  .tab-row-mobile{ display:contents; } /* påverka inte desktop */
+}
+
+
+
+/* =========================
+   STARTVY: centrerade knappar (webb + mobil)
+========================= */
+.tab-bar{
+  justify-content:center;
+}
+@media (max-width:720px){
+  .tab-bar{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+  }
+  #tabNow{ width:100%; max-width:340px; }
+  .tab-row-mobile{ width:100%; max-width:340px; display:flex; gap:10px; }
+  #tabCoach, #tabParticipant{ width:100%; }
+}
+
+
+
+/* =========================
+   MOBIL: helskärm när val är gjort (coach/deltagare)
+========================= */
+@media (max-width:720px){
+  body.mobile-fullscreen .tab-bar{ display:none !important; }
+
+  body.mobile-fullscreen .mobile-backbar{
+    display:block !important;
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0; right: 0;
+    z-index: 9999;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 10px 12px;
+    border-bottom: 1px solid #e6e6e6;
+  }
+
+  body.mobile-fullscreen #participantView,
+  body.mobile-fullscreen #coachView{
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: auto;
+    padding-top: calc(56px + env(safe-area-inset-top));
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    background: #f7f7fb;
+  }
+
+  /* Se till att dagrubriken alltid syns under backbaren */
+  body.mobile-fullscreen .mobile-day-header{
+    position: sticky;
+    /* Ligger UNDER den sticky .controls-raden (select) */
+    top: calc(56px + env(safe-area-inset-top) + 74px);
+    background:#f7f7fb;
+    z-index: 900; /* under .controls (1000), över kort */
+    padding: 8px 0 6px;
+    margin-top: 0;
+  }
+}
+
+
+
+/* =========================
+   WEBB: centrera översta knappar
+========================= */
+@media (min-width:721px){
+  .tab-bar{
+    justify-content:center;
+  }
+}
+
+
+
+/* =========================
+   WEBB: Coach + Deltagare bredvid varandra (som tidigare)
+========================= */
+@media (min-width: 721px){
+  .tab-row-mobile{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:center;
+  }
+  #tabCoach, #tabParticipant{
+    min-width: 240px;
+    justify-content:center;
+  }
+}
+
+
+
+/* =========================
+   MOBIL: Helskärm i schema (coach + deltagare) med Tillbaka
+   Aktiveras endast när body har class "mobile-fullscreen"
+========================= */
+.mobile-backbar{ display:none; }
+.mobile-back{ display:none; }
+
+@media (max-width:720px){
+  body.mobile-fullscreen header{ display:none !important; }
+  body.mobile-fullscreen #dataStatus{ display:none !important; }
+  body.mobile-fullscreen .tab-bar{ display:none !important; }
+
+  body.mobile-fullscreen{
+    overflow:hidden; /* låt själva vyn scrolla istället */
+  }
+
+  body.mobile-fullscreen .mobile-backbar{
+    display:block !important;
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0; right: 0;
+    z-index: 9999;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(10px);
+    padding: 10px 12px;
+    border-bottom: 1px solid #e6e6e6;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  }
+  body.mobile-fullscreen .mobile-back{
+    display:inline-flex !important;
+    align-items:center;
+    gap:8px;
+  }
+
+  body.mobile-fullscreen #participantView,
+  body.mobile-fullscreen #coachView{
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow:auto;
+    background:#f7f7fb;
+    padding-top: calc(56px + env(safe-area-inset-top));
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Spara yta: göm rubrik som dubblar info */
+  body.mobile-fullscreen #participantView #viewTitle,
+  body.mobile-fullscreen #coachView #viewTitle{
+    display:none !important;
+  }
+
+  /* Dag/datum får egen "säker zon" under backbaren */
+  body.mobile-fullscreen .mobile-day-header{
+    position: sticky;
+    /* Ligger UNDER den sticky .controls-raden (select) */
+    top: calc(56px + env(safe-area-inset-top) + 74px);
+    z-index: 900;
+    background:#f7f7fb;
+    padding: 8px 0 6px;
+    margin: 0;
+  }
+}
+
+
+/* ===== MOBIL DAGLÄGE (en enda tillbaka + fast rubrik) ===== */
+@media (max-width: 720px){
+  body.mobile-day-mode #viewTitle,
+  body.mobile-day-mode .controls,
+  body.mobile-day-mode .mobile-backbar,
+  body.mobile-day-mode .mobile-back{ display:none !important; }
+
+  /* Visa endast swipe-dagsvyn i dagläge */
+  body.mobile-day-mode #mobileParticipantDayView,
+  body.mobile-day-mode #mobileCoachDayView{ display:block !important; }
+
+  /* Gör dagsvyn till helskärms-scroll även utan mobile-fullscreen */
+  body.mobile-day-mode #mobileParticipantDayView,
+  body.mobile-day-mode #mobileCoachDayView{
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0; right: 0;
+    bottom: env(safe-area-inset-bottom);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 14px 18px;
+    background: #eef3f8;
+  }
+
+  /* Rubrik + hint ska ligga fast överst, korten under */
+  body.mobile-day-mode .mobile-day-header{
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #eef3f8;
+    padding: 6px 0 4px;
+    margin: 0 0 2px;
+  }
+
+  body.mobile-day-mode .mobile-swipe-hint{
+    position: sticky;
+    top: 54px;
+    z-index: 29;
+    background: #eef3f8;
+  }
+}
+
+
+
+
+/* ===== v33: FIX för mobil dagschema ===== */
+@media (max-width: 720px){
+  /* Visa INTE dagsvyn (rubrik/hint + kortlista) innan val är gjort */
+  body:not(.mobile-day-mode) #mobileParticipantDayView,
+  body:not(.mobile-day-mode) #mobileCoachDayView{ display:none !important; }
+
+  body:not(.mobile-day-mode) .mobile-day-header,
+  body:not(.mobile-day-mode) .mobile-swipe-hint{ display:none !important; }
+
+  /* Dagläge: fast rubrik + scroll under */
+  body.mobile-day-mode{ overflow:hidden; }
+  body.mobile-day-mode #mobileParticipantDayView,
+  body.mobile-day-mode #mobileCoachDayView{
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0; right: 0;
+    bottom: env(safe-area-inset-bottom);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 14px 18px;
+    background: #eef3f8;
+  }
+  body.mobile-day-mode .mobile-day-header{
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #eef3f8;
+    margin: 0 0 2px;
+  }
+  body.mobile-day-mode .mobile-swipe-hint{
+    position: sticky;
+    top: 54px;
+    z-index: 29;
+    background: #eef3f8;
+  }
+}
+
 </style>
 
-<link rel="stylesheet" href="features.css" />
-<script defer src="features.js"></script>
+<!-- =========================
+     PRINTFIX (2026-01-05)
+     Mål: Veckoschema = 1 sida (A4 liggande), Bildstöd = 1 dag per sida (A4 stående), max 8 rutor
+     Detta ligger SIST och vinner med !important.
+========================= -->
+<style id="printfix">
+/* Skärmläge påverkas inte – bara print */
+@media print {
+
+  /* Tydliga print-lägen */
+  body.print-week #participantPictos,
+  body.print-week #participantPictos * { display:none !important; visibility:hidden !important; }
+
+  body.print-pictos #participantWeek,
+  body.print-pictos #coachWeek,
+  body.print-pictos #compareOutput,
+  body.print-pictos #participantWeek *,
+  body.print-pictos #coachWeek *,
+  body.print-pictos #compareOutput * { display:none !important; visibility:hidden !important; }
+
+  /* Nollställ sådant som ofta skapar "extra sida" */
+  html, body { margin:0 !important; padding:0 !important; }
+  body { background:#fff !important; }
+
+  /* ===== VECKOSCHEMA: pressa till exakt 1 sida ===== */
+  body.print-week #participantWeek,
+  body.print-week #coachWeek,
+  body.print-week #compareOutput{
+    /* blockera sidbrytning */
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    overflow: hidden !important;
+
+    /* skala ner lite (Firefox/Chrome) */
+    transform: scale(0.92) !important;
+    transform-origin: top left !important;
+    width: 108.7% !important; /* 1/0.92 */
+  }
+
+  body.print-week .block-header{ font-size: .80rem !important; }
+  body.print-week .block-time{ font-size: .72rem !important; }
+  body.print-week .block{ font-size: .72rem !important; padding: 4px 5px !important; }
+  body.print-week .compare-wrap{ gap: 6mm !important; }
+
+  /* ===== BILDSTÖD: exakt 1 dag per sida, 8 rutor ===== */
+  body.print-pictos #print-logo,
+  body.print-pictos #print-header-single{ display:none !important; }
+
+  body.print-pictos #participantPictos{ display:block !important; visibility:visible !important; margin:0 !important; padding:0 !important; }
+
+  body.print-pictos #participantPictos .picto-wrap{ margin:0 !important; padding:0 !important; }
+
+  body.print-pictos #participantPictos .picto-day{
+    height: 277mm !important; /* A4 297mm - 20mm marginaler */
+    box-sizing: border-box !important;
+
+    /* GRID: rubrik + 8 lika höga rader */
+    display: grid !important;
+    grid-template-rows: 14mm repeat(8, 1fr) !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+
+    break-after: page !important;
+    page-break-after: always !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  body.print-pictos #participantPictos .picto-day:last-child{
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+
+  body.print-pictos #participantPictos .picto-day-title{
+    height: 14mm !important;
+    line-height: 14mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 16pt !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+  }
+
+  body.print-pictos #participantPictos .picto-item{
+    margin: 0 !important;
+    border-width: 2px !important;
+    border-radius: 12px !important;
+
+    display: grid !important;
+    grid-template-columns: 85px 1fr 150px !important;
+    align-items: center !important;
+    gap: 4mm !important;
+    padding: 4.5mm !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Lite mindre typografi så 8 alltid får plats */
+  body.print-pictos #participantPictos .picto-time .clock{ font-size: 24px !important; }
+  body.print-pictos #participantPictos .picto-time .t{ font-size: 16px !important; }
+  body.print-pictos #participantPictos .picto-act .e{ font-size: 34px !important; }
+  body.print-pictos #participantPictos .picto-act .a{ font-size: 16px !important; font-weight:900 !important; }
+  body.print-pictos #participantPictos .picto-coach .lbl{ font-size: 11px !important; }
+  body.print-pictos #participantPictos .picto-coach .names{ font-size: 14px !important; font-weight:900 !important; }
+
+  /* Text får inte växa höjden (ingen radbrytning) */
+  body.print-pictos #participantPictos .picto-act .a,
+  body.print-pictos #participantPictos .picto-coach .names{
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+/* Fallback @page om JS inte hinner (browser-bugg) */
+@media print { @page { size: A4 landscape; margin: 10mm; } }
+body.print-pictos{ }
+body.print-week{ }
+
+
+/* ===== v33: FIX för mobil dagschema ===== */
+@media (max-width: 720px){
+  /* Visa INTE dagsvyn (rubrik/hint + kortlista) innan val är gjort */
+  body:not(.mobile-day-mode) #mobileParticipantDayView,
+  body:not(.mobile-day-mode) #mobileCoachDayView{ display:none !important; }
+
+  body:not(.mobile-day-mode) .mobile-day-header,
+  body:not(.mobile-day-mode) .mobile-swipe-hint{ display:none !important; }
+
+  /* Dagläge: fast rubrik + scroll under */
+  body.mobile-day-mode{ overflow:hidden; }
+  body.mobile-day-mode #mobileParticipantDayView,
+  body.mobile-day-mode #mobileCoachDayView{
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0; right: 0;
+    bottom: env(safe-area-inset-bottom);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 14px 18px;
+    background: #eef3f8;
+  }
+  body.mobile-day-mode .mobile-day-header{
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #eef3f8;
+    margin: 0 0 2px;
+  }
+  body.mobile-day-mode .mobile-swipe-hint{
+    position: sticky;
+    top: 54px;
+    z-index: 29;
+    background: #eef3f8;
+  }
+}
+
+</style>
+
+
+
+<style id="print-logo-override">
+@media print{
+  /* Flytta Grunden-loggan i veckoutskrift ovanför strecket och undvik att den ligger på linjen */
+  #print-logo{
+    top: -4mm !important;
+    right: 10mm !important;
+    z-index: 999999 !important;
+    background: #fff !important;
+    padding: 1mm 2mm !important;
+    border-radius: 2mm !important;
+  }
+  #print-logo img{
+    height: 14mm !important;
+    width: auto !important;
+    display:block !important;
+  }
+}
+
+
+/* ===== v33: FIX för mobil dagschema ===== */
+@media (max-width: 720px){
+  /* Visa INTE dagsvyn (rubrik/hint + kortlista) innan val är gjort */
+  body:not(.mobile-day-mode) #mobileParticipantDayView,
+  body:not(.mobile-day-mode) #mobileCoachDayView{ display:none !important; }
+
+  body:not(.mobile-day-mode) .mobile-day-header,
+  body:not(.mobile-day-mode) .mobile-swipe-hint{ display:none !important; }
+
+  /* Dagläge: fast rubrik + scroll under */
+  body.mobile-day-mode{ overflow:hidden; }
+  body.mobile-day-mode #mobileParticipantDayView,
+  body.mobile-day-mode #mobileCoachDayView{
+    position: fixed;
+    top: env(safe-area-inset-top);
+    left: 0; right: 0;
+    bottom: env(safe-area-inset-bottom);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 14px 18px;
+    background: #eef3f8;
+  }
+  body.mobile-day-mode .mobile-day-header{
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #eef3f8;
+    margin: 0 0 2px;
+  }
+  body.mobile-day-mode .mobile-swipe-hint{
+    position: sticky;
+    top: 54px;
+    z-index: 29;
+    background: #eef3f8;
+  }
+}
+
+</style>
+
 
 </head>
 
 <body>
 
-  <div id="siteVersion"></div>
+<div id="print-logo" aria-hidden="true">
+  <img id="printLogoImg" alt="Grunden DV logotyp">
+</div>
 
-  <header title="Klicka för start (Pågår nu)">
-    <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
-         alt="Grunden DV logotyp" id="homeLogo">
-    <div id="clock"></div>
-  </header>
+<div id="print-header-single"></div>
+<header title="Klicka för start (Pågår nu)">
+  <img src="https://cdn.prod.website-files.com/63e24702f042c50ffc91818b/646239316cf71bde35bcc2b4_grunden-DV-logo%20copy.png"
+       alt="Grunden DV logotyp" id="homeLogo">
+  <div id="clock"></div>
+  <div id="logoFallback" style="display:none;font-weight:900;font-size:18px;">Grunden DV</div>
+</header>
 
+
+<div id="dataStatus" style="max-width:1100px;margin:0 auto 10px;display:none;
+  background:#fff3cd;border:1px solid #ffeeba;color:#856404;
+  padding:10px 12px;border-radius:12px;box-shadow:var(--shadow);">
+  <div style="font-weight:800;margin-bottom:6px;">⚠️ Kunde inte ladda schema-data</div>
+  <div style="font-size:14px;line-height:1.35;margin-bottom:8px;">
+    Kontrollera nätet. Om du öppnar filen som en lokal fil kan vissa mobiler blockera dataladdning.
+  </div>
+  <button id="btnRetryData" class="btn">🔄 Försök igen</button>
+</div>
 
 
 <!-- Flikar -->
 <div class="tab-bar">
-  <button id="tabParticipant" class="tab">👤 Deltagare</button>
-  <button id="tabCoach" class="tab">🧑‍🏫 Coach</button>
   <button id="tabNow" class="tab active">🔔 Pågår nu</button>
+  <div class="tab-row-mobile">
+    <button id="tabCoach" class="tab">🧑‍🏫 Coach</button>
+    <button id="tabParticipant" class="tab">👤 Deltagare</button>
+  </div>
   <button id="tabAssistant" class="tab">🤖 Assistent</button>
 </div>
 
 
 <!-- DELTAGARE-VY -->
 <div id="participantView" class="view">
-  <div id="viewTitle">👤 Deltagarschema</div>
-  <div class="controls">
+  <div class="mobile-backbar">
+  <button id="btnBackFromParticipant" class="btn mobile-back">← Tillbaka</button>
+</div>
+<div id="viewTitle">👤 Deltagarschema</div>
+
+<div class="controls">
     <select id="nameSelect"><option value="">-- Välj deltagare --</option></select>
     <button id="btnParticipantToday" class="btn primary">☀️ Dagens schema</button>
-    <button id="btnParticipantWeek" class="btn primary">📆 Veckoschema</button>
+    <button id="btnParticipantWeek" class="btn primary">📆 Schema</button>
+    <button id="btnParticipantPictos" class="btn primary">🖼️ Bildstöd (vecka)</button>
     <button id="btnPrintParticipant" class="btn">🖨️ Skriv ut</button>
+  
+    <div class="qr-tools">
+      <button id="btnParticipantQR" class="btn">🔳 QR (vald)</button>
+      <button id="btnParticipantQRAll" class="btn">🔳 QR (alla)</button>
+    </div>
+</div>
+<div id="participantQRInline" class="qr-inline">
+  <div class="row">
+    <div id="participantQRImg"></div>
+    <div class="meta">
+      <div class="name" id="participantQRName"></div>
+      <div class="url" id="participantQRUrl"></div>
+      <button id="btnPrintParticipantQR" class="btn">🖨️ Skriv ut QR</button>
+    </div>
   </div>
-  <div id="participantDay" class="cards print-scope"></div>
+</div>
+<div id="participantDay" class="cards print-scope"></div>
+
+  <!-- MOBIL (tittläge): Dag-för-dag med swipe (kortvy) -->
+  <div id="mobileParticipantDayView" class="print-scope">
+    <div class="mobile-day-header">
+      <div class="mobile-day-left">
+        <button class="btn mobile-inline-back" id="btnBackInlineP" aria-label="Tillbaka">←</button>
+        <div class="mobile-day-title" id="mPTitle">Idag</div>
+      </div>
+      <div class="mobile-day-sub" id="mPSub"></div></div>
+    <div class="mobile-swipe-hint" id="mPHint">Svep ← / → för att bläddra dagar</div>
+<div id="mPSwipe" class="mobile-swipe-surface">
+      <div id="mPDayCards" class="cards"></div>
+    </div>
+    <div class="mobile-edge-hint" id="mPEdgeHint"></div>
+  </div>
+
   <div id="participantWeek" class="print-scope" style="display:none;">
     <div class="block-header" id="pBlockHeader"></div>
     <div class="block-grid" id="pBlockGrid"></div>
   </div>
+
+<div id="participantPictos" class="print-scope" style="display:none;"></div>
+
 </div>
 
 <!-- COACH-VY -->
 <div id="coachView" class="view">
-  <div id="viewTitle">🧑‍🏫 Coachschema</div>
+  <div class="mobile-backbar">
+  <button id="btnBackFromCoach" class="btn mobile-back">← Tillbaka</button>
+</div>
+<div id="viewTitle">🧑‍🏫 Coachschema</div>
   <div class="controls">
     <select id="coachSelect"><option value="">-- Välj coach --</option></select>
     <button id="btnCoachToday" class="btn primary">☀️ Dagens schema</button>
-    <button id="btnCoachWeek" class="btn primary">📆 Veckoschema</button>
+    <button id="btnCoachWeek" class="btn primary">📆 Schema</button>
     <button id="btnPrintCoach" class="btn">🖨️ Skriv ut</button>
+  
+    <div class="qr-tools">
+      <button id="btnCoachQR" class="btn">🔳 QR (vald)</button>
+      <button id="btnCoachQRAll" class="btn">🔳 QR (alla)</button>
+    </div>
+</div>
+<div id="coachQRInline" class="qr-inline">
+  <div class="row">
+    <div id="coachQRImg"></div>
+    <div class="meta">
+      <div class="name" id="coachQRName"></div>
+      <div class="url" id="coachQRUrl"></div>
+      <button id="btnPrintCoachQR" class="btn">🖨️ Skriv ut QR</button>
+    </div>
   </div>
-  <div id="coachDay" class="cards print-scope"></div>
+</div>
+<div id="coachDay" class="cards print-scope"></div>
+
+  <!-- MOBIL (tittläge): Dag-för-dag med swipe (kortvy) -->
+  <div id="mobileCoachDayView" class="print-scope">
+    <div class="mobile-day-header">
+      <div class="mobile-day-left">
+        <button class="btn mobile-inline-back" id="btnBackInlineC" aria-label="Tillbaka">←</button>
+        <div class="mobile-day-title" id="mCTitle">Idag</div>
+      </div>
+      <div class="mobile-day-sub" id="mCSub"></div></div>
+    <div class="mobile-swipe-hint" id="mCHint">Svep ← / → för att bläddra dagar</div>
+<div id="mCSwipe" class="mobile-swipe-surface">
+      <div id="mCDayCards" class="cards"></div>
+    </div>
+    <div class="mobile-edge-hint" id="mCEdgeHint"></div>
+  </div>
+
   <div id="coachWeek" class="print-scope" style="display:none;">
     <div class="block-header" id="cBlockHeader"></div>
     <div class="block-grid" id="cBlockGrid"></div>
@@ -453,14 +2161,14 @@ select, .btn {
   <div id="viewTitle">🤖 Schema-assistenten</div>
 
   <div id="comparePanel" class="panel">
-    <h2>🔍 Jämför scheman</h2>
+    <h2>Jämför scheman</h2>
     <div class="chip-title">Coacher</div>
     <div id="coachListCompare" class="chip-group"></div>
     <div class="chip-title">Deltagare</div>
     <div id="participantListCompare" class="chip-group"></div>
     <div style="text-align:center; margin-top:12px;">
       <button id="btnShowCompare" class="btn primary">Visa valda scheman</button>
-      <button id="btnPrintCompare" class="btn">🖨️ Skriv ut</button>
+      <button id="btnPrintCompare" class="btn">Skriv ut</button>
     </div>
   </div>
 
@@ -478,7 +2186,7 @@ select, .btn {
   </div>
 
   <div class="controls" style="justify-content:center;margin-top:8px;">
-    <button id="btnOpenCompare" class="btn primary">🔍 Öppna jämförelse</button>
+    <button id="btnOpenCompare" class="btn primary">Öppna jämförelse</button>
     <button id="btnOpenSick" class="btn primary">🩺 Öppna ersättare</button>
   </div>
 </div>
@@ -504,15 +2212,15 @@ const aktivitetFarger = {
   "Ateljé": { color: "#F5CBA7", emoji: "🎨" },
   "Ateljén": { color: "#F5CBA7", emoji: "🎨" },
 
-  "Musik": { color: "#D2B4DE", emoji: "🎶" },
-  "Musik veckomöte": { color: "#D2B4DE", emoji: "🎶" },
-  "Musikutbyte": { color: "#D2B4DE", emoji: "🎶" },
-  "Musikproduktion": { color: "#D2B4DE", emoji: "🎶" },
-  "Egen musikproduktion": { color: "#D2B4DE", emoji: "🎶" },
-  "Rep och jam": { color: "#D2B4DE", emoji: "🎶" },
-  "Musikquizz": { color: "#D2B4DE", emoji: "🎶" },
-  "Musikdokumentär": { color: "#D2B4DE", emoji: "🎶" },
-  "Vocal": { color: "#D2B4DE", emoji: "🎤" },
+  "Musik": { color: "#C9C3D6", emoji: "🎶" },
+  "Musik veckomöte": { color: "#C9C3D6", emoji: "🎶" },
+  "Musikutbyte": { color: "#C9C3D6", emoji: "🎶" },
+  "Musikproduktion": { color: "#C9C3D6", emoji: "🎶" },
+  "Egen musikproduktion": { color: "#C9C3D6", emoji: "🎶" },
+  "Rep och jam": { color: "#C9C3D6", emoji: "🎶" },
+  "Musikquizz": { color: "#C9C3D6", emoji: "🎶" },
+  "Musikdokumentär": { color: "#C9C3D6", emoji: "🎶" },
+  "Vocal": { color: "#C9C3D6", emoji: "🎤" },
 
   "Pod": { color: "#A9CCE3", emoji: "🎙️" },
   "Pod sidbenor": { color: "#A9CCE3", emoji: "🎙️" },
@@ -522,6 +2230,8 @@ const aktivitetFarger = {
   "Lite av varje": { color: "#FADBD8", emoji: "✨" },
 
   "Yoga": { color: "#D5F5E3", emoji: "🧘" },
+  "Behandling": { color: "#D5F5E3", emoji: "💆‍♀️" },
+  "Behandlingar": { color: "#D5F5E3", emoji: "💆‍♀️" },
 
   "Gym": { color: "#A3E4D7", emoji: "🏋️‍♂️" },
   "Gym Slottskogens Gym": { color: "#A3E4D7", emoji: "🏋️‍♂️" },
@@ -530,11 +2240,11 @@ const aktivitetFarger = {
   "Filmgruppen": { color: "#E6B0AA", emoji: "🎬" },
 
   "Föreningsgruppen": { color: "#D6DBDF", emoji: "🤝" },
-  "Autentiskt relaterande": { color: "#D6DBDF", emoji: "🤝" },
+  "Autentiskt relaterande": { color: "#FCF3CF", emoji: "💬" },
 
   "Trummor": { color: "#F1948A", emoji: "🥁" },
 
-  "Återkoppling": { color: "#85C1E9", emoji: "🔄" },
+  "Återkoppling": { color: "#D6DBDF", emoji: "🔄" },
 
   "Medicin": { color: "#E59866", emoji: "💊" },
 
@@ -559,8 +2269,8 @@ const aktivitetFarger = {
   "Handla": { color: "#E5E7E8", emoji: "🛒" },
   "Handling": { color: "#E5E7E8", emoji: "🛒" },
 
-  "Behandling": { color: "#FDEDEC", emoji: "💆‍♀️" },
-  "Behandlingar": { color: "#FDEDEC", emoji: "💆‍♀️" },
+  
+  
   "Relax Massagestol": { color: "#FDEDEC", emoji: "💺" },
 
   "Transkribering": { color: "#E8DAEF", emoji: "⌨️" },
@@ -579,7 +2289,17 @@ const aktivitetFarger = {
 
   "Avslappning": { color: "#D5F5E3", emoji: "🪷" },
 
-  "Ladda stol": { color: "#FAD7A0", emoji: "🔋" }
+  "Ladda stol": { color: "#FAD7A0", emoji: "🔋" },
+
+  "Gåträning": { color: "#ABEBC6", emoji: "🚶‍♂️" },
+  "Uppstart": { color: "#D6DBDF", emoji: "🚀" },
+  "Filmkunskap": { color: "#E6B0AA", emoji: "🎥" },
+  "Pod Sidbenor": { color: "#A9CCE3", emoji: "🎙️" },
+
+  "Foto": { color: "#E8DAEF", emoji: "📸" },
+  "Samtal": { color: "#FCF3CF", emoji: "💬" },
+
+
 };
 
 /* ===== FUNKTIONER ===== */
@@ -596,10 +2316,306 @@ function dayKey(str) {
   return String(str).slice(0, 10);
 }
 
-function todayKey() {
-  return new Date().toISOString().slice(0, 10);
+function todayKey(){
+  const d=new Date(); d.setHours(0,0,0,0);
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
 }
 
+
+
+/* =========================
+   MOBIL: Dag-för-dag (kortvy) + swipe
+========================= */
+function isMobile(){
+  return window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+}
+
+function mondayOfWeek(date){
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Sun..6=Sat
+  const diff = (day === 0 ? -6 : 1 - day); // back to Monday
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function weekDaysMonFri(baseDate){
+  const mon = mondayOfWeek(baseDate);
+  const days = [];
+  for(let i=0;i<5;i++){
+    const x = new Date(mon);
+    x.setDate(mon.getDate() + i);
+    days.push(x);
+  }
+  return days;
+}
+
+function keyFromDate(d){
+  const x=new Date(d); x.setHours(0,0,0,0);
+  const y=x.getFullYear();
+  const m=String(x.getMonth()+1).padStart(2,"0");
+  const day=String(x.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+function prettyDay(d){
+  const dt = new Date(d);
+  const wd = ["söndag","måndag","tisdag","onsdag","torsdag","fredag","lördag"][dt.getDay()];
+  const date = new Intl.DateTimeFormat("sv-SE",{ day:"numeric", month:"short"}).format(dt);
+  return { wd, date };
+}
+
+/* Kort-rendering med valt datum (återanvänd dina kort-stilar) */
+function renderCardsGenericForDate(name,isCoach,targetEl,dateKeyStr){
+  const field=isCoach?"Coach":"Deltagare";
+  const rows=DATA.filter(r=>{
+    const list=splitNames(r[field]||"");
+    return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) || (r[field]||"").trim().toLowerCase()==="alla";
+  }).filter(r=>dayKey(r.Datum)===dateKeyStr).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
+
+  let html=``;
+  if(!rows.length) html+="<div class='card' style='--band:#cfd8e3'><div class='row'>Ledig</div></div>";
+  rows.forEach(r=>{
+    html+=`<div class="card" style="--band:${colorFor(r)}">
+      <h3>${emojiFor(r)} ${r.Aktivitet||"Aktivitet"}</h3>
+      <div class="row">🕒 ${r.Start||""}–${r.Slut||""}</div>
+      <div class="row">${isCoach?"👥 Deltagare: "+(r.Deltagare||"-"):"🧑‍🏫 Coach: "+(r.Coach||"-")}</div>
+    </div>`;
+  });
+  
+  targetEl.innerHTML=html;
+}
+
+/* Swipe-engine med motstånd (stopp i kanterna) */
+function attachDaySwipe(opts){
+  const surface = opts.surface;
+  // iOS: undvik dubbla listeners, men tillåt uppdatering av callbacks
+  if(surface && surface.__swipeAttached){
+    // uppdatera state och återanvänd samma listeners
+    surface.__swipeState = {
+      getIndex: opts.getIndex,
+      setIndex: opts.setIndex,
+      maxIndex: opts.maxIndex,
+      onEdge: opts.onEdge || function(){},
+      onChange: opts.onChange || function(){}
+    };
+    return;
+  }
+  if(surface) surface.__swipeAttached = true;
+  if(surface) surface.__swipeState = {
+    getIndex: opts.getIndex,
+    setIndex: opts.setIndex,
+    maxIndex: opts.maxIndex,
+    onEdge: opts.onEdge || function(){},
+    onChange: opts.onChange || function(){}
+  };
+  const state = surface.__swipeState;
+  const getIndex = ()=>state.getIndex();
+  const setIndex = (v)=>state.setIndex(v);
+  const maxIndex = ()=>state.maxIndex;
+  const onEdge = (w)=>state.onEdge(w);
+  const onChange = (i)=>state.onChange(i);
+
+  let startX=0, startY=0, dx=0, dy=0, dragging=false, horizontal=false;
+
+  let lastCommitTs = 0;
+
+  function rubberband(dist){
+    // mjuk motståndskurva
+    const k = 0.35;
+    return dist * k;
+  }
+
+  function reset(){
+    surface.style.transition = "transform 180ms cubic-bezier(.2,.8,.2,1)";
+    surface.style.transform = "translateX(0px)";
+    setTimeout(()=>{ surface.style.transition = "transform 180ms cubic-bezier(.2,.8,.2,1)"; }, 0);
+  }
+
+  surface.addEventListener("touchstart",(e)=>{
+    if(!e.touches || e.touches.length!==1) return;
+    dragging=true; horizontal=false;
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    dx=0; dy=0;
+    surface.style.transition = "none";
+  },{passive:true});
+
+  surface.addEventListener("touchmove",(e)=>{
+    if(!dragging || !e.touches || e.touches.length!==1) return;
+    dx=e.touches[0].clientX - startX;
+    dy=e.touches[0].clientY - startY;
+
+    if(!horizontal){
+      // lättare att fånga horisontell swipe på iPhone
+      if(Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)){
+        horizontal = true;
+      }else{
+        return;
+      }
+    }
+
+    const idx = getIndex();
+    const atStart = idx<=0;
+    const atEnd = idx>=maxIndex();
+
+    let move = dx;
+
+    // Motstånd i kanterna
+    if((atStart && dx>0) || (atEnd && dx<0)){
+      move = rubberband(dx);
+      onEdge(atStart ? "start" : "end");
+    }else{
+      onEdge(null);
+    }
+
+    surface.style.transform = `translateX(${move}px)`;
+    e.preventDefault();
+  },{passive:false});
+
+  surface.addEventListener("touchend",()=>{
+    if(!dragging){ reset(); return; }
+    dragging=false;
+
+    const idx = getIndex();
+    const atStart = idx<=0;
+    const atEnd = idx>=maxIndex();
+
+    const threshold = 60; // px
+
+    // dx>0 = svep höger (tillbaka), dx<0 = svep vänster (framåt)
+    const nowTs = Date.now();
+    if(nowTs - lastCommitTs < 220){ reset(); return; }
+    if(horizontal && Math.abs(dx) > threshold){
+      if(dx < 0 && !atEnd){
+        setIndex(idx+1);
+        lastCommitTs = Date.now();
+        onChange(getIndex(), dx<0 ? 'forward' : 'back');
+      }else if(dx > 0 && !atStart){
+        setIndex(idx-1);
+        lastCommitTs = Date.now();
+        onChange(getIndex(), dx<0 ? 'forward' : 'back');
+      }else{
+        // stopp
+        onEdge(atStart ? "start" : "end");
+      }
+    }
+    reset();
+  },{passive:true});
+}
+
+/* Init mobilvy för deltagare */
+let mPDays = [];
+let mPIndex = 0;
+let mPName = "";
+let mPLastDir = "forward";
+
+function initMobileParticipant(){
+  if(!isMobile()) return;
+  const name = document.getElementById("nameSelect")?.value;
+  if(!name) return;
+  mPName = name;
+
+  mPDays = weekDaysMonFri(new Date());
+  const today = todayKey();
+  const todayIdx = mPDays.findIndex(d=>keyFromDate(d)===today);
+  mPIndex = (todayIdx>=0)?todayIdx:0;
+
+  const titleEl = document.getElementById("mPTitle");
+  const subEl = document.getElementById("mPSub");
+  const cardsEl = document.getElementById("mPDayCards");
+  const edgeEl = document.getElementById("mPEdgeHint");
+  const surface = document.getElementById("mPSwipe");
+
+  function render(){
+    const d = mPDays[mPIndex];
+    const k = keyFromDate(d);
+    const pretty = prettyDay(d);
+    titleEl.textContent = (k===today) ? `Idag – ${pretty.wd}` : (pretty.wd.charAt(0).toUpperCase()+pretty.wd.slice(1));
+subEl.textContent = pretty.date;
+    renderCardsGenericForDate(mPName,false,cardsEl,k);
+  }
+
+  render();
+
+  attachDaySwipe({
+    surface,
+    getIndex: ()=>mPIndex,
+    setIndex: (v)=>{ mPIndex=v; },
+    maxIndex: mPDays.length-1,
+    onEdge: (where)=>{
+      edgeEl.textContent = where ? (where==="start" ? "Första dagen i veckan" : "Sista dagen i veckan") : "";
+    },
+    onChange: (_i,dir)=>{ if(dir) mPLastDir=dir; const h=document.getElementById("mPHint"); if(h) h.classList.add("hide"); try{ localStorage.setItem("swipeHintSeenP","1"); }catch(_e){}; render(); }
+  });
+}
+
+/* Init mobilvy för coach */
+let mCDays = [];
+let mCIndex = 0;
+let mCName = "";
+let mCLastDir = "forward";
+
+function initMobileCoach(){
+  if(!isMobile()) return;
+  const name = document.getElementById("coachSelect")?.value;
+  if(!name) return;
+  mCName = name;
+
+  mCDays = weekDaysMonFri(new Date());
+  const today = todayKey();
+  const todayIdx = mCDays.findIndex(d=>keyFromDate(d)===today);
+  mCIndex = (todayIdx>=0)?todayIdx:0;
+
+  const titleEl = document.getElementById("mCTitle");
+  const subEl = document.getElementById("mCSub");
+  const cardsEl = document.getElementById("mCDayCards");
+  const edgeEl = document.getElementById("mCEdgeHint");
+  const surface = document.getElementById("mCSwipe");
+
+  function render(){
+    const d = mCDays[mCIndex];
+    const k = keyFromDate(d);
+    const pretty = prettyDay(d);
+    titleEl.textContent = (k===today) ? `Idag – ${pretty.wd}` : (pretty.wd.charAt(0).toUpperCase()+pretty.wd.slice(1));
+subEl.textContent = pretty.date;
+    renderCardsGenericForDate(mCName,true,cardsEl,k);
+  }
+
+  render();
+
+  attachDaySwipe({
+    surface,
+    getIndex: ()=>mCIndex,
+    setIndex: (v)=>{ mCIndex=v; },
+    maxIndex: mCDays.length-1,
+    onEdge: (where)=>{
+      edgeEl.textContent = where ? (where==="start" ? "Första dagen i veckan" : "Sista dagen i veckan") : "";
+    },
+    onChange: (_i,dir)=>{ if(dir) mCLastDir=dir; const h=document.getElementById("mCHint"); if(h) h.classList.add("hide"); try{ localStorage.setItem("swipeHintSeenC","1"); }catch(_e){}; render(); }
+  });
+}
+
+/* Re-init när man byter person/coach */
+document.getElementById("nameSelect")?.addEventListener("change", ()=>{
+  if(!isMobile()) return;
+  mPName = document.getElementById("nameSelect")?.value || "";
+  initMobileParticipant();
+  // När ett val görs: gå till helskärm på mobil
+  if(typeof updateMobileFullscreenForCurrentView === "function") updateMobileFullscreenForCurrentView();
+});
+document.getElementById("coachSelect")?.addEventListener("change", ()=>{
+  if(!isMobile()) return;
+  mCName = document.getElementById("coachSelect")?.value || "";
+  initMobileCoach();
+  // När ett val görs: gå till helskärm på mobil
+  if(typeof updateMobileFullscreenForCurrentView === "function") updateMobileFullscreenForCurrentView();
+});
+
+/* Om skärmstorlek ändras (t.ex. rotering) */
 function weekdayName(d) {
   return ["söndag","måndag","tisdag","onsdag","torsdag","fredag","lördag"][d];
 }
@@ -614,10 +2630,20 @@ async function loadData(){
     const res=await fetch(url+"?t="+Date.now());
     const json=await res.json();
     DATA=json.data||[];
+    const st=document.getElementById("dataStatus"); if(st) st.style.display="none";
     fillLists(); fillCompareLists(); fillSickList();
     renderNow(); // startvy
-  }catch(e){ console.error("Kunde inte hämta data:", e); }
+    // Mobil-init om val redan finns
+    if(isMobile()) { initMobileParticipant(); initMobileCoach(); }
+  }catch(e){ console.error("Kunde inte hämta data:", e);
+    const st=document.getElementById("dataStatus"); if(st) st.style.display="block";
+  }
 }
+
+// hookFullscreenOnSelect
+document.getElementById("nameSelect")?.addEventListener("change", ()=>{ updateMobileFullscreenForCurrentView(); });
+document.getElementById("coachSelect")?.addEventListener("change", ()=>{ updateMobileFullscreenForCurrentView(); });
+
 loadData();
 
 /* Klocka */
@@ -628,6 +2654,17 @@ function updateClock(){
   el.textContent=now.toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
 }
 setInterval(updateClock,1000); updateClock();
+
+
+/* Logga-fallback (om bild inte kan laddas) */
+const logoImg = document.getElementById("homeLogo");
+if(logoImg){
+  logoImg.addEventListener("error", ()=>{
+    const fb=document.getElementById("logoFallback");
+    if(fb) fb.style.display="block";
+  });
+}
+
 
 /* =========================
    LISTOR / UTVAL
@@ -691,13 +2728,106 @@ function fillSickList(){
 function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   if(id==="participantView") document.getElementById("tabParticipant").classList.add("active");
   if(id==="coachView") document.getElementById("tabCoach").classList.add("active");
   if(id==="nowView") document.getElementById("tabNow").classList.add("active");
   if(id==="assistantView") document.getElementById("tabAssistant").classList.add("active");
+
+  // ===== Alternativ 3: Nollställ visningen vid vybyte, men behåll val i listorna =====
+  if(id==="participantView"){
+    const day = document.getElementById("participantDay");
+    const week = document.getElementById("participantWeek");
+    const pictos = document.getElementById("participantPictos");
+
+    if(week) week.style.display = "none";
+    if(pictos){ pictos.style.display = "none"; pictos.innerHTML = ""; }
+
+    if(day){
+      day.style.display = "block";
+      day.innerHTML = "";
+    }
+  }
+
+  if(id==="coachView"){
+    const day = document.getElementById("coachDay");
+    const week = document.getElementById("coachWeek");
+
+    if(week) week.style.display = "none";
+
+    if(day){
+      day.style.display = "block";
+      day.innerHTML = "";
+    }
+  }
+
+  // Mobil: init swipe-vyer om relevant
+  if(id==="participantView") initMobileParticipant();
+  if(id==="coachView") initMobileCoach();
+
+  // Mobil: helskärm endast i coach/deltagare
+    // Mobil: helskärm endast i schema när val är gjort
+  const hasParticipant = !!(document.getElementById('nameSelect')?.value);
+  const hasCoach = !!(document.getElementById('coachSelect')?.value);
+  const wantFull = isMobile() && ((id==='participantView' && hasParticipant) || (id==='coachView' && hasCoach));
+  // Vi använder endast mobile-day-mode för mobilens dagschema (undviker dubbel-layout)
+  document.body.classList.remove('mobile-fullscreen');
+  document.body.classList.toggle('mobile-day-mode', wantFull);
+  // Säkerställ korrekt läge även om val ändras
+  updateMobileFullscreenForCurrentView && updateMobileFullscreenForCurrentView();
 }
 
+function currentViewId(){
+  // Vi använder .active (inte style.display) eftersom vyerna styrs via klass.
+  const active = document.querySelector(".view.active");
+  return active?.id || "nowView";
+}
+
+function updateMobileFullscreenForCurrentView(){
+  if(typeof isMobile!=="function") return;
+  const id=currentViewId();
+  const hasParticipant = !!(document.getElementById('nameSelect')?.value);
+  const hasCoach = !!(document.getElementById('coachSelect')?.value);
+  const wantFull = isMobile() && ((id==='participantView' && hasParticipant) || (id==='coachView' && hasCoach));
+  document.body.classList.remove('mobile-fullscreen');
+  document.body.classList.toggle('mobile-day-mode', wantFull);
+}
+
+/* ===== v34: lämna dagläge korrekt (rensa val så man kan byta schema) ===== */
+function exitDayMode(){
+  // Rensa val i mobil så nästa gång kan man välja annat schema
+  const coachSel = document.getElementById("coachSelect");
+  const partSel  = document.getElementById("nameSelect");
+  if(coachSel) coachSel.value = "";
+  if(partSel) partSel.value = "";
+
+  // Rensa mobil state-variabler om de finns
+  try{ if(typeof mCName !== "undefined") mCName = ""; }catch(_e){}
+  try{ if(typeof mPName !== "undefined") mPName = ""; }catch(_e){}
+
+  document.body.classList.remove("mobile-fullscreen","mobile-day-mode");
+
+  // Gå till startsidan i mobil
+  if(typeof showView === "function") showView("nowView");
+}
+
+
+
+// Mobil: håll helskärmsläget korrekt vid rotation/resize
+window.addEventListener("resize", ()=>{ if(typeof updateMobileFullscreenForCurrentView === "function") updateMobileFullscreenForCurrentView(); });
+window.addEventListener("orientationchange", ()=>{ if(typeof updateMobileFullscreenForCurrentView === "function") updateMobileFullscreenForCurrentView(); });
+// Mobil: tillbaka från helskärm-dagschema
+document.getElementById("btnBackFromParticipant")?.addEventListener("click", ()=>{ exitDayMode(); showView("nowView"); });
+document.getElementById("btnBackFromCoach")?.addEventListener("click", ()=>{ exitDayMode(); showView("nowView"); });
+
+
+
+
+
+// Mobil: inline-tillbaka i dagraden
+document.getElementById("btnBackInlineP")?.addEventListener("click", ()=>{ exitDayMode(); showView("nowView"); });
+document.getElementById("btnBackInlineC")?.addEventListener("click", ()=>{ exitDayMode(); showView("nowView"); });
 document.getElementById("tabParticipant").onclick=()=>{ showView("participantView"); };
 document.getElementById("tabCoach").onclick=()=>{ showView("coachView"); };
 document.getElementById("tabNow").onclick=()=>{ showView("nowView"); renderNow(); };
@@ -772,7 +2902,7 @@ function renderCardsGeneric(name,isCoach,targetEl){
     return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) || (r[field]||"").trim().toLowerCase()==="alla";
   }).filter(r=>dayKey(r.Datum)===today).sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
 
-  let html=`<div class='cards'>`;
+  let html=``;
   if(!rows.length) html+="<div class='card' style='--band:#cfd8e3'><div class='row'>Inga aktiviteter idag.</div></div>";
   rows.forEach(r=>{
     html+=`<div class="card" style="--band:${colorFor(r)}">
@@ -781,40 +2911,38 @@ function renderCardsGeneric(name,isCoach,targetEl){
       <div class="row">${isCoach?"👥 Deltagare: "+(r.Deltagare||"-"):"🧑‍🏫 Coach: "+(r.Coach||"-")}</div>
     </div>`;
   });
-  html+="</div>";
+  
   targetEl.innerHTML=html;
 }
 
 /* =========================
    VECKA (BLOCK, LIGGANDE)
 ========================= */
-function makeSlots(){const a=[];for(let h=8;h<=16;h++){a.push(`${String(h).padStart(2,"0")}:00`,`${String(h).padStart(2,"0")}:30`);}a.push("16:30");return a;}
-// ★ TIDSTOLKNING (för udda tider som 11:15) – blockvyn ska aldrig tappa aktiviteter
-function timeToMinutes(t){
-  const [h,m] = (t||"00:00").split(":").map(Number);
-  return h*60 + m;
+function makeSlots(){
+  // Visuella tidsrader (30 min). Blockplacering beräknas i minuter och kan börja/sluta när som helst.
+  const start=8*60, end=15*60+30, step=30;
+  const a=[];
+  for(let m=start; m<=end; m+=step){
+    const h=Math.floor(m/60), mi=m%60;
+    a.push(String(h).padStart(2,"0")+":"+String(mi).padStart(2,"0"));
+  }
+  return a;
 }
-
-// Snappar NEDÅT till närmaste slot (t.ex. 11:15 → 11:30? Nej, nedåt betyder <= tid.
-// Eftersom dina slots är :00 och :30 innebär 11:15 → 11:00 och 11:45 → 11:30.
-// (Exakt tid visas alltid i texten.)
-function snapUpToSlotIndex(time, slots){
-  const mins = timeToMinutes(time);
-  let bestIdx = slots.length - 1;
-  let bestVal = Infinity;
-
-  slots.forEach((s, i) => {
-    const v = timeToMinutes(s);
-    if (v >= mins && v < bestVal) {
-      bestVal = v;
-      bestIdx = i;
-    }
-  });
-
-  // om tiden är senare än sista slot: lägg på sista slot
-  return bestIdx;
+function timeToMin(t){
+  const m=String(t||"").match(/^\s*(\d{1,2}):(\d{2})\s*$/);
+  if(!m) return null;
+  const h=+m[1], mi=+m[2];
+  if(h<0||h>23||mi<0||mi>59) return null;
+  return h*60+mi;
 }
-
+function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+function slotIndexForMin(min, slotMins){
+  if(min<=slotMins[0]) return 0;
+  for(let i=0;i<slotMins.length-1;i++){
+    if(min>=slotMins[i] && min<slotMins[i+1]) return i;
+  }
+  return slotMins.length-1;
+}
 
 function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
   const slots=makeSlots();
@@ -834,16 +2962,17 @@ function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
     const d=new Date(r.Datum);
     let wd=d.getDay(); if(wd===0||wd===6) return;
     const col=(wd-1)+1;
-    let sIdx=slots.indexOf(r.Start);
-let eIdx=slots.indexOf(r.Slut);
-
-// Om tiden inte matchar exakt (t.ex. 11:15) – snap till närmaste slot UPPÅT
-if(sIdx<0) sIdx=snapUpToSlotIndex(r.Start, slots);
-if(eIdx<0) eIdx=snapUpToSlotIndex(r.Slut, slots);
-
-// Säkerställ minst ett block så inget försvinner
-if(eIdx<=sIdx) eIdx=sIdx+1;
-    const firstCellIndex=sIdx*(1+days.length)+col, firstCell=cells[firstCellIndex];
+    const slotMins = slots.map(timeToMin);
+    const sMin = timeToMin(r.Start), eMin = timeToMin(r.Slut);
+    if(sMin===null || eMin===null) return;
+    const gridStart = slotMins[0];
+    const gridEnd = slotMins[slotMins.length-1] + 30; // sista radens slut
+    const sCl = clamp(sMin, gridStart, gridEnd);
+    const eCl = clamp(eMin, gridStart, gridEnd);
+    if(eCl<=sCl) return;
+    const baseIdx = slotIndexForMin(sCl, slotMins);
+    const firstCellIndex = baseIdx*(1+days.length) + col;
+    const firstCell = cells[firstCellIndex];
     const block=document.createElement("div");
     block.className="block"; block.style.background=colorFor(r);
 
@@ -851,28 +2980,39 @@ if(eIdx<=sIdx) eIdx=sIdx+1;
     const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
     const duration=(eh*60+em)-(sh*60+sm);
 
-    if(duration<=30) block.classList.add("small");
+// Coachens veckoschema (INTE jämförelse):
+// - 30 min: visa starttid + (1 deltagare => deltagare, annars aktivitet). Ingen sluttid.
+// - >30 min: visa start–slut + aktivitet + deltagare (så många som får plats).
+const deltagareList = splitNames(r.Deltagare||"");
+const deltagareCount = deltagareList.length;
 
-    if(noEmoji){
-      if(duration<=30){
-        block.innerHTML=`<div class="title">${r.Start||""}–${r.Slut||""} ${r.Aktivitet||""}</div>
-          <div class="mini">${isCoach ? "Deltagare: "+(r.Deltagare||"-") : "Coach: "+(r.Coach||"-")}</div>`;
-      }else{
-        block.innerHTML=`<div class="title">${r.Start||""}–${r.Slut||""}</div>
-          ${r.Aktivitet||""}<br>
-          ${isCoach ? "Deltagare: "+(r.Deltagare||"-") : "Coach: "+(r.Coach||"-")}`;
-      }
-    }else{
-      if(duration>30){
-        block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
-          ${emojiFor(r)} ${r.Aktivitet||""}<br>
-          ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
-      }else{
-        block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""} ${emojiFor(r)} ${r.Aktivitet||""}</div>
-          <div class="mini">${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}</div>`;
-      }
-    }
-requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;block.style.height=(eIdx-sIdx)*cellH+"px";});
+if(duration>30){
+  if(isCoach){
+    const deltagarRad = (deltagareCount>0) ? deltagareList.join(", ") : "-";
+    block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
+      ${emojiFor(r)} <span class="act">${r.Aktivitet||""}</span><br>
+      👥 ${deltagarRad}`;
+  }else{
+    // deltagarvy oförändrad
+    block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
+      ${emojiFor(r)} <span class="act">${r.Aktivitet||""}</span><br>
+      🧑‍🏫 ${(r.Coach||"-")}`;
+  }
+}else{
+  if(isCoach){
+    const label = (deltagareCount===1) ? deltagareList[0] : (r.Aktivitet||"");
+    block.classList.add("coach-half");
+    const act=(r.Aktivitet||"");
+    const one=(deltagareCount===1)?(" • "+deltagareList[0]):"";
+    block.innerHTML=`<span class="time">⏱️ ${r.Start||""}</span> <span class="act">${act}</span>${one}`;
+  }else{
+    // deltagarvy oförändrad
+    block.classList.add("part-half");
+      block.innerHTML=`🕒 ${r.Start||""} ${emojiFor(r)} <span class="act">${(r.Aktivitet||"")}</span> – 🧑‍🏫 ${(r.Coach||"-")}`;
+  }
+}
+
+    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;const topOff=((sCl-slotMins[baseIdx])/30)*cellH;const h=((eCl-sCl)/30)*cellH;block.style.top=(2+topOff)+"px";block.style.height=Math.max(10,h-4)+"px";block.style.zIndex=10;});
     firstCell.appendChild(block);
   });
 }
@@ -898,7 +3038,7 @@ document.getElementById("btnShowCompare").onclick = () => {
   ].map(cb => ({ name: cb.value, isCoach: cb.classList.contains("chk-coach") }));
 
   if (!selected.length) { alert("Välj minst ett namn."); return; }
-  if (selected.length > 6) { alert("Välj högst 6 personer för jämförelse."); return; }
+  if (selected.length > 4) { alert("Välj högst 4 personer för jämförelse."); return; }
 
   const out=document.getElementById("compareOutput");
   out.innerHTML = ""; // rensa
@@ -911,7 +3051,7 @@ document.getElementById("btnShowCompare").onclick = () => {
     const header = document.createElement("h3");
     header.textContent = sel.name;
     item.appendChild(header);
-    item.appendChild(renderSingleWeek(sel.name, sel.isCoach, true, true));
+    item.appendChild(renderSingleWeek(sel.name, sel.isCoach, true));
     wrap.appendChild(item);
   });
 
@@ -920,7 +3060,7 @@ document.getElementById("btnShowCompare").onclick = () => {
   document.getElementById("comparePanel").style.display="none";
 };
 
-function renderSingleWeek(name,isCoach,compact=false,noEmoji=false){
+function renderSingleWeek(name,isCoach,compact=false){
   const slots=makeSlots(), days=["måndag","tisdag","onsdag","torsdag","fredag"];
   const field=isCoach?"Coach":"Deltagare";
   const rows=DATA.filter(r=>{
@@ -943,16 +3083,16 @@ function renderSingleWeek(name,isCoach,compact=false,noEmoji=false){
   rows.forEach(r=>{
     const wd=new Date(r.Datum).getDay(); if(wd===0||wd===6) return;
     const col=(wd-1)+1;
-let sIdx=slots.indexOf(r.Start);
-let eIdx=slots.indexOf(r.Slut);
-
-// Om tiden inte matchar exakt (t.ex. 11:15) – snap till närmaste slot UPPÅT
-if(sIdx<0) sIdx=snapUpToSlotIndex(r.Start, slots);
-if(eIdx<0) eIdx=snapUpToSlotIndex(r.Slut, slots);
-
-// Säkerställ minst ett block så inget försvinner
-if(eIdx<=sIdx) eIdx=sIdx+1;
-    const firstCellIndex=sIdx*(1+days.length)+col, firstCell=cells[firstCellIndex];
+    const slotMins = slots.map(timeToMin);
+    const sMin = timeToMin(r.Start), eMin = timeToMin(r.Slut);
+    if(sMin===null || eMin===null) return;
+    const gridStart = slotMins[0];
+    const gridEnd = slotMins[slotMins.length-1] + 30;
+    const sCl = clamp(sMin, gridStart, gridEnd);
+    const eCl = clamp(eMin, gridStart, gridEnd);
+    if(eCl<=sCl) return;
+    const baseIdx = slotIndexForMin(sCl, slotMins);
+    const firstCellIndex=baseIdx*(1+days.length)+col, firstCell=cells[firstCellIndex];
     const block=document.createElement("div");
     block.className="block"; block.style.background=colorFor(r);
     block.style.fontSize = compact ? ".78rem" : ".82rem";
@@ -962,31 +3102,48 @@ if(eIdx<=sIdx) eIdx=sIdx+1;
     const [eh,em]=(r.Slut||"00:00").split(":").map(Number);
     const duration=(eh*60+em)-(sh*60+sm);
 
-    if(duration<=30) block.classList.add("small");
+    if(compact){
+      const participants = splitNames(r.Deltagare||"");
+      const coaches = splitNames(r.Coach||"");
+      const pCnt = participants.length;
+      const cCnt = coaches.length;
 
-    if(duration>30){
-      if(noEmoji){
-        block.innerHTML=`<div class="title">${r.Start||""}–${r.Slut||""}</div>
-          ${r.Aktivitet||""}<br>
-          ${isCoach ? "Deltagare: "+(r.Deltagare||"-") : "Coach: "+(r.Coach||"-")}`;
+      // JÄMFÖRELSEVY – EN RAD, INGEN EXTRA INFO
+      // Deltagarschema:
+      //  - 1 deltagare + 1 coach  => visa ENBART coach
+      //  - fler deltagare         => visa ENBART aktivitet
+      // Coachschema:
+      //  - 1 deltagare            => visa ENBART deltagare
+      //  - fler deltagare         => visa ENBART aktivitet
+      if(!isCoach){
+        if(pCnt===1 && cCnt===1){
+          block.innerHTML = `<div class="title" style="font-size:1.05em;font-weight:800;text-align:center">${coaches[0]}</div>`;
+        }else if(pCnt>1){
+          block.innerHTML = `<div class="title" style="font-size:1.05em;font-weight:800;text-align:center">${r.Aktivitet||""}</div>`;
+        }else{
+          // fallback
+          block.innerHTML = `<div class="title" style="font-size:1.05em;font-weight:800;text-align:center">${r.Aktivitet||""}</div>`;
+        }
       }else{
-        block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
-          ${emojiFor(r)} ${r.Aktivitet||""}<br>
-          ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
+        if(pCnt===1){
+          block.innerHTML = `<div class="title" style="font-size:1.05em;font-weight:800;text-align:center">${participants[0]}</div>`;
+        }else if(pCnt>1){
+          block.innerHTML = `<div class="title" style="font-size:1.05em;font-weight:800;text-align:center">${r.Aktivitet||""}</div>`;
+        }else{
+          block.innerHTML = `<div class="title" style="font-size:1.05em;font-weight:800;text-align:center">${r.Aktivitet||""}</div>`;
+        }
       }
     }else{
-      if(noEmoji){
-        block.innerHTML=`<div class="title">${r.Start||""}–${r.Slut||""}</div>
-          ${r.Aktivitet||""}<br>
-          ${isCoach ? "Deltagare: "+(r.Deltagare||"-") : "Coach: "+(r.Coach||"-")}`;
-      }else{
+      if(duration>30){
         block.innerHTML=`<div class="title">🕒 ${r.Start||""}–${r.Slut||""}</div>
-          ${emojiFor(r)} ${r.Aktivitet||""}<br>
-          ${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}`;
+          ${emojiFor(r)} <span class="act">${r.Aktivitet||""}</span><br>
+          ${isCoach?"👥 "+(r.Deltagare||"-"):"🧑‍🏫 "+(r.Coach||"-")}`;
+      }else{
+        block.innerHTML=`${emojiFor(r)} <span class="act">${r.Aktivitet||""}</span> – ${isCoach ? "👥 "+(r.Deltagare||"-") : "🧑‍🏫 "+(r.Coach||"-")}`;
       }
     }
 
-    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||26;block.style.height=(eIdx-sIdx)*cellH+"px";});
+    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||26;const topOff=((sCl-slotMins[baseIdx])/30)*cellH;const h=((eCl-sCl)/30)*cellH;block.style.top=(2+topOff)+"px";block.style.height=Math.max(10,h-4)+"px";block.style.zIndex=10;});
     firstCell.appendChild(block);
   });
   return container;
@@ -1076,11 +3233,15 @@ function renderSick(){
 document.getElementById("btnParticipantToday").onclick=()=>{
   const name=document.getElementById("nameSelect").value;
   if(!name){ alert("Välj en deltagare."); return; }
-  // visa dag, dölj vecka
+
+  // Visa ENBART bildstöd för IDAG (ingen kort-vy)
+  document.getElementById("participantDay").style.display="none";
   document.getElementById("participantWeek").style.display="none";
-  document.getElementById("participantDay").style.display="block";
-  renderCardsGeneric(name,false,document.getElementById("participantDay"));
+  document.getElementById("participantPictos").style.display="block";
+
+  renderParticipantPictosToday(name);
 };
+
 
 document.getElementById("btnParticipantWeek").onclick=()=>{
   const name=document.getElementById("nameSelect").value;
@@ -1088,6 +3249,7 @@ document.getElementById("btnParticipantWeek").onclick=()=>{
   // visa vecka, dölj dag
   document.getElementById("participantDay").style.display="none";
   document.getElementById("participantWeek").style.display="block";
+  document.getElementById("participantPictos").style.display="none";
   renderBlocksGeneric(name,false,document.getElementById("pBlockHeader"),document.getElementById("pBlockGrid"));
 };
 
@@ -1140,46 +3302,809 @@ window.addEventListener("load", () => {
 /* =====================================================
    FÖRBERED UTSKRIFTSRUBRIK
    ===================================================== */
-function preparePrintHeader(titleText, personName) {
-  // Ta bort eventuell gammal rubrik
-  document.querySelector(".print-header")?.remove();
-
-  // Skapa ny rubrik
-  const hdr = document.createElement("div");
-  hdr.className = "print-header";
-  hdr.innerHTML = `
-    <h2>Schema – ${personName || titleText || "Okänd"}</h2>
-    <div class="date">
-      Utskriftsdatum: ${new Date().toLocaleDateString("sv-SE", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      })}
-    </div>`;
-  document.body.prepend(hdr);
-}
-
-
 /* =====================================================
    UTFÖR UTSKRIFT
    ===================================================== */
-function printSchema(title, personName) {
-  preparePrintHeader(title, personName);
-
+function getActivePrintName(){
   const activeView = document.querySelector(".view.active");
-  if (activeView) activeView.classList.add("print-visible");
+  if(activeView?.id === "participantView"){
+    return document.getElementById("nameSelect")?.value || "";
+  }
+  if(activeView?.id === "coachView"){
+    return document.getElementById("coachSelect")?.value || "";
+  }
+  // För "Pågår nu" och "Jämförelse" finns inget enskilt namn
+  return "";
+}
 
-  // Vänta kort så layouten hinner uppdateras innan utskrift
-  setTimeout(() => window.print(), 300);
+function updatePrintHeaderSingleNow(){
+  const el = document.getElementById("print-header-single");
+  if(!el) return;
+  const d = new Date();
+  const yy = String(d.getFullYear()).slice(2);
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  const dateStr = yy+mm+dd;
 
-  // Rensa efteråt
-  setTimeout(() => {
-    document.querySelectorAll(".print-visible").forEach(el => el.classList.remove("print-visible"));
-    document.querySelector(".print-header")?.remove();
-  }, 1500);
+  const name = getActivePrintName();
+  el.textContent = name ? `Schema ${name} ${dateStr}` : `Schema ${dateStr}`;
+}
+
+/* =====================================================
+   UTFÖR UTSKRIFT (ALLTID FÄRSKT NAMN)
+   ===================================================== */
+function printSchema(title, personName) {
+  // Alltid färskt namn i rubriken
+  updatePrintHeaderSingleNow();
+
+  // ===== PRINT-LÄGE: lås orientering rätt innan dialogen öppnas =====
+  (function(){
+    const pv = document.getElementById("participantView");
+    const pictos = document.getElementById("participantPictos");
+    const isPictos = pv && pv.classList.contains("active") && pictos && pictos.style.display !== "none" && pictos.innerHTML.trim() !== "";
+    // Sätt klass tidigt så print-CSS kan slå igenom
+    document.body.classList.toggle("pictos-print", !!isPictos);
+
+    // Lås @page via dynamicPageStyle direkt (inte bara via beforeprint)
+    const styleEl = document.getElementById("dynamicPageStyle");
+    if(styleEl){
+      styleEl.textContent = isPictos
+        ? "@media print { @page { size: A4 portrait; margin: 10mm; } }"
+        : "@media print { @page { size: A4 landscape; margin: 10mm; } }";
+    }
+  })();
+
+  // Säkerställ att bara EN yta i respektive vy är synlig vid utskrift
+  const activeView = document.querySelector(".view.active");
+  const restore = [];
+
+  function hideIfShown(el){
+    if(!el) return;
+    const prev = el.style.display;
+    restore.push(()=>{ el.style.display = prev; });
+    el.style.display = "none";
+  }
+
+  if(activeView?.id === "participantView"){
+    const day = document.getElementById("participantDay");
+    const week = document.getElementById("participantWeek");
+    const pictos = document.getElementById("participantPictos");
+
+    // Avgör vad som är "valt" just nu
+    const dayOn   = day && day.style.display !== "none";
+    const weekOn  = week && week.style.display !== "none";
+    const picOn   = pictos && pictos.style.display !== "none";
+
+    if(dayOn){ hideIfShown(week); hideIfShown(pictos); }
+    else if(weekOn){ hideIfShown(day); hideIfShown(pictos); }
+    else if(picOn){ hideIfShown(day); hideIfShown(week); }
+  }
+
+  if(activeView?.id === "coachView"){
+    const day = document.getElementById("coachDay");
+    const week = document.getElementById("coachWeek");
+
+    const dayOn  = day && day.style.display !== "none";
+    const weekOn = week && week.style.display !== "none";
+
+    if(dayOn){ hideIfShown(week); }
+    else if(weekOn){ hideIfShown(day); }
+  }
+
+  // Kör utskrift efter att layouten hunnit sätta sig
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.print();
+      // Återställ visning efter print-dialogen öppnats
+      setTimeout(()=>restore.forEach(fn=>fn()), 500);
+    });
+  });
+}
+// ===== Single print header (print-time accurate) =====
+(function(){
+  function yymmdd(){
+    const d = new Date();
+    const yy = String(d.getFullYear()).slice(2);
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return yy+mm+dd;
+  }
+  function currentName(){
+    const activeView = document.querySelector(".view.active");
+    // Prioritera aktiv vy, så coach-utskrift inte råkar få deltagarnamn
+    if(activeView?.id === "coachView"){
+      const sel = document.getElementById("coachSelect");
+      const txt = (sel && sel.value || "").trim();
+      if(txt && !txt.startsWith("--")) return txt;
+    }
+    if(activeView?.id === "participantView"){
+      const sel = document.getElementById("nameSelect");
+      const txt = (sel && sel.value || "").trim();
+      if(txt && !txt.startsWith("--")) return txt;
+    }
+
+    // Fallback: om något är valt, använd det
+    const c = (document.getElementById("coachSelect")?.value || "").trim();
+    if(c && !c.startsWith("--")) return c;
+    const p = (document.getElementById("nameSelect")?.value || "").trim();
+    if(p && !p.startsWith("--")) return p;
+
+    return "";
+  }
+  function setHeader(){
+    const el = document.getElementById("print-header-single");
+    if(!el) return;
+    const name = currentName();
+    const dateStr = yymmdd();
+    el.textContent = name ? `Schema ${name} ${dateStr}` : `Schema ${dateStr}`;
+  }
+
+  window.addEventListener("beforeprint", setHeader);
+  // also update when user changes selection
+  for(const id of ["nameSelect","coachSelect"]){
+    const sel = document.getElementById(id);
+    if(sel) sel.addEventListener("change", setHeader);
+  }
+  // initial
+  setHeader();
+})();
+
+
+// ===== Print logo: use already-loaded home logo, fallback to embedded SVG =====
+(function(){
+  const fallback = "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22360%22%20height%3D%22120%22%20viewBox%3D%220%200%20360%20120%22%3E%0A%20%20%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22360%22%20height%3D%22120%22%20rx%3D%2218%22%20fill%3D%22%23111%22/%3E%0A%20%20%3Ctext%20x%3D%2224%22%20y%3D%2272%22%20font-family%3D%22Arial%2C%20Helvetica%2C%20sans-serif%22%20font-size%3D%2256%22%20font-weight%3D%22800%22%20fill%3D%22%23fff%22%3EGrunden%3C/text%3E%0A%20%20%3Ctext%20x%3D%22260%22%20y%3D%2272%22%20font-family%3D%22Arial%2C%20Helvetica%2C%20sans-serif%22%20font-size%3D%2244%22%20font-weight%3D%22800%22%20fill%3D%22%23fff%22%3EDV%3C/text%3E%0A%3C/svg%3E";
+  function setLogo(){
+    const img = document.getElementById("printLogoImg");
+    if(!img) return;
+    const home = document.getElementById("homeLogo");
+    const src = home ? (home.currentSrc || home.src || "") : "";
+    img.onerror = () => { img.onerror = null; img.src = fallback; };
+    img.src = src || fallback;
+  }
+  window.addEventListener("beforeprint", setLogo);
+  document.addEventListener("DOMContentLoaded", setLogo);
+})();
+
+/* =========================
+   BILDSTÖD (Deltagare) – VECKA (mån–fre)
+   - 1 dag per sida vid utskrift (stående A4)
+   - Ingen datumrad (bara veckodag)
+   - Max 8 aktiviteter per dag
+   - Tom dag = ledig (ingen sida)
+========================= */
+
+function mondayOf(dateObj){
+  const d = new Date(dateObj);
+  const day = d.getDay(); // 0=sön
+  const diff = (day === 0 ? -6 : 1 - day);
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function isoDate(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const da=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+function weekDatesMonFri(monDate){
+  const dates=[];
+  for(let i=0;i<5;i++){
+    const dd=new Date(monDate);
+    dd.setDate(monDate.getDate()+i);
+    dates.push(isoDate(dd));
+  }
+  return dates;
+}
+
+function buildPictosWeekData(name){
+  // Samma logik som tidigare: välj första vecka (mån–fre) med minst en aktivitet inom 0–6 veckor framåt
+  const allRows = DATA
+    .filter(r=>{
+      const list = splitNames(r["Deltagare"]||"");
+      return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) ||
+             (r["Deltagare"]||"").trim().toLowerCase()==="alla";
+    })
+    .filter(r=> sanitizeName(r.Aktivitet||""));
+
+  const startMon = mondayOf(new Date());
+  let chosenDates = null;
+
+  for(let w=0; w<7; w++){
+    const mon = new Date(startMon);
+    mon.setDate(startMon.getDate() + w*7);
+    const dates = weekDatesMonFri(mon);
+    const hasAny = allRows.some(r => dates.includes(dayKey(r.Datum)));
+    if(hasAny){ chosenDates = dates; break; }
+  }
+
+  if(!chosenDates) return [];
+
+  const rows = allRows
+    .filter(r=> chosenDates.includes(dayKey(r.Datum)))
+    .sort((a,b)=> (a.Datum||"").localeCompare(b.Datum||"") || (a.Start||"").localeCompare(b.Start||""));
+
+  const byDate = {};
+  rows.forEach(r=>{
+    const k = dayKey(r.Datum);
+    (byDate[k] ||= []).push(r);
+  });
+
+  const daysData = [];
+  chosenDates.forEach(dateKeyStr=>{
+    const allDayRows = (byDate[dateKeyStr]||[]);
+    if(!allDayRows.length) return; // Tom dag = inget blad
+
+    const d = new Date(dateKeyStr);
+    const title = `${name} – ${weekdayName(d.getDay())}`;
+
+    const items = allDayRows.slice(0,8).map(r=>({
+      time: `🕒 ${r.Start||""}`,
+      emoji: emojiFor(r) || "✨",
+      label: r.Aktivitet||"",
+      coach: (splitNames(r.Coach||"").join(", ") || (r.Coach||"-") || "-")
+    }));
+
+    daysData.push({ title, items });
+  });
+
+  return daysData;
+}
+
+function renderParticipantPictosWeek(name){
+  const out = document.getElementById("participantPictos");
+  if(!out) return;
+
+  // Alla rader för deltagaren
+  const allRows = DATA
+    .filter(r=>{
+      const list = splitNames(r["Deltagare"]||"");
+      return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) ||
+             (r["Deltagare"]||"").trim().toLowerCase()==="alla";
+    })
+    .filter(r=> sanitizeName(r.Aktivitet||""));
+
+  // Välj första vecka (mån–fre) med minst en aktivitet: denna vecka + upp till 6 veckor framåt
+  const startMon = mondayOf(new Date());
+  let chosenDates = null;
+
+  for(let w=0; w<7; w++){
+    const mon = new Date(startMon);
+    mon.setDate(startMon.getDate() + w*7);
+    const dates = weekDatesMonFri(mon);
+    const hasAny = allRows.some(r => dates.includes(dayKey(r.Datum)));
+    if(hasAny){ chosenDates = dates; break; }
+  }
+
+  if(!chosenDates){
+    out.innerHTML = `<div class="cards"><div class="card" style="--band:#cfd8e3"><div class="row">Inget schema mån–fre de närmaste veckorna.</div></div></div>`;
+    return;
+  }
+
+  // Rader inom vald vecka
+  const rows = allRows
+    .filter(r=> chosenDates.includes(dayKey(r.Datum)))
+    .sort((a,b)=> (a.Datum||"").localeCompare(b.Datum||"") || (a.Start||"").localeCompare(b.Start||""));
+
+  // Grupp per datum
+  const byDate = {};
+  rows.forEach(r=>{
+    const k = dayKey(r.Datum);
+    (byDate[k] ||= []).push(r);
+  });
+
+  const wrap = document.createElement("div");
+  wrap.className = "picto-wrap";
+
+  // 1 dag = 1 sida. Tom dag = inget blad. Max 8 aktiviteter per dag.
+  const MAX_PER_DAY = 8;
+
+  chosenDates.forEach(dateKeyStr=>{
+    const allDayRows = (byDate[dateKeyStr]||[])
+      .filter(r=> sanitizeName(r.Aktivitet||""))
+      .sort((a,b)=> (a.Start||"").localeCompare(b.Start||""));
+
+    if(!allDayRows.length) return; // tom dag = ledig, inget blad
+
+    const d = new Date(dateKeyStr);
+    const dayRows = allDayRows.slice(0, MAX_PER_DAY);
+
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "picto-day";
+
+    const title = document.createElement("div");
+    title.className = "picto-day-title";
+    title.textContent = `${name} – ${weekdayName(d.getDay())}`;
+    dayDiv.appendChild(title);
+
+    dayRows.forEach(r=>{
+      const item = document.createElement("div");
+      item.className = "picto-item";
+
+      const time = document.createElement("div");
+      time.className = "picto-time";
+      time.innerHTML = `<div class="clock">🕒</div><div class="t">${r.Start||""}</div>`;
+
+      const act = document.createElement("div");
+      act.className = "picto-act";
+      const e = emojiFor(r) || "✨";
+      act.innerHTML = `<div class="e">${e}</div><div class="a">${r.Aktivitet||"Aktivitet"}</div>`;
+
+      const coach = document.createElement("div");
+      coach.className = "picto-coach";
+      const coachNames = splitNames(r.Coach||"").join(", ") || (r.Coach||"-") || "-";
+      coach.innerHTML = `<div class="lbl">Coach</div><div class="names">${coachNames}</div>`;
+
+      item.appendChild(time);
+      item.appendChild(act);
+      item.appendChild(coach);
+      dayDiv.appendChild(item);
+    });
+
+    wrap.appendChild(dayDiv);
+  });
+
+  out.innerHTML = "";
+  out.appendChild(wrap);
+
+  if(!wrap.children.length){
+    out.innerHTML = `<div class="cards"><div class="card" style="--band:#cfd8e3"><div class="row">Inget schema mån–fre i vald vecka.</div></div></div>`;
+  }
 }
 
 
+function renderParticipantPictosToday(name){
+  const outEl = document.getElementById("participantPictos");
+  if(!outEl) return;
+
+  const today = todayKey();
+  const dayRows = DATA
+    .filter(r=>{
+      const list = splitNames(r["Deltagare"]||"");
+      return (list.map(x=>x.toLowerCase()).includes(name.toLowerCase())) ||
+             (r["Deltagare"]||"").trim().toLowerCase()==="alla";
+    })
+    .filter(r=> dayKey(r.Datum) === today)
+    .filter(r=> sanitizeName(r.Aktivitet||""))
+    .sort((a,b)=>(a.Start||"").localeCompare(b.Start||""));
+
+  // Tom dag = ledig, inget bildstöd
+  if(!dayRows.length){
+    outEl.style.display = "none";
+    outEl.innerHTML = "";
+    return;
+  }
+
+  const d = new Date(today);
+  const wrap = document.createElement("div");
+  wrap.className = "picto-wrap";
+
+  const dayDiv = document.createElement("div");
+  dayDiv.className = "picto-day";
+
+  const title = document.createElement("div");
+  title.className = "picto-day-title";
+  title.textContent = `${name} – ${weekdayName(d.getDay())}`;
+  dayDiv.appendChild(title);
+
+  // max 8 per dag (som du vill)
+  dayRows.slice(0, 8).forEach(r=>{
+    const item = document.createElement("div");
+    item.className = "picto-item";
+
+    const time = document.createElement("div");
+    time.className = "picto-time";
+    time.innerHTML = `<div class="clock">🕒</div><div class="t">${r.Start||""}</div>`;
+
+    const act = document.createElement("div");
+    act.className = "picto-act";
+    const e = emojiFor(r) || "✨";
+    act.innerHTML = `<div class="e">${e}</div><div class="a">${r.Aktivitet||"Aktivitet"}</div>`;
+
+    const coach = document.createElement("div");
+    coach.className = "picto-coach";
+    const coachNames = splitNames(r.Coach||"").join(", ") || (r.Coach||"-") || "-";
+    coach.innerHTML = `<div class="lbl">Coach</div><div class="names">${coachNames}</div>`;
+
+    item.appendChild(time);
+    item.appendChild(act);
+    item.appendChild(coach);
+    dayDiv.appendChild(item);
+  });
+
+  wrap.appendChild(dayDiv);
+  outEl.innerHTML = "";
+  outEl.appendChild(wrap);
+  outEl.style.display = "block";
+}
+
+// Knapp: Bildstöd (vecka)
+const btnP = document.getElementById("btnParticipantPictos");
+if(btnP){
+  btnP.addEventListener("click", ()=>{
+    const name = document.getElementById("nameSelect").value;
+    if(!name){ alert("Välj en deltagare."); return; }
+
+    // Bygg bildstödsdata (1 dag = 1 blad, max 8, tom dag = inget blad)
+    const daysData = buildPictosWeekData(name);
+    if(!daysData.length){
+      alert("Inget schema mån–fre de närmaste veckorna.");
+      return;
+    }
+
+    // Gör datan tillgänglig för nya fönstret direkt (bäst för Firefox/file://)
+    window.__PICTO_DATA__ = daysData;
+
+    // Spara även som fallback
+    try{ localStorage.setItem("PICTO_DATA_V1", JSON.stringify(daysData)); }catch(e){}
+    try{ localStorage.setItem("PICTO_BACK_URL", location.href); }catch(e){}
+
+    // Öppna separat print-fil (stående A4) – löser Firefox-låsning i liggande
+    location.href = "./bildstod_print_v11.html";
+  });
+}
+
+// När man går till veckoschemat: göm bildstödet så det inte råkar följa med i utskrift
+const btnWeek = document.getElementById("btnParticipantWeek");
+if(btnWeek){
+  const old = btnWeek.onclick;
+  btnWeek.onclick = ()=>{
+    const pp = document.getElementById("participantPictos");
+    if(pp) pp.style.display="none";
+    if(typeof old === "function") return old();
+  };
+}
+
+/* Print: om Bildstöd är synligt -> stående A4 */
+window.addEventListener("beforeprint", ()=>{
+  const pv = document.getElementById("participantView");
+  const pictos = document.getElementById("participantPictos");
+  if(pv && pv.classList.contains("active") && pictos && pictos.style.display !== "none"){
+    document.body.classList.add("pictos-print");
+  }else{
+    document.body.classList.remove("pictos-print");
+  }
+});
+window.addEventListener("afterprint", ()=>{
+  document.body.classList.remove("pictos-print");
+});
+
+
+// ===== Dynamic @page size (portrait for bildstöd, landscape otherwise) =====
+(function(){
+  const styleEl = document.getElementById("dynamicPageStyle");
+  function setPage(orientation){
+    if(!styleEl) return;
+    if(orientation === "portrait"){
+      styleEl.textContent = "@media print { @page { size: A4 portrait; margin: 10mm; } }";
+    }else{
+      styleEl.textContent = "@media print { @page { size: A4 landscape; margin: 10mm; } }";
+    }
+  }
+  window.addEventListener("beforeprint", ()=>{
+    const pv = document.getElementById("participantView");
+    const pictos = document.getElementById("participantPictos");
+    const isPictos = pv && pv.classList.contains("active") && pictos && pictos.style.display !== "none";
+    setPage(isPictos ? "portrait" : "landscape");
+  });
+  // default
+  setPage("landscape");
+})();
+
+
 </script>
+<script>
+  // Minimal PWA: registrera service worker (kräver HTTPS eller localhost)
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    });
+  }
+</script>
+
+
+<script id="printfix-js">
+/* =========================
+   PRINTFIX (2026-01-05)
+   - Sätter tydligt print-läge (week/pictos)
+   - Sätter @page via dynamicPageStyle
+========================= */
+(function(){
+  const styleEl = document.getElementById("dynamicPageStyle");
+
+  function setPage(orientation){
+    if(!styleEl) return;
+    styleEl.textContent = "@media print { @page { size: A4 " + orientation + "; margin: 10mm; } }";
+  }
+
+  function computeMode(){
+    const activeView = document.querySelector(".view.active");
+    const pictos = document.getElementById("participantPictos");
+    const pictosVisible = activeView && activeView.id === "participantView" &&
+      pictos && pictos.style.display !== "none" && pictos.innerHTML.trim().length > 0;
+
+    // Bildstöd styr endast när bildstöd är synligt i deltagarvyn
+    return pictosVisible ? "pictos" : "week";
+  }
+
+  function applyMode(){
+    const mode = computeMode();
+
+    document.body.classList.remove("print-week","print-pictos","pictos-print");
+    if(mode === "pictos"){
+      document.body.classList.add("print-pictos","pictos-print");
+      setPage("portrait");
+    }else{
+      document.body.classList.add("print-week");
+      setPage("landscape");
+    }
+  }
+
+  window.addEventListener("beforeprint", applyMode);
+  window.addEventListener("afterprint", ()=>{
+    document.body.classList.remove("print-week","print-pictos","pictos-print");
+    // tillbaka till standard (landscape) så veckoschema känns "normalt"
+    setPage("landscape");
+  });
+
+  // Om användaren växlar vy precis innan print (Chrome kan vara seg)
+  document.addEventListener("click", (e)=>{
+    const t = e.target;
+    if(t && t.id && String(t.id).toLowerCase().includes("print")){
+      applyMode();
+    }
+  }, true);
+
+/* =========================
+   QR: GENERERA & SKRIV UT
+   - Vald deltagare/coach (inline)
+   - Alla deltagare/coach (overlay grid)
+========================= */
+
+function baseUrlWithoutQuery(){
+  return location.origin + location.pathname;
+}
+function urlForParticipant(name){
+  return baseUrlWithoutQuery() + "?participant=" + encodeURIComponent(name);
+}
+function urlForCoach(name){
+  return baseUrlWithoutQuery() + "?coach=" + encodeURIComponent(name);
+}
+function requireQRCode(){
+  if(typeof window.QRCode !== "function"){
+    alert("QR-biblioteket kunde inte laddas. Kontrollera att nätet fungerar och att cdnjs inte blockeras.");
+    return false;
+  }
+  return true;
+}
+function clearNode(el){ if(el) el.innerHTML=""; }
+
+function showInlineQR(kind, name){
+  if(!requireQRCode()) return;
+
+  const inline = document.getElementById(kind==="participant" ? "participantQRInline" : "coachQRInline");
+  const imgBox = document.getElementById(kind==="participant" ? "participantQRImg" : "coachQRImg");
+  const nameEl = document.getElementById(kind==="participant" ? "participantQRName" : "coachQRName");
+  const urlEl  = document.getElementById(kind==="participant" ? "participantQRUrl" : "coachQRUrl");
+
+  const url = kind==="participant" ? urlForParticipant(name) : urlForCoach(name);
+
+  nameEl.textContent = name;
+  urlEl.textContent  = url;
+
+  clearNode(imgBox);
+  new QRCode(imgBox, { text:url, width:180, height:180 });
+
+  inline.style.display = "block";
+}
+
+function openQROverlay(title, items){
+  if(!requireQRCode()) return;
+  const overlay = document.getElementById("qrOverlay");
+  const area = document.getElementById("qrPrintArea");
+  const t = document.getElementById("qrOverlayTitle");
+  if(!overlay || !area || !t) return;
+
+  t.textContent = title;
+  clearNode(area);
+
+  items.forEach(({name,url})=>{
+    const card = document.createElement("div");
+    card.className = "qr-card";
+    const nameDiv = document.createElement("div");
+    nameDiv.className = "qr-name";
+    nameDiv.textContent = name;
+
+    const qrDiv = document.createElement("div");
+    qrDiv.className = "qr-img";
+
+    const urlDiv = document.createElement("div");
+    urlDiv.className = "qr-url";
+    urlDiv.textContent = url;
+
+    card.appendChild(nameDiv);
+    card.appendChild(qrDiv);
+    card.appendChild(urlDiv);
+    area.appendChild(card);
+
+    new QRCode(qrDiv, { text:url, width:180, height:180 });
+  });
+
+  overlay.style.display = "block";
+  overlay.setAttribute("aria-hidden","false");
+}
+
+function closeQROverlay(){
+  const overlay = document.getElementById("qrOverlay");
+  if(!overlay) return;
+  overlay.style.display = "none";
+  overlay.setAttribute("aria-hidden","true");
+  document.body.classList.remove("qr-print");
+  // rensa så vi inte bygger upp DOM i onödan
+  const area = document.getElementById("qrPrintArea");
+  if(area) area.innerHTML = "";
+}
+
+function printQROverlay(){
+  document.body.classList.add("qr-print");
+  window.print();
+  // efter print: återställ
+  setTimeout(()=>document.body.classList.remove("qr-print"), 300);
+}
+
+function allParticipantNames(){
+  // hämtas från dropdown så det matchar exakt dina namn
+  const sel = document.getElementById("nameSelect");
+  if(!sel) return [];
+  return [...sel.querySelectorAll("option")]
+    .map(o=>o.value || o.textContent)
+    .map(s=>(s||"").trim())
+    .filter(s=>s && !s.startsWith("--"));
+}
+function allCoachNames(){
+  const sel = document.getElementById("coachSelect");
+  if(!sel) return [];
+  return [...sel.querySelectorAll("option")]
+    .map(o=>o.value || o.textContent)
+    .map(s=>(s||"").trim())
+    .filter(s=>s && !s.startsWith("--"));
+}
+
+/* Koppla knappar */
+document.addEventListener("DOMContentLoaded", ()=>{
+  const btnP = document.getElementById("btnParticipantQR");
+  const btnPA = document.getElementById("btnParticipantQRAll");
+  const btnC = document.getElementById("btnCoachQR");
+  const btnCA = document.getElementById("btnCoachQRAll");
+  const btnClose = document.getElementById("btnCloseQROverlay");
+  const btnPrint = document.getElementById("btnPrintQROverlay");
+
+  btnP?.addEventListener("click", ()=>{
+    const name = document.getElementById("nameSelect")?.value || "";
+    if(!name){ alert("Välj en deltagare."); return; }
+    showInlineQR("participant", name);
+  });
+  btnPA?.addEventListener("click", ()=>{
+    const names = allParticipantNames();
+    if(!names.length){ alert("Inga deltagare hittades ännu. Vänta tills listan laddat."); return; }
+    openQROverlay("QR-koder – deltagare", names.map(n=>({name:n, url:urlForParticipant(n)})));
+  });
+
+  btnC?.addEventListener("click", ()=>{
+    const name = document.getElementById("coachSelect")?.value || "";
+    if(!name){ alert("Välj en coach."); return; }
+    showInlineQR("coach", name);
+  });
+  btnCA?.addEventListener("click", ()=>{
+    const names = allCoachNames();
+    if(!names.length){ alert("Inga coacher hittades ännu. Vänta tills listan laddat."); return; }
+    openQROverlay("QR-koder – coacher", names.map(n=>({name:n, url:urlForCoach(n)})));
+  });
+
+  btnClose?.addEventListener("click", closeQROverlay);
+  btnPrint?.addEventListener("click", printQROverlay);
+
+  // Inline print-knappar: använder overlay för snygg utskrift
+  document.getElementById("btnPrintParticipantQR")?.addEventListener("click", ()=>{
+    const name = document.getElementById("nameSelect")?.value || "";
+    if(!name) return;
+    openQROverlay("QR-kod – deltagare", [{name, url:urlForParticipant(name)}]);
+    printQROverlay();
+  });
+  document.getElementById("btnPrintCoachQR")?.addEventListener("click", ()=>{
+    const name = document.getElementById("coachSelect")?.value || "";
+    if(!name) return;
+    openQROverlay("QR-kod – coach", [{name, url:urlForCoach(name)}]);
+    printQROverlay();
+  });
+
+  // Klick utanför sheet stänger
+  document.getElementById("qrOverlay")?.addEventListener("click", (e)=>{
+    if(e.target && e.target.id==="qrOverlay") closeQROverlay();
+  });
+});
+
+})();
+
+/* ===== Deep link från QR: öppna direkt rätt schema ===== */
+function _normId(s){
+  return (s||"").toString().trim().toLowerCase()
+    .replace(/\s+/g," ")
+    .replace(/[åä]/g,"a")
+    .replace(/ö/g,"o");
+}
+function _selectByParam(selectEl, paramValue){
+  if(!selectEl) return false;
+  const target = (paramValue||"").toString().trim();
+  if(!target) return false;
+
+  // Försök 1: exakt match på value
+  for(const opt of Array.from(selectEl.options||[])){
+    if(opt.value === target){ selectEl.value = opt.value; return true; }
+  }
+  // Försök 2: exakt match på text
+  for(const opt of Array.from(selectEl.options||[])){
+    if((opt.textContent||"").trim() === target){ selectEl.value = opt.value; return true; }
+  }
+  // Försök 3: normaliserad match (tål mellanslag/åäö/case)
+  const nt = _normId(target);
+  for(const opt of Array.from(selectEl.options||[])){
+    const nv = _normId(opt.value);
+    const nx = _normId(opt.textContent);
+    if(nv === nt || nx === nt){ selectEl.value = opt.value; return true; }
+  }
+  return false;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(location.search);
+  const p = params.get("participant");
+  const c = params.get("coach");
+
+  // Vänta en tick så att listor/optioner hinner fyllas av befintlig init-kod.
+  setTimeout(() => {
+    if(p){
+      // Gå till deltagarfliken/vyn
+      try { showView("participantView"); } catch(e) {}
+      const sel = document.getElementById("nameSelect");
+      if(_selectByParam(sel, p)){
+        sel.dispatchEvent(new Event("change", { bubbles:true }));
+      }
+    } else if(c){
+      try { showView("coachView"); } catch(e) {}
+      const sel = document.getElementById("coachSelect");
+      if(_selectByParam(sel, c)){
+        sel.dispatchEvent(new Event("change", { bubbles:true }));
+      }
+    }
+  }, 0);
+});
+
+/* När man lämnar dagläge: rensa även URL-parametern så man inte fastnar */
+(function(){
+  const _oldExit = window.exitDayMode;
+  window.exitDayMode = function(){
+    try{ if(typeof _oldExit === "function") _oldExit(); } catch(e){}
+    try{ history.replaceState(null, "", location.origin + location.pathname); } catch(e){}
+  };
+})();
+
+</script>
+
+
+<!-- QR OVERLAY (admin/utskrift) -->
+<div id="qrOverlay" aria-hidden="true">
+  <div class="qr-sheet">
+    <div class="qr-actions">
+      <div class="left">
+        <button class="btn" id="btnCloseQROverlay">✖️ Stäng</button>
+        <button class="btn" id="btnPrintQROverlay">🖨️ Skriv ut</button>
+      </div>
+      <h2 id="qrOverlayTitle">QR-koder</h2>
+    </div>
+    <div id="qrPrintArea"></div>
+  </div>
+</div>
+
 </body>
 </html>
