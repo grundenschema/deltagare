@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -6,111 +7,10 @@
 <title>Schema v5 – Grunden DV</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#ffffff">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style id="dynamicPageStyle">
-/* @page rules handled dynamically */
+@media print { /* @page removed (handled dynamically) */}
 
-/* ===== QR overlay + print ===== */
-#qrOverlay{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.35);
-  display:none;
-  z-index:9999;
-}
-#qrOverlay .qr-sheet{
-  position:absolute;
-  inset:12px;
-  background:#fff;
-  border-radius:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);
-  overflow:auto;
-  padding:14px;
-}
-#qrOverlay .qr-actions{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  margin-bottom:12px;
-}
-#qrOverlay .qr-actions .left{
-  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-}
-#qrOverlay h2{ font-size:18px; margin:0; }
-#qrPrintArea{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-  gap:12px;
-}
-.qr-card{
-  border:1px solid #ddd;
-  border-radius:12px;
-  padding:10px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  align-items:center;
-}
-.qr-card .qr-name{
-  font-weight:800;
-  text-align:center;
-}
-.qr-card .qr-url{
-  font-size:10px;
-  opacity:.65;
-  word-break:break-all;
-  text-align:center;
-}
-.qr-inline{
-  display:none;
-  margin:10px auto 0;
-  max-width:360px;
-  background:#fff;
-  border:1px solid #ddd;
-  border-radius:14px;
-  padding:10px;
-  box-shadow:var(--shadow);
-}
-.qr-inline .row{
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-}
-.qr-inline .meta{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-.qr-inline .meta .name{ font-weight:900; }
-.qr-inline .meta .url{ font-size:12px; opacity:.7; word-break:break-all; }
-
-/* ===== QR knappar: håll rent i UI ===== */
-.qr-tools{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-@media (max-width: 720px){
-  .qr-tools{ display:none !important; } /* QR-admin är för personal på större skärm */
-  #qrOverlay .qr-sheet{ inset:8px; }
-  #qrPrintArea{ grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); }
-}
-@media print{
-  body.qr-print *{ visibility:hidden !important; }
-  body.qr-print #qrOverlay,
-  body.qr-print #qrOverlay *{ visibility:visible !important; }
-  body.qr-print #qrOverlay{
-    position:absolute !important;
-    inset:0 !important;
-    background:#fff !important;
-  }
-  body.qr-print #qrOverlay .qr-sheet{
-    position:static !important;
-    inset:auto !important;
-    box-shadow:none !important;
-    border-radius:0 !important;
-    padding:0 !important;
-  }
-  body.qr-print #qrOverlay .qr-actions{ display:none !important; }
-}
 
 /* ===== v33: FIX för mobil dagschema ===== */
 @media (max-width: 720px){
@@ -2003,6 +1903,86 @@ body.print-week{ }
 </style>
 
 
+
+<style id="timeGridStyleOverrides">
+/* ===== VECKOSCHEMA: Google-känsla ===== */
+
+/* 1) Fyrkantiga block */
+.block{
+  border-radius: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;              /* JS sätter top exakt */
+  box-shadow: none !important;    /* lugnare, mer "kalender" */
+  border: 1px solid rgba(0,0,0,.22) !important;
+}
+
+/* 2) Stabil rad-höjd (30 min) – JS sätter --rowH efter första render */
+.block-cell{ min-height: 40px; }
+
+/* 3) Själva gridytan: linjer bakom block */
+.block-grid{
+  position: relative;
+  --rowH: 40px;        /* fallback tills JS sätter rätt */
+}
+
+/* Tim- + halvtimlinjer som bakgrund (går även genom tidkolumnen).
+   Halvtimlinjen offset så den inte sammanfaller med timlinjen. */
+.block-grid::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+
+  background-image:
+    /* timme (tjockare) */
+    linear-gradient(to bottom, rgba(0,0,0,.32) 2px, transparent 2px),
+    /* halvtimme (tunn) */
+    linear-gradient(to bottom, rgba(0,0,0,.14) 1px, transparent 1px);
+
+  background-size: 100% calc(var(--rowH) * 2), 100% var(--rowH);
+  background-position: 0 0, 0 var(--rowH);
+}
+
+/* 4) Tidssiffror: inga 09:30-texter i kolumnen */
+.block-time{
+  color: transparent;           /* behåll layout, men ingen text */
+  user-select:none;
+}
+
+/* 5) Timlabel ligger PÅ timlinjen (Google-känsla) */
+.hour-label{
+  position:absolute;
+  left:0;
+  width:80px;                   /* samma som tidkolumnen */
+  transform: translateY(-50%);
+  text-align:right;
+  padding-right:6px;
+  font-size:.86rem;
+  font-weight:900;
+  color:#2b2b2b;
+  z-index:3;                    /* över linjer */
+  line-height:1;
+}
+
+/* Mask bakom texten så linjen ser ut att gå bakom */
+.hour-label::after{
+  content:"";
+  position:absolute;
+  right:0;
+  top:50%;
+  transform: translateY(-50%);
+  height:18px;
+  width:80px;
+  background: var(--bg);
+  z-index:-1;
+}
+
+/* 6) Se till att gridceller hamnar över bakgrund men under block */
+.block-grid > *{ position: relative; z-index: 1; }
+</style>
+
 </head>
 
 <body>
@@ -2055,22 +2035,7 @@ body.print-week{ }
     <button id="btnParticipantWeek" class="btn primary">📆 Schema</button>
     <button id="btnParticipantPictos" class="btn primary">🖼️ Bildstöd (vecka)</button>
     <button id="btnPrintParticipant" class="btn">🖨️ Skriv ut</button>
-  
-    <div class="qr-tools">
-      <button id="btnParticipantQR" class="btn">🔳 QR (vald)</button>
-      <button id="btnParticipantQRAll" class="btn">🔳 QR (alla)</button>
-    </div>
-</div>
-<div id="participantQRInline" class="qr-inline">
-  <div class="row">
-    <div id="participantQRImg"></div>
-    <div class="meta">
-      <div class="name" id="participantQRName"></div>
-      <div class="url" id="participantQRUrl"></div>
-      <button id="btnPrintParticipantQR" class="btn">🖨️ Skriv ut QR</button>
-    </div>
   </div>
-</div>
 <div id="participantDay" class="cards print-scope"></div>
 
   <!-- MOBIL (tittläge): Dag-för-dag med swipe (kortvy) -->
@@ -2108,22 +2073,7 @@ body.print-week{ }
     <button id="btnCoachToday" class="btn primary">☀️ Dagens schema</button>
     <button id="btnCoachWeek" class="btn primary">📆 Schema</button>
     <button id="btnPrintCoach" class="btn">🖨️ Skriv ut</button>
-  
-    <div class="qr-tools">
-      <button id="btnCoachQR" class="btn">🔳 QR (vald)</button>
-      <button id="btnCoachQRAll" class="btn">🔳 QR (alla)</button>
-    </div>
-</div>
-<div id="coachQRInline" class="qr-inline">
-  <div class="row">
-    <div id="coachQRImg"></div>
-    <div class="meta">
-      <div class="name" id="coachQRName"></div>
-      <div class="url" id="coachQRUrl"></div>
-      <button id="btnPrintCoachQR" class="btn">🖨️ Skriv ut QR</button>
-    </div>
   </div>
-</div>
 <div id="coachDay" class="cards print-scope"></div>
 
   <!-- MOBIL (tittläge): Dag-för-dag med swipe (kortvy) -->
@@ -2202,12 +2152,12 @@ const aktivitetFarger = {
   "Måndagsmöte": { color: "#AED6F1", emoji: "📅" },
   "Gruppmöte": { color: "#7FB3D5", emoji: "👥" },
 
-  "Lunch": { color: "#F9E79F", emoji: "🍲" },
+  "Lunch": { color: "#F9E79F", emoji: "🍽️" },
   "Lunch Mio": { color: "#F9A825", emoji: "🍽️" },
   "Lunch Anders B": { color: "#F9A825", emoji: "🍽️" },
 
   "Frukost": { color: "#FAD7A0", emoji: "🥐" },
-  "Morgonrutiner": { color: "#FAD7A0", emoji: "☀️" },
+  "morgonrutiner": { color: "#FAD7A0", emoji: "☀️" },
 
   "Ateljé": { color: "#F5CBA7", emoji: "🎨" },
   "Ateljén": { color: "#F5CBA7", emoji: "🎨" },
@@ -2237,7 +2187,7 @@ const aktivitetFarger = {
   "Gym Slottskogens Gym": { color: "#A3E4D7", emoji: "🏋️‍♂️" },
 
   "Film": { color: "#E6B0AA", emoji: "🎬" },
-  "Filmgruppen": { color: "#E6B0AA", emoji: "🎬" },
+  
 
   "Föreningsgruppen": { color: "#D6DBDF", emoji: "🤝" },
   "Autentiskt relaterande": { color: "#FCF3CF", emoji: "💬" },
@@ -2283,7 +2233,8 @@ const aktivitetFarger = {
 
   "Poesigrupp": { color: "#FDEBD0", emoji: "✍️" },
   "Poesigruppen": { color: "#FDEBD0", emoji: "✍️" },
-
+"Poesi": { color: "#FDEBD0", emoji: "✍️" },
+  
   "Samtal": { color: "#FCF3CF", emoji: "💬" },
   "Samtal onsdag eller torsdag": { color: "#FCF3CF", emoji: "💬" },
 
@@ -2298,6 +2249,8 @@ const aktivitetFarger = {
 
   "Foto": { color: "#E8DAEF", emoji: "📸" },
   "Samtal": { color: "#FCF3CF", emoji: "💬" },
+  "Mediagruppen": { color: "#E8DAEF", emoji: "📱" },
+  "Gaming":       { color: "#C39BD3", emoji: "🎮" },
 
 
 };
@@ -2944,6 +2897,33 @@ function slotIndexForMin(min, slotMins){
   return slotMins.length-1;
 }
 
+
+/* =========================
+   TIDSLINJE: timtext på linje (Google-känsla)
+========================= */
+function buildHourLabels(gridEl, slots, cellH){
+  if(!gridEl) return;
+  // Rensa gamla
+  gridEl.querySelectorAll(".hour-label").forEach(el=>el.remove());
+
+  const slotMins = slots.map(timeToMin);
+  const gridStart = slotMins[0];
+
+  // Sätt rad-höjd för bakgrundslinjer
+  gridEl.style.setProperty("--rowH", (cellH||40) + "px");
+
+  // Skapa label för varje heltimme som finns i slots
+  slots.forEach(t=>{
+    if(!String(t).endsWith(":00")) return;
+    const y = ((timeToMin(t) - gridStart) / 30) * (cellH||40);
+    const lab = document.createElement("div");
+    lab.className = "hour-label";
+    lab.style.top = y + "px";
+    lab.textContent = t;
+    gridEl.appendChild(lab);
+  });
+}
+
 function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
   const slots=makeSlots();
   const days=["måndag","tisdag","onsdag","torsdag","fredag"];
@@ -2955,7 +2935,7 @@ function renderBlocksGeneric(name,isCoach,headerEl,gridEl){
 
   headerEl.innerHTML="<div>Tid</div>"+days.map(d=>`<div>${d}</div>`).join("");
   gridEl.innerHTML="";gridEl.style.gridTemplateColumns=`80px repeat(${days.length},1fr)`;
-  slots.forEach(t=>{gridEl.innerHTML+=`<div class='block-time'>${t}</div>`+days.map(()=>`<div class='block-cell'></div>`).join("");});
+  slots.forEach(t=>{gridEl.innerHTML+=`<div class='block-time' data-t='${t}'>${t}</div>`+days.map(()=>`<div class='block-cell'></div>`).join("");});
   const cells=[...gridEl.children];
 
   rows.forEach(r=>{
@@ -3012,7 +2992,7 @@ if(duration>30){
   }
 }
 
-    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;const topOff=((sCl-slotMins[baseIdx])/30)*cellH;const h=((eCl-sCl)/30)*cellH;block.style.top=(2+topOff)+"px";block.style.height=Math.max(10,h-4)+"px";block.style.zIndex=10;});
+    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||28;const topOff=((sCl-slotMins[baseIdx])/30)*cellH;const h=((eCl-sCl)/30)*cellH;block.style.top=(topOff)+"px";block.style.height=Math.max(10,h)+"px";block.style.zIndex=10;});
     firstCell.appendChild(block);
   });
 }
@@ -3073,12 +3053,23 @@ function renderSingleWeek(name,isCoach,compact=false){
   <div class="block-grid" style="grid-template-columns:80px repeat(${days.length},1fr)"></div>`;
 
   const grid=container.querySelector(".block-grid");
+  if(grid) { grid.dataset.rh=""; }
   const timeFont = compact ? ".78rem" : ".86rem";
   grid.previousElementSibling.querySelectorAll('div').forEach(d => d.style.fontSize = compact ? ".86rem" : ".92rem");
   slots.forEach(t=>{
-    grid.innerHTML+=`<div class='block-time' style="font-size:${timeFont}">${t}</div>`+days.map(()=>`<div class='block-cell'></div>`).join("");
+    grid.innerHTML+=`<div class='block-time' data-t='${t}' style="font-size:${timeFont}">${t}</div>`+days.map(()=>`<div class='block-cell'></div>`).join("");
   });
   const cells=[...grid.children];
+
+  // Bygg timlabels + synka rad-höjd mot verklig cellhöjd
+  requestAnimationFrame(()=>{
+    const anyCell = grid.querySelector('.block-cell');
+    const cellH = anyCell ? (anyCell.clientHeight||40) : 40;
+    if(!grid.dataset.rh){
+      grid.dataset.rh = '1';
+      buildHourLabels(grid, slots, cellH);
+    }
+  });
 
   rows.forEach(r=>{
     const wd=new Date(r.Datum).getDay(); if(wd===0||wd===6) return;
@@ -3143,7 +3134,7 @@ function renderSingleWeek(name,isCoach,compact=false){
       }
     }
 
-    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||26;const topOff=((sCl-slotMins[baseIdx])/30)*cellH;const h=((eCl-sCl)/30)*cellH;block.style.top=(2+topOff)+"px";block.style.height=Math.max(10,h-4)+"px";block.style.zIndex=10;});
+    requestAnimationFrame(()=>{const cellH=firstCell.clientHeight||26;const topOff=((sCl-slotMins[baseIdx])/30)*cellH;const h=((eCl-sCl)/30)*cellH;block.style.top=(topOff)+"px";block.style.height=Math.max(10,h)+"px";block.style.zIndex=10;});
     firstCell.appendChild(block);
   });
   return container;
@@ -3854,281 +3845,9 @@ window.addEventListener("afterprint", ()=>{
       applyMode();
     }
   }, true);
-
-/* =========================
-   QR: GENERERA & SKRIV UT
-   - Vald deltagare/coach (inline)
-   - Alla deltagare/coach (overlay grid)
-========================= */
-
-function baseUrlWithoutQuery(){
-  return location.origin + location.pathname;
-}
-function urlForParticipant(name){
-  return baseUrlWithoutQuery() + "?participant=" + encodeURIComponent(name);
-}
-function urlForCoach(name){
-  return baseUrlWithoutQuery() + "?coach=" + encodeURIComponent(name);
-}
-function requireQRCode(){
-  if(typeof window.QRCode !== "function"){
-    alert("QR-biblioteket kunde inte laddas. Kontrollera att nätet fungerar och att cdnjs inte blockeras.");
-    return false;
-  }
-  return true;
-}
-function clearNode(el){ if(el) el.innerHTML=""; }
-
-function showInlineQR(kind, name){
-  if(!requireQRCode()) return;
-
-  const inline = document.getElementById(kind==="participant" ? "participantQRInline" : "coachQRInline");
-  const imgBox = document.getElementById(kind==="participant" ? "participantQRImg" : "coachQRImg");
-  const nameEl = document.getElementById(kind==="participant" ? "participantQRName" : "coachQRName");
-  const urlEl  = document.getElementById(kind==="participant" ? "participantQRUrl" : "coachQRUrl");
-
-  const url = kind==="participant" ? urlForParticipant(name) : urlForCoach(name);
-
-  nameEl.textContent = name;
-  urlEl.textContent  = url;
-
-  clearNode(imgBox);
-  new QRCode(imgBox, { text:url, width:180, height:180 });
-
-  inline.style.display = "block";
-}
-
-function openQROverlay(title, items){
-  if(!requireQRCode()) return;
-  const overlay = document.getElementById("qrOverlay");
-  const area = document.getElementById("qrPrintArea");
-  const t = document.getElementById("qrOverlayTitle");
-  if(!overlay || !area || !t) return;
-
-  t.textContent = title;
-  clearNode(area);
-
-  items.forEach(({name,url})=>{
-    const card = document.createElement("div");
-    card.className = "qr-card";
-    const nameDiv = document.createElement("div");
-    nameDiv.className = "qr-name";
-    nameDiv.textContent = name;
-
-    const qrDiv = document.createElement("div");
-    qrDiv.className = "qr-img";
-
-    const urlDiv = document.createElement("div");
-    urlDiv.className = "qr-url";
-    urlDiv.textContent = url;
-
-    card.appendChild(nameDiv);
-    card.appendChild(qrDiv);
-    card.appendChild(urlDiv);
-    area.appendChild(card);
-
-    new QRCode(qrDiv, { text:url, width:180, height:180 });
-  });
-
-  overlay.style.display = "block";
-  overlay.setAttribute("aria-hidden","false");
-}
-
-function closeQROverlay(){
-  const overlay = document.getElementById("qrOverlay");
-  if(!overlay) return;
-  overlay.style.display = "none";
-  overlay.setAttribute("aria-hidden","true");
-  document.body.classList.remove("qr-print");
-  // rensa så vi inte bygger upp DOM i onödan
-  const area = document.getElementById("qrPrintArea");
-  if(area) area.innerHTML = "";
-}
-
-function printQROverlay(){
-  document.body.classList.add("qr-print");
-  window.print();
-  // efter print: återställ
-  setTimeout(()=>document.body.classList.remove("qr-print"), 300);
-}
-
-function allParticipantNames(){
-  // hämtas från dropdown så det matchar exakt dina namn
-  const sel = document.getElementById("nameSelect");
-  if(!sel) return [];
-  return [...sel.querySelectorAll("option")]
-    .map(o=>o.value || o.textContent)
-    .map(s=>(s||"").trim())
-    .filter(s=>s && !s.startsWith("--"));
-}
-function allCoachNames(){
-  const sel = document.getElementById("coachSelect");
-  if(!sel) return [];
-  return [...sel.querySelectorAll("option")]
-    .map(o=>o.value || o.textContent)
-    .map(s=>(s||"").trim())
-    .filter(s=>s && !s.startsWith("--"));
-}
-
-/* Koppla knappar */
-document.addEventListener("DOMContentLoaded", ()=>{
-  const btnP = document.getElementById("btnParticipantQR");
-  const btnPA = document.getElementById("btnParticipantQRAll");
-  const btnC = document.getElementById("btnCoachQR");
-  const btnCA = document.getElementById("btnCoachQRAll");
-  const btnClose = document.getElementById("btnCloseQROverlay");
-  const btnPrint = document.getElementById("btnPrintQROverlay");
-
-  btnP?.addEventListener("click", ()=>{
-    const name = document.getElementById("nameSelect")?.value || "";
-    if(!name){ alert("Välj en deltagare."); return; }
-    showInlineQR("participant", name);
-  });
-  btnPA?.addEventListener("click", ()=>{
-    const names = allParticipantNames();
-    if(!names.length){ alert("Inga deltagare hittades ännu. Vänta tills listan laddat."); return; }
-    openQROverlay("QR-koder – deltagare", names.map(n=>({name:n, url:urlForParticipant(n)})));
-  });
-
-  btnC?.addEventListener("click", ()=>{
-    const name = document.getElementById("coachSelect")?.value || "";
-    if(!name){ alert("Välj en coach."); return; }
-    showInlineQR("coach", name);
-  });
-  btnCA?.addEventListener("click", ()=>{
-    const names = allCoachNames();
-    if(!names.length){ alert("Inga coacher hittades ännu. Vänta tills listan laddat."); return; }
-    openQROverlay("QR-koder – coacher", names.map(n=>({name:n, url:urlForCoach(n)})));
-  });
-
-  btnClose?.addEventListener("click", closeQROverlay);
-  btnPrint?.addEventListener("click", printQROverlay);
-
-  // Inline print-knappar: använder overlay för snygg utskrift
-  document.getElementById("btnPrintParticipantQR")?.addEventListener("click", ()=>{
-    const name = document.getElementById("nameSelect")?.value || "";
-    if(!name) return;
-    openQROverlay("QR-kod – deltagare", [{name, url:urlForParticipant(name)}]);
-    printQROverlay();
-  });
-  document.getElementById("btnPrintCoachQR")?.addEventListener("click", ()=>{
-    const name = document.getElementById("coachSelect")?.value || "";
-    if(!name) return;
-    openQROverlay("QR-kod – coach", [{name, url:urlForCoach(name)}]);
-    printQROverlay();
-  });
-
-  // Klick utanför sheet stänger
-  document.getElementById("qrOverlay")?.addEventListener("click", (e)=>{
-    if(e.target && e.target.id==="qrOverlay") closeQROverlay();
-  });
-});
-
 })();
-
-/* ===== Deep link från QR: öppna direkt rätt schema ===== */
-function _normId(s){
-  return (s||"").toString().trim().toLowerCase()
-    .replace(/\s+/g," ")
-    .replace(/[åä]/g,"a")
-    .replace(/ö/g,"o");
-}
-function _selectByParam(selectEl, paramValue){
-  if(!selectEl) return false;
-  const target = (paramValue||"").toString().trim();
-  if(!target) return false;
-
-  // Försök 1: exakt match på value
-  for(const opt of Array.from(selectEl.options||[])){
-    if(opt.value === target){ selectEl.value = opt.value; return true; }
-  }
-  // Försök 2: exakt match på text
-  for(const opt of Array.from(selectEl.options||[])){
-    if((opt.textContent||"").trim() === target){ selectEl.value = opt.value; return true; }
-  }
-  // Försök 3: normaliserad match (tål mellanslag/åäö/case)
-  const nt = _normId(target);
-  for(const opt of Array.from(selectEl.options||[])){
-    const nv = _normId(opt.value);
-    const nx = _normId(opt.textContent);
-    if(nv === nt || nx === nt){ selectEl.value = opt.value; return true; }
-  }
-  return false;
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const params = new URLSearchParams(location.search);
-  const p = params.get("participant");
-  const c = params.get("coach");
-
-  // Vänta tills listorna faktiskt är fyllda (loadData kan vara async)
-  function waitForOptions(selectId, timeoutMs=4000){
-    return new Promise(resolve=>{
-      const start = Date.now();
-      const tick = ()=>{
-        const el = document.getElementById(selectId);
-        const ok = !!el && el.options && el.options.length > 1;
-        if(ok) return resolve(true);
-        if(Date.now() - start > timeoutMs) return resolve(false);
-        requestAnimationFrame(tick);
-      };
-      tick();
-    });
-  }
-
-  (async ()=>{
-    if(p){
-      try { showView("participantView"); } catch(e) {}
-      await waitForOptions("nameSelect");
-      const sel = document.getElementById("nameSelect");
-      if(_selectByParam(sel, p)){
-        // trigga samma flöde som vid manuellt val
-        sel.dispatchEvent(new Event("change", { bubbles:true }));
-        try { if(typeof initMobileParticipant === "function") initMobileParticipant(); } catch(e) {}
-        try { if(typeof enterDayMode === "function") enterDayMode("participant"); } catch(e) {}
-        try { if(typeof updateMobileFullscreenForCurrentView === "function") updateMobileFullscreenForCurrentView(); } catch(e) {}
-      }
-      return;
-    }
-    if(c){
-      try { showView("coachView"); } catch(e) {}
-      await waitForOptions("coachSelect");
-      const sel = document.getElementById("coachSelect");
-      if(_selectByParam(sel, c)){
-        sel.dispatchEvent(new Event("change", { bubbles:true }));
-        try { if(typeof initMobileCoach === "function") initMobileCoach(); } catch(e) {}
-        try { if(typeof enterDayMode === "function") enterDayMode("coach"); } catch(e) {}
-        try { if(typeof updateMobileFullscreenForCurrentView === "function") updateMobileFullscreenForCurrentView(); } catch(e) {}
-      }
-    }
-  })();
-});
-
-/* När man lämnar dagläge: rensa även URL-parametern så man inte fastnar */
-(function(){
-  const _oldExit = window.exitDayMode;
-  window.exitDayMode = function(){
-    try{ if(typeof _oldExit === "function") _oldExit(); } catch(e){}
-    try{ history.replaceState(null, "", location.origin + location.pathname); } catch(e){}
-  };
-})();
-
 </script>
-
-
-<!-- QR OVERLAY (admin/utskrift) -->
-<div id="qrOverlay" aria-hidden="true">
-  <div class="qr-sheet">
-    <div class="qr-actions">
-      <div class="left">
-        <button class="btn" id="btnCloseQROverlay">✖️ Stäng</button>
-        <button class="btn" id="btnPrintQROverlay">🖨️ Skriv ut</button>
-      </div>
-      <h2 id="qrOverlayTitle">QR-koder</h2>
-    </div>
-    <div id="qrPrintArea"></div>
-  </div>
-</div>
 
 </body>
 </html>
+
