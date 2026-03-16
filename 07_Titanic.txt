@@ -1,0 +1,77 @@
+TITEL: Titanic
+
+TEXT:
+Passagerarfartyget Titanic byggdes i Belfast och ansågs vara ett av världens lyxigaste
+skepp. Över 1500 människor miste livet när fartyget sjönk. Skrovet skadades och vatten
+började fylla flera av fartygets sektioner. Det fanns inte tillräckligt med livbåtar för
+alla ombord. Skrovet skadades och vatten började fylla flera av fartygets sektioner. Det
+fanns inte tillräckligt med livbåtar för alla ombord. Över 1500 människor miste livet när
+fartyget sjönk. Över 1500 människor miste livet när fartyget sjönk. Över 1500 människor
+miste livet när fartyget sjönk. Det fanns inte tillräckligt med livbåtar för alla ombord.
+Över 1500 människor miste livet när fartyget sjönk. Fartyget gjorde sin första resa från
+Southampton till New York år 1912. Passagerarfartyget Titanic byggdes i Belfast och ansågs
+vara ett av världens lyxigaste skepp. Passagerarfartyget Titanic byggdes i Belfast och
+ansågs vara ett av världens lyxigaste skepp. Det fanns inte tillräckligt med livbåtar för
+alla ombord. Det fanns inte tillräckligt med livbåtar för alla ombord. Under resan
+kolliderade Titanic med ett stort isberg i Atlanten. Passagerarfartyget Titanic byggdes i
+Belfast och ansågs vara ett av världens lyxigaste skepp. Fartyget gjorde sin första resa
+från Southampton till New York år 1912. Under resan kolliderade Titanic med ett stort
+isberg i Atlanten. Det fanns inte tillräckligt med livbåtar för alla ombord.
+Passagerarfartyget Titanic byggdes i Belfast och ansågs vara ett av världens lyxigaste
+skepp. Under resan kolliderade Titanic med ett stort isberg i Atlanten. Det fanns inte
+tillräckligt med livbåtar för alla ombord. Det fanns inte tillräckligt med livbåtar för
+alla ombord. Över 1500 människor miste livet när fartyget sjönk. Skrovet skadades och
+vatten började fylla flera av fartygets sektioner. Passagerarfartyget Titanic byggdes i
+Belfast och ansågs vara ett av världens lyxigaste skepp. Fartyget gjorde sin första resa
+från Southampton till New York år 1912. Det fanns inte tillräckligt med livbåtar för alla
+ombord. Fartyget gjorde sin första resa från Southampton till New York år 1912.
+Passagerarfartyget Titanic byggdes i Belfast och ansågs vara ett av världens lyxigaste
+skepp. Passagerarfartyget Titanic byggdes i Belfast och ansågs vara ett av världens
+lyxigaste skepp. Skrovet skadades och vatten började fylla flera av fartygets sektioner.
+Skrovet skadades och vatten började fylla flera av fartygets sektioner. Under resan
+kolliderade Titanic med ett stort isberg i Atlanten. Under resan kolliderade Titanic med
+ett stort isberg i Atlanten. Det fanns inte tillräckligt med livbåtar för alla ombord.
+Under resan kolliderade Titanic med ett stort isberg i Atlanten. Under resan kolliderade
+Titanic med ett stort isberg i Atlanten. Fartyget gjorde sin första resa från Southampton
+till New York år 1912. Fartyget gjorde sin första resa från Southampton till New York år
+1912. Under resan kolliderade Titanic med ett stort isberg i Atlanten. Fartyget gjorde sin
+första resa från Southampton till New York år 1912. Under resan kolliderade Titanic med
+ett stort isberg i Atlanten. Det fanns inte tillräckligt med livbåtar för alla ombord.
+Passagerarfartyget Titanic byggdes i Belfast och ansågs vara ett av världens lyxigaste
+skepp. Under resan kolliderade Titanic med ett stort isberg i Atlanten. Det fanns inte
+tillräckligt med livbåtar för alla ombord. Skrovet skadades och vatten började fylla flera
+av fartygets sektioner. Fartyget gjorde sin första resa från Southampton till New York år
+1912. Fartyget gjorde sin första resa från Southampton till New York år 1912. Det fanns
+inte tillräckligt med livbåtar för alla ombord. Fartyget gjorde sin första resa från
+Southampton till New York år 1912. Över 1500 människor miste livet när fartyget sjönk.
+Under resan kolliderade Titanic med ett stort isberg i Atlanten. Över 1500 människor miste
+livet när fartyget sjönk. Det fanns inte tillräckligt med livbåtar för alla ombord.
+Fartyget gjorde sin första resa från Southampton till New York år 1912. Det fanns inte
+tillräckligt med livbåtar för alla ombord. Skrovet skadades och vatten började fylla flera
+av fartygets sektioner. Fartyget gjorde sin första resa från Southampton till New York år
+1912. Passagerarfartyget Titanic byggdes i Belfast och ansågs vara ett av världens
+lyxigaste skepp.
+
+FRÅGA:
+Vad handlar texten främst om?
+* Ett historiskt ämne
+- En matlagning
+- En sporttävling
+
+FRÅGA:
+Vad använder historiker för att förstå det förflutna?
+* Dokument och fynd
+- Endast rykten
+- Ingenting alls
+
+FRÅGA:
+Varför studerar människor historia?
+* För att förstå samhällen
+- För att bli snabbare
+- För att slippa läsa
+
+FRÅGA:
+Vad kan historiska händelser påverka?
+* Hela samhällen
+- Bara vädret
+- Ingenting
