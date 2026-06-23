@@ -1,213 +1,657 @@
 <!DOCTYPE html>
-<html lang="sv">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0051)file:///C:/Users/dator/Downloads/testschema_10.html -->
+<html lang="sv"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grunden – Testformulär</title>
+<title>Grunden – Testschema</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #f0f4f8;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #f0f4f8;
+  color: #222;
+  font-size: 13px;
+}
 
-  .card {
-    background: white;
-    border-radius: 16px;
-    padding: 32px;
-    width: 100%;
-    max-width: 480px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-  }
+header {
+  background: #1a73e8;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+header h1 { font-size: 18px; font-weight: 700; }
+header button {
+  background: white;
+  color: #1a73e8;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+}
+header button:hover { background: #e8f0fe; }
 
-  h1 {
-    font-size: 22px;
-    font-weight: 800;
-    color: #1a1a2e;
-    margin-bottom: 6px;
-  }
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+.week-nav button {
+  background: #f1f3f4;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.week-nav button:hover { background: #e2e5e9; }
+#weekLabel { font-weight: 700; font-size: 14px; min-width: 160px; text-align: center; }
 
-  .subtitle {
-    font-size: 13px;
-    color: #888;
-    margin-bottom: 28px;
-  }
+/* Kalender-grid */
+.cal-wrap { overflow-x: auto; padding: 12px 16px; }
+.cal-grid {
+  display: grid;
+  grid-template-columns: 54px repeat(5, 1fr);
+  min-width: 700px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+}
 
-  .field {
-    margin-bottom: 18px;
-  }
+.col-header {
+  background: #1a73e8;
+  color: white;
+  text-align: center;
+  padding: 10px 4px;
+  font-weight: 700;
+  font-size: 13px;
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+.col-header.time-col { background: #1558c0; }
 
-  label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 6px;
-  }
+.time-label {
+  background: #f8f9fa;
+  text-align: right;
+  padding: 4px 6px 0 0;
+  font-size: 11px;
+  color: #888;
+  border-right: 1px solid #e0e0e0;
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 30px;
+}
 
-  input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 15px;
-    color: #222;
-    background: #fafafa;
-    transition: border-color 0.15s;
-    outline: none;
-  }
+.day-cell {
+  border-right: 1px solid #e8e8e8;
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 30px;
+  position: relative;
+}
+.day-cell:last-child { border-right: none; }
 
-  input:focus {
-    border-color: #3b82f6;
-    background: #fff;
-  }
+/* Aktivitetsblock */
+.evt {
+  position: absolute;
+  left: 2px; right: 2px; top: 2px;
+  border-radius: 8px;
+  padding: 5px 7px;
+  font-size: 11px;
+  line-height: 1.3;
+  cursor: pointer;
+  border-left: 4px solid rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: opacity 0.15s, transform 0.1s;
+  overflow: hidden;
+}
+.evt:hover { opacity: 0.85; transform: scale(1.01); }
+.evt .evt-time { font-size: 10px; opacity: 0.8; }
+.evt .evt-title { font-weight: 700; margin: 2px 0 1px; }
+.evt .evt-people { font-size: 10px; opacity: 0.75; }
 
-  .row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+/* Modal */
+.overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: white;
+  border-radius: 14px;
+  padding: 28px;
+  width: 90%;
+  max-width: 460px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.modal h2 { font-size: 17px; margin-bottom: 16px; color: #1a73e8; }
 
-  button {
-    width: 100%;
-    padding: 13px;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: background 0.15s;
-  }
+.modal-field { margin-bottom: 14px; }
+.modal-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.modal-field input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+.modal-field input:focus { border-color: #1a73e8; }
 
-  button:hover { background: #2563eb; }
-  button:disabled { background: #93c5fd; cursor: not-allowed; }
+.chipbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #e8f0fe;
+  border: 1px solid #c5d8fc;
+  color: #1a3a6b;
+  border-radius: 999px;
+  padding: 4px 10px 4px 11px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.chip button {
+  background: none;
+  border: none;
+  color: #6b87c0;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.chip button:hover { color: #c0392b; }
 
-  .status {
-    margin-top: 16px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    display: none;
-    text-align: center;
-  }
+.modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-  .status.success {
-    background: #d1fae5;
-    color: #065f46;
-    display: block;
-  }
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.modal-actions button {
+  flex: 1;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-spara { background: #1a73e8; color: white; }
+.btn-spara:hover { background: #1558c0; }
+.btn-radera { background: #fee2e2; color: #991b1b; }
+.btn-radera:hover { background: #fca5a5; }
+.btn-stang { background: #f1f3f4; color: #444; }
+.btn-stang:hover { background: #e2e5e9; }
 
-  .status.error {
-    background: #fee2e2;
-    color: #991b1b;
-    display: block;
-  }
+.status-bar {
+  text-align: center;
+  padding: 6px;
+  font-size: 12px;
+  color: #888;
+  background: white;
+  border-top: 1px solid #eee;
+}
 
-  .status.loading {
-    background: #dbeafe;
-    color: #1e40af;
-    display: block;
-  }
+/* Ny aktivitet – flytande knapp */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(26,115,232,0.4);
+  z-index: 500;
+}
+.fab:hover { background: #1558c0; }
+
+.loader {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-size: 15px;
+}
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h1>📅 Lägg till aktivitet</h1>
-  <p class="subtitle">Testformulär – skriver till testkalendern</p>
+<header>
+  <h1>📅 Grunden – Testschema</h1>
+  <button onclick="oppnaModal(null)">+ Ny aktivitet</button>
+</header>
 
-  <div class="field">
-    <label>Titel</label>
-    <input type="text" id="titel" placeholder="t.ex. Musikgruppen" />
-  </div>
+<div class="week-nav">
+  <button onclick="byttVecka(-1)">◀ Förra</button>
+  <span id="weekLabel">v.26 · 22 juni – 26 juni</span>
+  <button onclick="byttVecka(1)">Nästa ▶</button>
+  <button onclick="byttVecka(0)" style="margin-left:8px">Idag</button>
+</div>
 
-  <div class="field">
-    <label>Datum</label>
-    <input type="date" id="datum" />
-  </div>
+<div class="cal-wrap">
+  <div class="cal-grid" id="calGrid"><div class="col-header time-col">Tid</div><div class="col-header"><div>Måndag</div><div style="font-size:11px;opacity:.85">22 juni</div></div><div class="col-header" style="background: rgb(13, 71, 161);"><div>Tisdag</div><div style="font-size:11px;opacity:.85">23 juni 📍</div></div><div class="col-header"><div>Onsdag</div><div style="font-size:11px;opacity:.85">24 juni</div></div><div class="col-header"><div>Torsdag</div><div style="font-size:11px;opacity:.85">25 juni</div></div><div class="col-header"><div>Fredag</div><div style="font-size:11px;opacity:.85">26 juni</div></div><div class="time-label">08:00</div><div class="day-cell" data-date="2026-06-22" data-time="08:00"></div><div class="day-cell" data-date="2026-06-23" data-time="08:00"></div><div class="day-cell" data-date="2026-06-24" data-time="08:00"></div><div class="day-cell" data-date="2026-06-25" data-time="08:00"></div><div class="day-cell" data-date="2026-06-26" data-time="08:00"></div><div class="time-label"></div><div class="day-cell" data-date="2026-06-22" data-time="08:30"></div><div class="day-cell" data-date="2026-06-23" data-time="08:30"></div><div class="day-cell" data-date="2026-06-24" data-time="08:30"></div><div class="day-cell" data-date="2026-06-25" data-time="08:30"></div><div class="day-cell" data-date="2026-06-26" data-time="08:30"></div><div class="time-label">09:00</div><div class="day-cell" data-date="2026-06-22" data-time="09:00"></div><div class="day-cell" data-date="2026-06-23" data-time="09:00"></div><div class="day-cell" data-date="2026-06-24" data-time="09:00"></div><div class="day-cell" data-date="2026-06-25" data-time="09:00"></div><div class="day-cell" data-date="2026-06-26" data-time="09:00"></div><div class="time-label"></div><div class="day-cell" data-date="2026-06-22" data-time="09:30"></div><div class="day-cell" data-date="2026-06-23" data-time="09:30"></div><div class="day-cell" data-date="2026-06-24" data-time="09:30"></div><div class="day-cell" data-date="2026-06-25" data-time="09:30"></div><div class="day-cell" data-date="2026-06-26" data-time="09:30"></div><div class="time-label">10:00</div><div class="day-cell" data-date="2026-06-22" data-time="10:00"></div><div class="day-cell" data-date="2026-06-23" data-time="10:00"></div><div class="day-cell" data-date="2026-06-24" data-time="10:00"></div><div class="day-cell" data-date="2026-06-25" data-time="10:00"></div><div class="day-cell" data-date="2026-06-26" data-time="10:00"></div><div class="time-label"></div><div class="day-cell" data-date="2026-06-22" data-time="10:30"></div><div class="day-cell" data-date="2026-06-23" data-time="10:30"></div><div class="day-cell" data-date="2026-06-24" data-time="10:30"></div><div class="day-cell" data-date="2026-06-25" data-time="10:30"></div><div class="day-cell" data-date="2026-06-26" data-time="10:30"></div><div class="time-label">11:00</div><div class="day-cell" data-date="2026-06-22" data-time="11:00"></div><div class="day-cell" data-date="2026-06-23" data-time="11:00"></div><div class="day-cell" data-date="2026-06-24" data-time="11:00"></div><div class="day-cell" data-date="2026-06-25" data-time="11:00"></div><div class="day-cell" data-date="2026-06-26" data-time="11:00"></div><div class="time-label"></div><div class="day-cell" data-date="2026-06-22" data-time="11:30"></div><div class="day-cell" data-date="2026-06-23" data-time="11:30"></div><div class="day-cell" data-date="2026-06-24" data-time="11:30"></div><div class="day-cell" data-date="2026-06-25" data-time="11:30"></div><div class="day-cell" data-date="2026-06-26" data-time="11:30"></div><div class="time-label">12:00</div><div class="day-cell" data-date="2026-06-22" data-time="12:00"></div><div class="day-cell" data-date="2026-06-23" data-time="12:00"></div><div class="day-cell" data-date="2026-06-24" data-time="12:00"></div><div class="day-cell" data-date="2026-06-25" data-time="12:00"></div><div class="day-cell" data-date="2026-06-26" data-time="12:00"></div><div class="time-label"></div><div class="day-cell" data-date="2026-06-22" data-time="12:30"></div><div class="day-cell" data-date="2026-06-23" data-time="12:30"></div><div class="day-cell" data-date="2026-06-24" data-time="12:30"></div><div class="day-cell" data-date="2026-06-25" data-time="12:30"></div><div class="day-cell" data-date="2026-06-26" data-time="12:30"></div><div class="time-label">13:00</div><div class="day-cell" data-date="2026-06-22" data-time="13:00"></div><div class="day-cell" data-date="2026-06-23" data-time="13:00"></div><div class="day-cell" data-date="2026-06-24" data-time="13:00"></div><div class="day-cell" data-date="2026-06-25" data-time="13:00"></div><div class="day-cell" data-date="2026-06-26" data-time="13:00"></div><div class="time-label"></div><div class="day-cell" data-date="2026-06-22" data-time="13:30"></div><div class="day-cell" data-date="2026-06-23" data-time="13:30"></div><div class="day-cell" data-date="2026-06-24" data-time="13:30"></div><div class="day-cell" data-date="2026-06-25" data-time="13:30"></div><div class="day-cell" data-date="2026-06-26" data-time="13:30"></div><div class="time-label">14:00</div><div class="day-cell" data-date="2026-06-22" data-time="14:00"></div><div class="day-cell" data-date="2026-06-23" data-time="14:00"></div><div class="day-cell" data-date="2026-06-24" data-time="14:00"></div><div class="day-cell" data-date="2026-06-25" data-time="14:00"></div><div class="day-cell" data-date="2026-06-26" data-time="14:00"></div><div class="time-label"></div><div class="day-cell" data-date="2026-06-22" data-time="14:30"></div><div class="day-cell" data-date="2026-06-23" data-time="14:30"></div><div class="day-cell" data-date="2026-06-24" data-time="14:30"></div><div class="day-cell" data-date="2026-06-25" data-time="14:30"></div><div class="day-cell" data-date="2026-06-26" data-time="14:30"></div><div class="time-label">15:00</div><div class="day-cell" data-date="2026-06-22" data-time="15:00"></div><div class="day-cell" data-date="2026-06-23" data-time="15:00"></div><div class="day-cell" data-date="2026-06-24" data-time="15:00"></div><div class="day-cell" data-date="2026-06-25" data-time="15:00"></div><div class="day-cell" data-date="2026-06-26" data-time="15:00"></div><div class="time-label"></div><div class="day-cell" data-date="2026-06-22" data-time="15:30"></div><div class="day-cell" data-date="2026-06-23" data-time="15:30"></div><div class="day-cell" data-date="2026-06-24" data-time="15:30"></div><div class="day-cell" data-date="2026-06-25" data-time="15:30"></div><div class="day-cell" data-date="2026-06-26" data-time="15:30"></div><div class="time-label">16:00</div><div class="day-cell" data-date="2026-06-22" data-time="16:00"></div><div class="day-cell" data-date="2026-06-23" data-time="16:00"></div><div class="day-cell" data-date="2026-06-24" data-time="16:00"></div><div class="day-cell" data-date="2026-06-25" data-time="16:00"></div><div class="day-cell" data-date="2026-06-26" data-time="16:00"></div></div>
+</div>
 
-  <div class="row">
-    <div class="field">
-      <label>Starttid</label>
-      <input type="time" id="start" value="09:00" />
+<div class="status-bar" id="statusBar">Uppdaterat 15:34</div>
+
+<button class="fab" onclick="oppnaModal(null)">＋ Ny aktivitet</button>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="stangModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2 id="modalRubrik">Ny aktivitet</h2>
+
+    <div class="modal-field">
+      <label>Deltagare</label>
+      <div class="chipbox" id="mDeltagareChips"></div>
+      <input type="text" id="mDeltagareInput" placeholder="Namn + Enter" list="mDeltagareInput_list">
+    <datalist id="mDeltagareInput_list"><option value="Anna"></option><option value="Erik"></option><option value="Maria"></option><option value="Jonas"></option><option value="Sara"></option><option value="Peter"></option><option value="Lena"></option><option value="David"></option><option value="Karin"></option><option value="Mikael"></option></datalist></div>
+
+    <div class="modal-field">
+      <label>Aktivitet</label>
+      <input type="text" id="mAktivitet" placeholder="t.ex. Musikgruppen">
     </div>
-    <div class="field">
-      <label>Sluttid</label>
-      <input type="time" id="slut" value="10:00" />
+
+    <div class="modal-field">
+      <label>Coach</label>
+      <div class="chipbox" id="mCoachChips"></div>
+      <input type="text" id="mCoachInput" placeholder="Namn + Enter" list="mCoachInput_list">
+    <datalist id="mCoachInput_list"><option value="Sofia"></option><option value="Anders"></option><option value="Jessica"></option><option value="Tommy"></option><option value="Jaana"></option><option value="John"></option><option value="Emma"></option><option value="Rickard"></option></datalist></div>
+
+    <div class="modal-field">
+      <label>Datum</label>
+      <input type="date" id="mDatum">
+    </div>
+
+    <div class="modal-row">
+      <div class="modal-field">
+        <label>Starttid</label>
+        <input type="time" id="mStart" value="09:00">
+      </div>
+      <div class="modal-field">
+        <label>Sluttid</label>
+        <input type="time" id="mSlut" value="10:00">
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-stang" onclick="stangModal()">Avbryt</button>
+      <button class="btn-radera" id="btnRadera" onclick="raderaAktivitet()" style="display:none">🗑 Radera</button>
+      <button class="btn-spara" onclick="sparaAktivitet()">💾 Spara</button>
     </div>
   </div>
-
-  <button id="btnSpara" onclick="spara()">Spara till kalender</button>
-
-  <div class="status" id="status"></div>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ8wJiL2PY4a_vzegP82Gwqh4PwI7Jc_MxP9RvDehD2EGeDMdAOTtgwOXLyyvCozBV/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJELQjDoLIoqlp5LKsR8pxoNOQKXEq963Z_Qrp0ccaqXHShRRUQzroA-xTkpeNkThX/exec";
 
-// Sätt dagens datum som default
-document.getElementById("datum").value = new Date().toISOString().slice(0,10);
+/* ===== Testpersoner ===== */
+const DELTAGARE = ["Anna","Erik","Maria","Jonas","Sara","Peter","Lena","David","Karin","Mikael"];
+const COACHER   = ["Sofia","Anders","Jessica","Tommy","Jaana","John","Emma","Rickard"];
 
-function visaStatus(typ, text) {
-  const el = document.getElementById("status");
-  el.className = "status " + typ;
-  el.textContent = text;
+/* ===== Färger per aktivitet ===== */
+const FARGER = {
+  "musik":      "#f3e5f5",
+  "film":       "#e8eaf6",
+  "lunch":      "#fff3e0",
+  "frukost":    "#fff3e0",
+  "promenad":   "#e8f5e9",
+  "gym":        "#e0f2f1",
+  "möte":       "#e3f2fd",
+  "kommunikation": "#fce4ec",
+  "yoga":       "#f1f8e9",
+  "ateljé":     "#fff8e1",
+  "default":    "#f5f5f5"
+};
+
+function fargFor(aktivitet) {
+  const a = (aktivitet || "").toLowerCase();
+  for (const [key, color] of Object.entries(FARGER)) {
+    if (a.includes(key)) return color;
+  }
+  return FARGER.default;
 }
 
-async function spara() {
-  const titel  = document.getElementById("titel").value.trim();
-  const datum  = document.getElementById("datum").value;
-  const start  = document.getElementById("start").value;
-  const slut   = document.getElementById("slut").value;
+/* ===== Veckonavigering ===== */
+let veckoOffset = 0;
+let DATA = [];
+let redigeraId = null;
+let redigeraData = null;
 
-  if (!titel || !datum || !start || !slut) {
-    visaStatus("error", "Fyll i alla fält.");
-    return;
-  }
+function mandagForVecka(offset) {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1 - day);
+  d.setDate(d.getDate() + diff + offset * 7);
+  d.setHours(0,0,0,0);
+  return d;
+}
 
-  if (start >= slut) {
-    visaStatus("error", "Sluttid måste vara efter starttid.");
-    return;
-  }
+function isoDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
 
-  const btn = document.getElementById("btnSpara");
-  btn.disabled = true;
-  visaStatus("loading", "Sparar...");
+function veckodagar(offset) {
+  const mon = mandagForVecka(offset);
+  return Array.from({length:5}, (_,i) => {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    return d;
+  });
+}
 
-  const startISO = datum + "T" + start + ":00";
-  const slutISO  = datum + "T" + slut  + ":00";
+function formatVeckaLabel(days) {
+  const opts = { day:"numeric", month:"short" };
+  return `v.${veckonummer(days[0])} · ${days[0].toLocaleDateString("sv-SE",opts)} – ${days[4].toLocaleDateString("sv-SE",opts)}`;
+}
+
+function veckonummer(d) {
+  const tmp = new Date(d);
+  tmp.setHours(0,0,0,0);
+  tmp.setDate(tmp.getDate() + 3 - (tmp.getDay()+6)%7);
+  const w1 = new Date(tmp.getFullYear(),0,4);
+  return 1 + Math.round(((tmp-w1)/86400000 - 3 + (w1.getDay()+6)%7)/7);
+}
+
+function byttVecka(delta) {
+  if (delta === 0) veckoOffset = 0;
+  else veckoOffset += delta;
+  laddaData();
+}
+
+/* ===== Hämta data ===== */
+async function laddaData() {
+  document.getElementById("statusBar").textContent = "Laddar...";
+  document.getElementById("calGrid").innerHTML = '<div class="loader" style="grid-column:1/-1">Laddar schema...</div>';
 
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({ title: titel, start: startISO, end: slutISO })
-    });
+    const res = await fetch(SCRIPT_URL + "?offset=" + veckoOffset + "&t=" + Date.now());
     const json = await res.json();
-
-    if (json.success) {
-      visaStatus("success", "✅ Aktiviteten sparades i testkalendern!");
-      // Rensa formuläret
-      document.getElementById("titel").value = "";
-    } else {
-      visaStatus("error", "Fel: " + (json.error || "Okänt fel"));
-    }
+    DATA = json.data || [];
+    ritaSchema();
+    document.getElementById("statusBar").textContent = "Uppdaterat " + new Date().toLocaleTimeString("sv-SE",{hour:"2-digit",minute:"2-digit"});
   } catch(e) {
-    visaStatus("error", "Kunde inte nå scriptet. Kontrollera URL:en.");
+    document.getElementById("statusBar").textContent = "Kunde inte ladda data: " + e.message;
+    document.getElementById("calGrid").innerHTML = '<div class="loader" style="grid-column:1/-1; color:#c00">Fel vid laddning</div>';
+  }
+}
+
+/* ===== Rita schema ===== */
+const SLOTS_START = 8 * 60;
+const SLOTS_END   = 16 * 60;
+const SLOT_MIN    = 30;
+
+function timeToMin(t) {
+  const [h,m] = (t||"00:00").split(":").map(Number);
+  return h*60+m;
+}
+
+function ritaSchema() {
+  const days = veckodagar(veckoOffset);
+  document.getElementById("weekLabel").textContent = formatVeckaLabel(days);
+
+  const dagNamn = ["Måndag","Tisdag","Onsdag","Torsdag","Fredag"];
+  const idag = isoDate(new Date());
+
+  const grid = document.getElementById("calGrid");
+  grid.innerHTML = "";
+
+  // Header-rad
+  const tidHeader = document.createElement("div");
+  tidHeader.className = "col-header time-col";
+  tidHeader.textContent = "Tid";
+  grid.appendChild(tidHeader);
+
+  days.forEach((d,i) => {
+    const h = document.createElement("div");
+    h.className = "col-header";
+    const isToday = isoDate(d) === idag;
+    h.innerHTML = `<div>${dagNamn[i]}</div><div style="font-size:11px;opacity:.85">${d.toLocaleDateString("sv-SE",{day:"numeric",month:"short"})}${isToday?" 📍":""}</div>`;
+    if (isToday) h.style.background = "#0d47a1";
+    grid.appendChild(h);
+  });
+
+  // Tidsrader
+  for (let m = SLOTS_START; m <= SLOTS_END; m += SLOT_MIN) {
+    const h = Math.floor(m/60), mi = m%60;
+    const tLabel = document.createElement("div");
+    tLabel.className = "time-label";
+    tLabel.textContent = mi === 0 ? String(h).padStart(2,"0")+":00" : "";
+    grid.appendChild(tLabel);
+
+    days.forEach(d => {
+      const cell = document.createElement("div");
+      cell.className = "day-cell";
+      cell.dataset.date = isoDate(d);
+      cell.dataset.time = String(h).padStart(2,"0")+":"+String(mi).padStart(2,"0");
+      cell.ondblclick = () => {
+        oppnaModal(null, cell.dataset.date, cell.dataset.time);
+      };
+      grid.appendChild(cell);
+    });
   }
 
-  btn.disabled = false;
+  // Placera aktiviteter
+  const cells = [...grid.querySelectorAll(".day-cell")];
+  const slotMins = [];
+  for (let m = SLOTS_START; m <= SLOTS_END; m += SLOT_MIN) slotMins.push(m);
+
+  DATA.forEach(r => {
+    const dayIdx = days.findIndex(d => isoDate(d) === r.datum);
+    if (dayIdx < 0) return;
+
+    const sMin = timeToMin(r.start);
+    const eMin = timeToMin(r.slut);
+    if (eMin <= sMin) return;
+
+    const sClamped = Math.max(sMin, SLOTS_START);
+    const eClamped = Math.min(eMin, SLOTS_END + SLOT_MIN);
+
+    const baseSlot = slotMins.findIndex(m => m <= sClamped && sClamped < m + SLOT_MIN);
+    if (baseSlot < 0) return;
+
+    const cellIdx = baseSlot * 6 + (dayIdx + 1);
+    const firstCell = cells[cellIdx];
+    if (!firstCell) return;
+
+    const evt = document.createElement("div");
+    evt.className = "evt";
+    evt.style.background = fargFor(r.aktivitet);
+
+    const cellH = 30;
+    const topOff = ((sClamped - slotMins[baseSlot]) / SLOT_MIN) * cellH;
+    const height = ((eClamped - sClamped) / SLOT_MIN) * cellH;
+    evt.style.top = (2 + topOff) + "px";
+    evt.style.height = Math.max(18, height - 4) + "px";
+    evt.style.zIndex = 10;
+
+    evt.innerHTML = `
+      <div class="evt-time">🕒 ${r.start}–${r.slut}</div>
+      <div class="evt-title">${r.aktivitet||""}</div>
+      <div class="evt-people">${r.deltagare||""} ${r.coach ? "· "+r.coach : ""}</div>
+    `;
+    evt.onclick = () => oppnaModal(r);
+    firstCell.appendChild(evt);
+  });
 }
+
+/* ===== Modal – chips ===== */
+let mDeltagare = [];
+let mCoach = [];
+
+function renderChips(arr, containerId) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = "";
+  arr.forEach((n,i) => {
+    const c = document.createElement("span");
+    c.className = "chip";
+    c.innerHTML = `${n} <button type="button">×</button>`;
+    c.querySelector("button").onclick = () => { arr.splice(i,1); renderChips(arr,containerId); };
+    el.appendChild(c);
+  });
+}
+
+function kopplaInput(inputId, arr, chipsId, suggestions) {
+  const inp = document.getElementById(inputId);
+  inp.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      const v = inp.value.trim();
+      if (v && !arr.some(n => n.toLowerCase() === v.toLowerCase())) {
+        arr.push(v);
+        renderChips(arr, chipsId);
+      }
+      inp.value = "";
+    }
+  });
+
+  // Enkel autocomplete från testpersoner
+  inp.setAttribute("list", inputId + "_list");
+  const dl = document.createElement("datalist");
+  dl.id = inputId + "_list";
+  suggestions.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s;
+    dl.appendChild(opt);
+  });
+  inp.parentNode.appendChild(dl);
+}
+
+/* ===== Öppna modal ===== */
+function oppnaModal(rad, datum, tid) {
+  mDeltagare = [];
+  mCoach = [];
+  redigeraId = null;
+  redigeraData = null;
+
+  document.getElementById("btnRadera").style.display = "none";
+
+  if (rad) {
+    // Redigera befintlig
+    redigeraId = rad.id;
+    redigeraData = rad;
+    document.getElementById("modalRubrik").textContent = "Redigera aktivitet";
+    document.getElementById("mAktivitet").value = rad.aktivitet || "";
+    document.getElementById("mDatum").value = rad.datum || "";
+    document.getElementById("mStart").value = rad.start || "09:00";
+    document.getElementById("mSlut").value = rad.slut || "10:00";
+
+    if (rad.deltagare) rad.deltagare.split(/,\s*/).filter(Boolean).forEach(n => mDeltagare.push(n.trim()));
+    if (rad.coach) rad.coach.split(/,\s*/).filter(Boolean).forEach(n => mCoach.push(n.trim()));
+
+    document.getElementById("btnRadera").style.display = "block";
+  } else {
+    // Ny aktivitet
+    document.getElementById("modalRubrik").textContent = "Ny aktivitet";
+    document.getElementById("mAktivitet").value = "";
+    document.getElementById("mDatum").value = datum || isoDate(new Date());
+    document.getElementById("mStart").value = tid || "09:00";
+    const [h,m] = (tid||"09:00").split(":").map(Number);
+    const slutH = String(h+1).padStart(2,"0");
+    document.getElementById("mSlut").value = slutH + ":" + String(m).padStart(2,"0");
+  }
+
+  renderChips(mDeltagare, "mDeltagareChips");
+  renderChips(mCoach, "mCoachChips");
+  document.getElementById("overlay").classList.add("open");
+}
+
+function stangModal(e) {
+  if (e && e.target !== document.getElementById("overlay")) return;
+  document.getElementById("overlay").classList.remove("open");
+}
+
+/* ===== Spara ===== */
+async function sparaAktivitet() {
+  const aktivitet = document.getElementById("mAktivitet").value.trim();
+  const datum = document.getElementById("mDatum").value;
+  const start = document.getElementById("mStart").value;
+  const slut  = document.getElementById("mSlut").value;
+
+  if (!aktivitet || !datum || !start || !slut) {
+    alert("Fyll i minst aktivitet, datum och tid.");
+    return;
+  }
+
+  let titel = "";
+  if (mDeltagare.length) titel += mDeltagare.join(", ") + " - ";
+  titel += aktivitet;
+  if (mCoach.length) titel += " (" + mCoach.join(", ") + ")";
+
+  const startISO = datum + "T" + start + ":00+02:00";
+  const slutISO  = datum + "T" + slut  + ":00+02:00";
+
+  document.getElementById("statusBar").textContent = "Sparar...";
+
+  await fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ title: titel, start: startISO, end: slutISO })
+  });
+
+  await new Promise(r => setTimeout(r, 2000));
+  document.getElementById("overlay").classList.remove("open");
+  await laddaData();
+}
+
+/* ===== Radera ===== */
+async function raderaAktivitet() {
+  if (!redigeraId) return;
+  if (!confirm("Radera aktiviteten?")) return;
+
+  document.getElementById("statusBar").textContent = "Raderar...";
+
+  await fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ action: "delete", id: redigeraId })
+  });
+
+  await new Promise(r => setTimeout(r, 2000));
+  document.getElementById("overlay").classList.remove("open");
+  await laddaData();
+}
+
+/* ===== Init ===== */
+window.addEventListener("load", () => {
+  kopplaInput("mDeltagareInput", mDeltagare, "mDeltagareChips", DELTAGARE);
+  kopplaInput("mCoachInput", mCoach, "mCoachChips", COACHER);
+  laddaData();
+});
 </script>
 
-</body>
-</html>
+
+</body></html>
